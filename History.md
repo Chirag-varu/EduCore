@@ -3,6 +3,9 @@
 # 1.3.1 / 2025-08-06
 - Added Compression 
 - added Rate Limiting to backend API
+- Bug Fix: Deployment bug fix jet token and csrf Protection
+- Bug Fix: Logout Bug Fix
+- Merge: Integrated branch changes into `master`
 
 # 1.3.1 / 2025-08-05
 - Bug Fix: Fixed user authentication issue  

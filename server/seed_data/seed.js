@@ -43,7 +43,6 @@ const seed = async () => {
         courseLevel: 'Beginner',
         coursePrice: 99,
         courseThumbnail: `https://raw.githubusercontent.com/Chirag-varu/EduCore/refs/heads/master/client/src/assets/Logo.png`,
-        courseThumbnail: `https://lms67.s3.ap-south-1.amazonaws.com/minimalist-header-photo-with-woman-with-closed-eyes-free-image.jpg`,
         creator: u1._id,
         isPublished: true,
       }),
@@ -55,7 +54,7 @@ const seed = async () => {
         courseLevel: 'Medium',
         coursePrice: 149,
         courseThumbnail: `https://raw.githubusercontent.com/Chirag-varu/EduCore/refs/heads/master/client/src/assets/Logo.png`,
-        courseThumbnail: `https://lms67.s3.ap-south-1.amazonaws.com/minimalist-header-photo-with-woman-with-closed-eyes-free-image.jpg`,
+         
         creator: u1._id,
         isPublished: true,
       }),
@@ -67,7 +66,7 @@ const seed = async () => {
         courseLevel: 'Advance',
         coursePrice: 129,
         courseThumbnail: `https://raw.githubusercontent.com/Chirag-varu/EduCore/refs/heads/master/client/src/assets/Logo.png`,
-        courseThumbnail: `https://lms67.s3.ap-south-1.amazonaws.com/minimalist-header-photo-with-woman-with-closed-eyes-free-image.jpg`,
+         
         creator: u1._id,
         isPublished: true,
       }),
@@ -79,7 +78,7 @@ const seed = async () => {
         courseLevel: 'Advance',
         coursePrice: 179,
         courseThumbnail: `https://raw.githubusercontent.com/Chirag-varu/EduCore/refs/heads/master/client/src/assets/Logo.png`,
-        courseThumbnail: `https://lms67.s3.ap-south-1.amazonaws.com/minimalist-header-photo-with-woman-with-closed-eyes-free-image.jpg`,
+         
         creator: u1._id,
         isPublished: true,
       }),
@@ -91,7 +90,7 @@ const seed = async () => {
         courseLevel: 'Medium',
         coursePrice: 199,
         courseThumbnail: `https://raw.githubusercontent.com/Chirag-varu/EduCore/refs/heads/master/client/src/assets/Logo.png`,
-        courseThumbnail: `https://lms67.s3.ap-south-1.amazonaws.com/minimalist-header-photo-with-woman-with-closed-eyes-free-image.jpg`,
+         
         creator: u1._id,
         isPublished: true,
       })
