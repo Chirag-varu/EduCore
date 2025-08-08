@@ -1,4 +1,6 @@
-# HISTORY.md
+
+# 1.3.2 / 2025-08-07
+- Server: Implemented DB connection pooling to decrease latency, handle multiple users simultaneously
 
 # 1.3.1 / 2025-08-06
 - Added Compression 
@@ -40,6 +42,7 @@
 
 # 1.0.0 / 2025-07-29
 - Release: First major stable release of EduCore  
+>>>>>>> f62a6a276ddd269684be87c8979d69c4a24bff03
 
 # 0.1.0 / 2025-07-28
 - Server: `start` logic added in server  
