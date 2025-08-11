@@ -1,0 +1,33 @@
+{
+  "name": "EduCore",
+  "version": "1.4.0",
+  "description": "EduCore is a comprehensive educational platform designed to facilitate learning and teaching through a variety of tools and resources.",
+  "scripts": {
+    "dev": "node start-dev.js",
+    "install-all": "node install-deps.js",
+    "build": "npm install --prefix server && npm install --prefix client && npm run build --prefix client",
+    "start": "npm run start --prefix server",
+    "b:pt": "node server/bump-version.js patch",
+    "b:mn": "node server/bump-version.js minor",
+    "b:mj": "node server/bump-version.js major",
+    "seed": "node server/seed_data/seed.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Chirag-varu/EduCore.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Chirag-varu/EduCore/issues"
+  },
+  "homepage": "https://github.com/Chirag-varu/EduCore",
+  "Live link": "",
+  "keywords": [
+    "EduCore"
+  ],
+  "author": "Chirag Varu",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "@vitejs/plugin-react": "^4.7.0"
+  }
+}
