@@ -4,10 +4,11 @@ import { Button } from "../ui/button";
 import { useContext } from "react";
 import { AuthContext } from "@/context/auth-context";
 import EduCore_Logo from "@/assets/logoImg.png";
+import RouteGuard from "@/components/route-guard/index.jsx";
 
 function StudentViewCommonHeader() {
   const navigate = useNavigate();
-  const { resetCredentials } = useContext(AuthContext);
+  const { resetCredentials, auth } = useContext(AuthContext);
 
   function handleLogout() {
     resetCredentials();
@@ -45,7 +46,7 @@ function StudentViewCommonHeader() {
             className="flex cursor-pointer items-center gap-3"
           >
             <span className="font-extrabold md:text-xl text-[14px]">
-              My Courses
+              {auth.user?.userName || 'User'}
             </span>
             <TvMinimalPlay className="w-8 h-8 cursor-pointer" />
           </div>
