@@ -8,7 +8,7 @@ import InstructorProvider from "./context/instructor-context/index.jsx";
 import StudentProvider from "./context/student-context/index.jsx";
 
 createRoot(document.getElementById("root")).render(
-  <BrowserRouter>
+  <BrowserRouter future={{ v7_relativeSplatPath: true }}>
     <AuthProvider>
       <InstructorProvider>
         <StudentProvider>

@@ -11,6 +11,7 @@ import { signInFormControls, signUpFormControls } from "@/config";
 import { AuthContext } from "@/context/auth-context";
 // import { GraduationCap } from "lucide-react";
 import { useContext, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import EduCore_Logo from "@/assets/logoImg.png";
 
@@ -24,6 +25,74 @@ function AuthPage() {
     handleRegisterUser,
     handleLoginUser,
   } = useContext(AuthContext);
+  const { toast } = useToast();
+
+  const handleSuccessSignup = async (formData) => {
+    try {
+      const res = await handleRegisterUser(formData);
+
+      if (res?.success) {
+        // assuming handleRegisterUser returns an object with success
+        toast({
+          title: "🎉 Account Created",
+          description: "Your account has been successfully created.",
+          variant: "default",
+        });
+        setActiveTab("signin"); // Optional: switch to Sign In tab after success
+      } else {
+        toast({
+          title: "❌ Signup Failed",
+          description:
+            res?.message || "Something went wrong. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "❌ Error",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSignUpFormData({
+        userName: "",
+        userEmail: "",
+        password: "",
+      });
+    }
+  };
+
+  const handleSignIn = async (formData) => {
+    try {
+      const res = await handleLoginUser(formData);
+
+      if (res?.success) {
+        toast({
+          title: "✅ Sign In Successful",
+          description: "Welcome back!",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "❌ Sign In Failed",
+          description:
+            res?.message || "Invalid credentials. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "❌ Error",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSignInFormData({
+        userEmail: "",
+        password: "",
+      });
+    }
+  }
 
   function handleTabChange(value) {
     setActiveTab(value);
@@ -46,7 +115,7 @@ function AuthPage() {
     );
   }
 
-  console.log(signInFormData);
+  // console.log(signInFormData);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -102,7 +171,7 @@ function AuthPage() {
                   formData={signUpFormData}
                   setFormData={setSignUpFormData}
                   isButtonDisabled={!checkIfSignUpFormIsValid()}
-                  handleSubmit={handleRegisterUser}
+                  handleSubmit={handleSuccessSignup}
                 />
               </CardContent>
             </Card>

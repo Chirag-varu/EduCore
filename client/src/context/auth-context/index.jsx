@@ -17,12 +17,28 @@ export default function AuthProvider({ children }) {
   async function handleRegisterUser(event) {
     event.preventDefault();
     const data = await registerService(signUpFormData);
+
+    if (data.success) {
+      sessionStorage.setItem(
+        "accessToken",
+        JSON.stringify(data.data.accessToken)
+      );
+      setAuth({
+        authenticate: true,
+        user: data.data.user,
+      });
+    } else {
+      setAuth({
+        authenticate: false,
+        user: null,
+      });
+    }
   }
 
   async function handleLoginUser(event) {
     event.preventDefault();
     const data = await loginService(signInFormData);
-    console.log(data, "datadatadatadatadata");
+    // console.log(data, "datadatadatadatadata");
 
     if (data.success) {
       sessionStorage.setItem(
@@ -82,7 +98,7 @@ export default function AuthProvider({ children }) {
     checkAuthUser();
   }, []);
 
-  console.log(auth, "gf");
+  // console.log(auth, "gf");
 
   return (
     <AuthContext.Provider
