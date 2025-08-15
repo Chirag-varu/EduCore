@@ -35,8 +35,8 @@ export default function AuthProvider({ children }) {
     }
   }
 
-  async function handleLoginUser(event) {
-    event.preventDefault();
+  async function handleLoginUser(e) {
+    e.preventDefault();
     const data = await loginService(signInFormData);
     // console.log(data, "datadatadatadatadata");
 
@@ -55,6 +55,8 @@ export default function AuthProvider({ children }) {
         user: null,
       });
     }
+
+    return data;
   }
 
   //check auth user

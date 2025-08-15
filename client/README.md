@@ -1,4 +1,4 @@
-# Client Folder
+# client Folder
 
 this is frontend of the application which is made with Vite + React and tailwind v3
 

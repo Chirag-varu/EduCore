@@ -1,1 +1,5 @@
-# Serv
+# server Folder
+
+this is backend of the application which is made with node + express and mongoDB
+
+lets first look at the folder we are working with:
