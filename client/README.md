@@ -1,8 +1,31 @@
-# React + Vite
+# Client Folder
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+this is frontend of the application which is made with Vite + React and tailwind v3
 
-Currently, two official plugins are available:
+lets first look at the folder we are working with:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+client/
+├── public/    → we have banner and favicon images in there
+└── src/       → main folder (source folder)
+└── .env       → to make one take reference of .env.example
+```
+
+to run the frontend of our app run: 
+```bash 
+npm run dev
+```
+
+lets deep dive in our source code:
+
+```bash
+scr/
+├── api/          → this is for our api gateway to backend or server using axios(providing backend endpoint)
+└── assets/       → logo of our app
+└── components/   → we are following folder based structure in our components
+└── config        → providing varis models for our app like login / register details
+└── context       → providing context of our app like in app memory
+└── hooks         → toast config and management
+└── pages         → pages in our app and there code
+└── services      → all services fuction or methods are listed (e.g loginService / registerService)
+```

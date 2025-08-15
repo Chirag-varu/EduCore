@@ -31,13 +31,13 @@ mongoose
   .catch((e) => console.log(e));
 
 //routes configuration
-app.use("/auth", authRoutes);
-app.use("/media", mediaRoutes);
-app.use("/instructor/course", instructorCourseRoutes);
-app.use("/student/course", studentViewCourseRoutes);
-app.use("/student/order", studentViewOrderRoutes);
-app.use("/student/courses-bought", studentCoursesRoutes);
-app.use("/student/course-progress", studentCourseProgressRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/media", mediaRoutes);
+app.use("/api/v1/instructor/course", instructorCourseRoutes);
+app.use("/api/v1/student/course", studentViewCourseRoutes);
+app.use("/api/v1/student/order", studentViewOrderRoutes);
+app.use("/api/v1/student/courses-bought", studentCoursesRoutes);
+app.use("/api/v1/student/course-progress", studentCourseProgressRoutes);
 
 app.use((err, req, res, next) => {
   console.log(err.stack);
