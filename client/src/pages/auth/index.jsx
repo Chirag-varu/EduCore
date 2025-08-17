@@ -220,14 +220,14 @@ function AuthPage() {
             <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
               By clicking continue, you agree to our{" "}
               <a
-                href="https://github.com/Chirag-varu/EduCore/LICENSE"
+                href="https://github.com/Chirag-varu/EduCore/blob/main/LICENSE"
                 target="_blank"
               >
                 Terms of Service
               </a>{" "}
               and{" "}
               <a
-                href="https://github.com/Chirag-varu/EduCore/LICENSE"
+                href="https://github.com/Chirag-varu/EduCore/blob/main/LICENSE"
                 target="_blank"
               >
                 Privacy Policy
