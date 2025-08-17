@@ -1,5 +1,8 @@
 # HISTORY.md
 
+
+
+
 # 1.4.0 / 2025-08-07
 - Fix: Admin route fixed at '/'
 

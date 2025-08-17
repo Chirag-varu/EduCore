@@ -2,6 +2,8 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const session = require("express-session");
+const passport = require("passport");
 const authRoutes = require("./routes/auth-routes/index");
 const mediaRoutes = require("./routes/instructor-routes/media-routes");
 const instructorCourseRoutes = require("./routes/instructor-routes/course-routes");
@@ -16,13 +18,24 @@ const MONGO_URI = process.env.MONGO_URI;
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    // origin: ["http://localhost:5173", "http://localhost:5000", "https://accounts.google.com/o/oauth2"],
+    origin: ["http://localhost:5173", "https://accounts.google.com"],
     methods: ["GET", "POST", "DELETE", "PUT"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
+app.use(
+  session({
+    secret: "mySecret",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
 app.use(express.json());
+app.use(passport.initialize());
+app.use(passport.session());
 
 //database connection
 mongoose

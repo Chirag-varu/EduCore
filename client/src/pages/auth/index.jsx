@@ -1,7 +1,4 @@
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { AuthContext } from "@/context/auth-context";
 import { useContext, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -11,13 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import auth_image from "@/assets/auth_image.jpg";
+import { GoogleLogin } from "@react-oauth/google";
+import axios from "axios";
 
 function AuthPage() {
-  const {
-    signInFormData,
-    setSignInFormData,
-    handleLoginUser,
-  } = useContext(AuthContext);
+  const { signInFormData, setSignInFormData, handleLoginUser } =
+    useContext(AuthContext);
   const { toast } = useToast();
 
   const handleSignIn = async (e) => {
@@ -47,6 +43,34 @@ function AuthPage() {
       setSignInFormData({
         userEmail: "",
         password: "",
+      });
+    }
+  };
+
+  const googleLoginSuccess = async ({ credential }) => {
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/api/v1/auth/google/login",
+        { credential },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      const data = res.data;
+      if (data.success) {
+        window.location.href = "http://localhost:5173/home";
+        toast({ title: "✅ Google login successful" });
+      } else {
+        toast({
+          title: "❌ Google login failed",
+          description: data.message || "Failed to authenticate with Google",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "❌ Error",
+        description: error.response?.data?.message || error.message,
+        variant: "destructive",
       });
     }
   };
@@ -102,12 +126,12 @@ function AuthPage() {
                     <div className="grid gap-2">
                       <div className="flex items-center">
                         <Label htmlFor="password">Password</Label>
-                        <a
-                          href="#"
+                        <Link
+                          to="/auth/forgotPassword"
                           className="ml-auto text-sm underline-offset-2 hover:underline"
                         >
                           Forgot your password?
-                        </a>
+                        </Link>
                       </div>
                       <Input
                         id="password"
@@ -143,7 +167,7 @@ function AuthPage() {
 
                     {/* Google Login */}
                     <div className="grid gap-4 w-full">
-                      <Button variant="outline" className="w-full">
+                      {/* <Button variant="outline" className="w-full">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           viewBox="0 0 24 24"
@@ -155,13 +179,25 @@ function AuthPage() {
                         </svg>{" "}
                         Google
                         <span className="sr-only">Login with Google</span>
-                      </Button>
+                      </Button> */}
+                      <GoogleLogin
+                        onSuccess={(credentialResponse) => {
+                          console.log("Google Token:", credentialResponse);
+                          googleLoginSuccess(credentialResponse);
+                        }}
+                        onError={() => {
+                          console.log("Login Failed");
+                        }}
+                      />
                     </div>
 
                     {/* Sign Up Link */}
                     <div className="text-center text-sm">
                       Don&apos;t have an account?{" "}
-                      <Link to="/signup" className="underline underline-offset-4">
+                      <Link
+                        to="/auth/signup"
+                        className="underline underline-offset-4"
+                      >
                         Sign up
                       </Link>
                     </div>
@@ -183,8 +219,20 @@ function AuthPage() {
             {/* Terms */}
             <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
               By clicking continue, you agree to our{" "}
-              <a href="#">Terms of Service</a> and{" "}
-              <a href="#">Privacy Policy</a>.
+              <a
+                href="https://github.com/Chirag-varu/EduCore/LICENSE"
+                target="_blank"
+              >
+                Terms of Service
+              </a>{" "}
+              and{" "}
+              <a
+                href="https://github.com/Chirag-varu/EduCore/LICENSE"
+                target="_blank"
+              >
+                Privacy Policy
+              </a>
+              .
             </div>
           </div>
         </div>

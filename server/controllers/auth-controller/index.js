@@ -1,6 +1,60 @@
 const User = require("../../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const express = require("express");
+const router = express.Router();
+
+// Google auth implementation
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const googleLogin = async (req, res) => {
+  try {
+    const { credential } = req.body;
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+
+    // Check if user exists or create new user
+    let user = await User.findOne({ userEmail: payload.email });
+    if (!user) {
+      user = new User({
+        userName: payload.name,
+        userEmail: payload.email,
+        role: 'student'
+      });
+      await user.save();
+    }
+
+    // Generate JWT token
+    const accessToken = jwt.sign(
+      {
+        _id: user._id,
+        userEmail: user.userEmail,
+        role: user.role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '120m' }
+    );
+
+    res.json({
+      success: true,
+      accessToken,
+      user: {
+        _id: user._id,
+        userEmail: user.userEmail,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: 'Google authentication failed'
+    });
+  }
+};
 
 const registerUser = async (req, res) => {
   const { userName, userEmail, password, role } = req.body;
@@ -70,4 +124,4 @@ const loginUser = async (req, res) => {
   });
 };
 
-module.exports = { registerUser, loginUser };
+module.exports = { registerUser, loginUser, googleLogin };
