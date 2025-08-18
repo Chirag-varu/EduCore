@@ -75,7 +75,7 @@ EduCore/
 └── server/    → Node + Express + TS (backend)
 ```
 
-## Live Link: https://educore-oj6e.onrender.com/ (MVP Deployment)
+## Live Link: (comming soon...) (MVP Deployment)
 
 ---
 

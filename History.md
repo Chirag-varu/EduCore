@@ -1,9 +1,29 @@
 # HISTORY.md
 
+# 1.5.0 / 2025-08-15
+- Auth: Improved authentication, instructor can now view the other courses
+- Fix: Typos corrected
+- Feature: Google OAuth made working
 
+# 1.4.3 / 2025-08-14
+- UI/UX: User name added in header for better user experience
 
+# 1.4.2 / 2025-08-13
+- Security: Safety and security improvements added and proper README file added in client folder
 
-# 1.4.0 / 2025-08-07
+# 1.4.1 / 2025-08-12
+- Deployment: Deployment changes made
+
+# 1.4.0 / 2025-08-11
+- Feature: Shadcn auth implemented
+
+# 1.3.4 / 2025-08-10
+- Feature: Google AuthO-2 added, shadcn auth page added, minor UI changes and bug fixes
+
+# 1.3.3 / 2025-08-09
+- Feature: Terms and conditions added
+
+# 1.3.2 / 2025-08-08
 - Fix: Admin route fixed at '/'
 
 # 1.3.2 / 2025-08-07
