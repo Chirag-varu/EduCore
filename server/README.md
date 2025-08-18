@@ -19,6 +19,7 @@ server/
 as you can see we are following MVC (Model, View, Controller) architecture for our backend
 
 to run the backend of our app run: 
+
 ```bash 
 npm run dev
 ```
