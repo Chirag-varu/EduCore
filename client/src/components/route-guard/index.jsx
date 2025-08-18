@@ -4,37 +4,31 @@ import { Fragment } from "react";
 function RouteGuard({ authenticated, user, element }) {
   const location = useLocation();
 
-  console.log(authenticated, user, "useruser");
+  const path = location.pathname;
 
-  if (!authenticated && !location.pathname.includes("/auth")) {
-    return <Navigate to="/auth" />;
+  // 🔹 Redirect rules based on roles
+  const roleRedirects = {
+    instructor: "/",  // default page for instructor
+    user: "/home",    // default page for normal user
+  };
+
+  // 1️⃣ If not authenticated → only allow /auth/*
+  if (!authenticated && !path.startsWith("/auth")) {
+    return <Navigate to="/auth" replace />;
   }
 
-  if (
-    authenticated &&
-    user?.role !== "instructor" &&
-    (location.pathname.includes("instructor") ||
-      location.pathname.includes("/auth"))
-  ) {
-    return <Navigate to="/home" />;
+  // 2️⃣ If authenticated & tries to access /auth → redirect by role
+  if (authenticated && path.startsWith("/auth")) {
+    const redirectPath = roleRedirects[user?.role] || "/home";
+    return <Navigate to={redirectPath} replace />;
   }
 
-  if (
-    authenticated &&
-    user.role === "instructor" &&
-    location.pathname.includes("/auth")
-  ) {
-    return <Navigate to="/" />;
+  // 3️⃣ If user is not instructor but tries to access /instructor
+  if (authenticated && user?.role !== "instructor" && path.startsWith("/instructor")) {
+    return <Navigate to="/home" replace />;
   }
 
-  if (
-    authenticated &&
-    user.role === "user" &&
-    location.pathname.includes("/auth")
-  ) {
-    return <Navigate to="/home" />;
-  }
-
+  // ✅ Otherwise, render the element
   return <Fragment>{element}</Fragment>;
 }
 

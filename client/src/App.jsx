@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import AuthPage from "./pages/auth";
 import RouteGuard from "./components/route-guard";
-import { useContext } from "react";
+import { useEffect, useContext } from "react";
 import { AuthContext } from "./context/auth-context";
 import InstructorDashboardpage from "./pages/instructor";
 import StudentViewCommonLayout from "./components/student-view/common-layout";
@@ -16,7 +16,16 @@ import StudentViewCourseProgressPage from "./pages/student/course-progress";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 function App() {
-  const { auth } = useContext(AuthContext);
+  const { auth, setAuth } = useContext(AuthContext);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+
+    if (token && user) {
+      setAuth({ token, user: JSON.parse(user), authenticate: true });
+    }
+  }, []);
 
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>

@@ -1,4 +1,5 @@
 import axiosInstance from "@/api/axiosInstance";
+import { AuthContext } from "@/context/auth-context";
 
 export async function registerService(formData) {
   const { data } = await axiosInstance.post("/auth/register", {
@@ -16,7 +17,26 @@ export async function loginService(formData) {
 }
 
 export async function checkAuthService() {
+  const { setAuth } = useContext(AuthContext);
   const { data } = await axiosInstance.get("/auth/check-auth");
+
+  if (data.success) {
+      sessionStorage.setItem(
+        "accessToken",
+        JSON.stringify(data.data.accessToken)
+      );
+      localStorage.setItem("token", data.data.accessToken);
+      localStorage.setItem("user", JSON.stringify(data.data.user));
+      setAuth({
+        authenticate: true,
+        user: data.data.user,
+      });
+    } else {
+      setAuth({
+        authenticate: false,
+        user: null,
+      });
+    }
 
   return data;
 }

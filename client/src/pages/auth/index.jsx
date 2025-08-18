@@ -115,6 +115,7 @@ function AuthPage() {
                         id="email"
                         type="email"
                         placeholder="m@example.com"
+                        autoComplete="email"
                         required
                         value={signInFormData.userEmail}
                         onChange={(e) =>
@@ -141,6 +142,7 @@ function AuthPage() {
                         id="password"
                         type="password"
                         placeholder="••••••••"
+                        autoComplete="current-password"
                         required
                         value={signInFormData.password}
                         onChange={(e) =>

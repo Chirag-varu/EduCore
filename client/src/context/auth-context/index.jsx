@@ -23,6 +23,8 @@ export default function AuthProvider({ children }) {
         "accessToken",
         JSON.stringify(data.data.accessToken)
       );
+      localStorage.setItem("token", data.data.accessToken);
+      localStorage.setItem("user", JSON.stringify(data.data.user));
       setAuth({
         authenticate: true,
         user: data.data.user,
@@ -45,6 +47,8 @@ export default function AuthProvider({ children }) {
         "accessToken",
         JSON.stringify(data.data.accessToken)
       );
+      localStorage.setItem("token", data.data.accessToken);
+      localStorage.setItem("user", JSON.stringify(data.data.user));
       setAuth({
         authenticate: true,
         user: data.data.user,
@@ -62,7 +66,12 @@ export default function AuthProvider({ children }) {
   async function handleGoogleLogin(data) {
     try {
       if (data.success) {
-        sessionStorage.setItem("accessToken", JSON.stringify(data.data.accessToken));
+        sessionStorage.setItem(
+          "accessToken",
+          JSON.stringify(data.data.accessToken)
+        );
+      localStorage.setItem("token", data.data.accessToken);
+      localStorage.setItem("user", JSON.stringify(data.data.user));
         setAuth({
           authenticate: true,
           user: data.data.user,
@@ -138,6 +147,7 @@ export default function AuthProvider({ children }) {
         handleLoginUser,
         handleGoogleLogin,
         auth,
+        setAuth,
         resetCredentials,
       }}
     >

@@ -13,6 +13,8 @@ function StudentViewCommonHeader() {
   function handleLogout() {
     resetCredentials();
     sessionStorage.clear();
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   }
 
   return (
@@ -21,9 +23,7 @@ function StudentViewCommonHeader() {
         <Link to="/home" className="flex items-center hover:text-black">
           {/* <GraduationCap className="h-8 w-8 mr-4 " /> */}
           <img src={EduCore_Logo} alt="" className="w-11" />
-          <span className="font-extrabold md:text-xl text-[14px]">
-            EduCore
-          </span>
+          <span className="font-extrabold md:text-xl text-[14px]">EduCore</span>
         </Link>
         <div className="flex items-center space-x-1">
           <Button
@@ -46,7 +46,7 @@ function StudentViewCommonHeader() {
             className="flex cursor-pointer items-center gap-3"
           >
             <span className="font-extrabold md:text-xl text-[14px]">
-              {auth.user?.userName || 'User'}
+              {auth.user?.userName || "User"}
             </span>
             <TvMinimalPlay className="w-8 h-8 cursor-pointer" />
           </div>

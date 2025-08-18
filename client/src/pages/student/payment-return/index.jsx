@@ -12,7 +12,7 @@ function PaypalPaymentReturnPage() {
   useEffect(() => {
     if (paymentId && payerId) {
       async function capturePayment() {
-        const orderId = JSON.parse(sessionStorage.getItem("currentOrderId"));
+        const orderId = JSON.parse(sessionStorage.getItem("currentOrderId")); // change it to localStorage in future
 
         const response = await captureAndFinalizePaymentService(
           paymentId,
