@@ -10,9 +10,6 @@ export async function registerService(formData) {
 }
 
 export async function loginService(formData) {
-  console.log('====================================');
-  console.log("Logging in with form data:", formData);
-  console.log('====================================');
   const { data } = await axiosInstance.post("/auth/login", formData);
 
   return data;

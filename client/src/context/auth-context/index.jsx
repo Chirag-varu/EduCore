@@ -38,7 +38,7 @@ export default function AuthProvider({ children }) {
   async function handleLoginUser(e) {
     e.preventDefault();
     const data = await loginService(signInFormData);
-    // console.log(data, "datadatadatadatadata");
+    console.log(data, "datadatadatadatadata");
 
     if (data.success) {
       sessionStorage.setItem(
@@ -57,6 +57,31 @@ export default function AuthProvider({ children }) {
     }
 
     return data;
+  }
+
+  async function handleGoogleLogin(data) {
+    try {
+      if (data.success) {
+        sessionStorage.setItem("accessToken", JSON.stringify(data.data.accessToken));
+        setAuth({
+          authenticate: true,
+          user: data.data.user,
+        });
+      } else {
+        setAuth({
+          authenticate: false,
+          user: null,
+        });
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Google login failed:", error);
+      setAuth({
+        authenticate: false,
+        user: null,
+      });
+    }
   }
 
   //check auth user
@@ -111,6 +136,7 @@ export default function AuthProvider({ children }) {
         setSignUpFormData,
         handleRegisterUser,
         handleLoginUser,
+        handleGoogleLogin,
         auth,
         resetCredentials,
       }}

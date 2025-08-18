@@ -12,8 +12,12 @@ import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 
 function AuthPage() {
-  const { signInFormData, setSignInFormData, handleLoginUser } =
-    useContext(AuthContext);
+  const {
+    signInFormData,
+    setSignInFormData,
+    handleLoginUser,
+    handleGoogleLogin,
+  } = useContext(AuthContext);
   const { toast } = useToast();
 
   const handleSignIn = async (e) => {
@@ -47,7 +51,7 @@ function AuthPage() {
     }
   };
 
-  const googleLoginSuccess = async ({ credential }) => {
+  const googleLoginSuccess = async (credential) => {
     try {
       const res = await axios.post(
         "http://localhost:5000/api/v1/auth/google/login",
@@ -55,9 +59,9 @@ function AuthPage() {
         { headers: { "Content-Type": "application/json" } }
       );
 
-      const data = res.data;
-      if (data.success) {
-        window.location.href = "http://localhost:5173/home";
+      const data = await handleGoogleLogin(res.data);
+      if (data) {
+        // window.location.href = "http://localhost:5173/home";
         toast({ title: "✅ Google login successful" });
       } else {
         toast({
@@ -182,8 +186,7 @@ function AuthPage() {
                       </Button> */}
                       <GoogleLogin
                         onSuccess={(credentialResponse) => {
-                          console.log("Google Token:", credentialResponse);
-                          googleLoginSuccess(credentialResponse);
+                          googleLoginSuccess(credentialResponse.credential);
                         }}
                         onError={() => {
                           console.log("Login Failed");
