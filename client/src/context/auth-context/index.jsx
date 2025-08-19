@@ -2,6 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { initialSignInFormData, initialSignUpFormData } from "@/config";
 import { checkAuthService, loginService, registerService } from "@/services";
 import { createContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 
 export const AuthContext = createContext(null);
 
@@ -70,8 +71,8 @@ export default function AuthProvider({ children }) {
           "accessToken",
           JSON.stringify(data.data.accessToken)
         );
-      localStorage.setItem("token", data.data.accessToken);
-      localStorage.setItem("user", JSON.stringify(data.data.user));
+        localStorage.setItem("token", data.data.accessToken);
+        localStorage.setItem("user", JSON.stringify(data.data.user));
         setAuth({
           authenticate: true,
           user: data.data.user,
@@ -94,7 +95,6 @@ export default function AuthProvider({ children }) {
   }
 
   //check auth user
-
   async function checkAuthUser() {
     try {
       const data = await checkAuthService();
@@ -103,23 +103,20 @@ export default function AuthProvider({ children }) {
           authenticate: true,
           user: data.data.user,
         });
-        setLoading(false);
       } else {
         setAuth({
           authenticate: false,
           user: null,
         });
-        setLoading(false);
       }
     } catch (error) {
       console.log(error);
-      if (!error?.response?.data?.success) {
-        setAuth({
-          authenticate: false,
-          user: null,
-        });
-        setLoading(false);
-      }
+      setAuth({
+        authenticate: false,
+        user: null,
+      });
+    } finally {
+      setLoading(false);
     }
   }
 
