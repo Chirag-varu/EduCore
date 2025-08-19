@@ -1,5 +1,8 @@
 # HISTORY.md
 
+# 1.5.1 / 2025-08-16
+- Fix: raute handling fixed
+
 # 1.5.0 / 2025-08-15
 - Auth: Improved authentication, instructor can now view the other courses
 - Fix: Typos corrected

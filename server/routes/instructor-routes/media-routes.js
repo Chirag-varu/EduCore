@@ -11,14 +11,18 @@ const upload = multer({ dest: "uploads/" });
 
 router.post("/upload", upload.single("file"), async (req, res) => {
   try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
+    }
+
     const result = await uploadMediaToCloudinary(req.file.path);
+
     res.status(200).json({
       success: true,
       data: result,
     });
   } catch (e) {
-    console.log(e);
-
+    console.error("Upload error:", e);
     res.status(500).json({ success: false, message: "Error uploading file" });
   }
 });
