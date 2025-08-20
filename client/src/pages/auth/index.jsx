@@ -193,6 +193,7 @@ function AuthPage() {
                         onError={() => {
                           console.log("Login Failed");
                         }}
+                        text="continue_with"
                       />
                     </div>
 
