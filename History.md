@@ -1,5 +1,9 @@
 # HISTORY.md
 
+# 1.15.2 / 2025-08-17
+- Change: Home page UI Improved
+- Add: Footer added
+
 # 1.5.1 / 2025-08-16
 - Fix: raute handling fixed
 
