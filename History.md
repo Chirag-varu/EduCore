@@ -1,6 +1,8 @@
 # HISTORY.md
 
 # 1.15.2 / 2025-08-17
+- Change: instructor page improved 
+- Added hamburger and logout dialog box
 - Change: Home page UI Improved
 - Add: Footer added
 
