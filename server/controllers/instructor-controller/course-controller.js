@@ -3,6 +3,9 @@ const Course = require("../../models/Course");
 const addNewCourse = async (req, res) => {
   try {
     const courseData = req.body;
+    console.log('====================================');
+    console.log("received course data:", req.body);
+    console.log('====================================');
     const newlyCreatedCourse = new Course(courseData);
     const saveCourse = await newlyCreatedCourse.save();
 

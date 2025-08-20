@@ -15,8 +15,9 @@ import {
   fetchInstructorCourseDetailsService,
   updateCourseByIdService,
 } from "@/services";
-import { useContext, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import InstructorNav from "@/components/instructor-view/nav";
 
 function AddNewCoursePage() {
   const {
@@ -27,6 +28,7 @@ function AddNewCoursePage() {
     currentEditedCourseId,
     setCurrentEditedCourseId,
   } = useContext(InstructorContext);
+  const [activeTab, setActiveTab] = useState("courses");
 
   const { auth } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -119,6 +121,11 @@ function AddNewCoursePage() {
     console.log(response, "response");
   }
 
+  function handleLogout() {
+    resetCredentials();
+    sessionStorage.clear();
+  }
+
   useEffect(() => {
     if (currentEditedCourseId !== null) fetchCurrentCourseDetails();
   }, [currentEditedCourseId]);
@@ -130,41 +137,48 @@ function AddNewCoursePage() {
   console.log(params, currentEditedCourseId, "params");
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between">
-        <h1 className="text-3xl font-extrabold mb-5">Create a new course</h1>
-        <Button
-          disabled={!validateFormData()}
-          className="text-sm tracking-wider font-bold px-8"
-          onClick={handleCreateCourse}
-        >
-          SUBMIT
-        </Button>
+    <div className="flex h-full min-h-screen bg-gray-100">
+      <InstructorNav
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        handleLogout={handleLogout}
+      />
+      <div className="container mx-auto p-4">
+        <div className="flex justify-between">
+          <h1 className="text-3xl font-extrabold mb-5">Create a new course</h1>
+          <Button
+            disabled={!validateFormData()}
+            className="text-sm tracking-wider font-bold px-8"
+            onClick={handleCreateCourse}
+          >
+            SUBMIT
+          </Button>
+        </div>
+        <Card>
+          <CardContent>
+            <div className="container mx-auto p-4">
+              <Tabs defaultValue="curriculum" className="space-y-4">
+                <TabsList>
+                  <TabsTrigger value="curriculum">Curriculum</TabsTrigger>
+                  <TabsTrigger value="course-landing-page">
+                    Course Landing Page
+                  </TabsTrigger>
+                  <TabsTrigger value="settings">Settings</TabsTrigger>
+                </TabsList>
+                <TabsContent value="curriculum">
+                  <CourseCurriculum />
+                </TabsContent>
+                <TabsContent value="course-landing-page">
+                  <CourseLanding />
+                </TabsContent>
+                <TabsContent value="settings">
+                  <CourseSettings />
+                </TabsContent>
+              </Tabs>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-      <Card>
-        <CardContent>
-          <div className="container mx-auto p-4">
-            <Tabs defaultValue="curriculum" className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="curriculum">Curriculum</TabsTrigger>
-                <TabsTrigger value="course-landing-page">
-                  Course Landing Page
-                </TabsTrigger>
-                <TabsTrigger value="settings">Settings</TabsTrigger>
-              </TabsList>
-              <TabsContent value="curriculum">
-                <CourseCurriculum />
-              </TabsContent>
-              <TabsContent value="course-landing-page">
-                <CourseLanding />
-              </TabsContent>
-              <TabsContent value="settings">
-                <CourseSettings />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
