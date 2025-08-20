@@ -4,60 +4,65 @@ const StudentCourses = require("../../models/StudentCourses");
 const getAllStudentViewCourses = async (req, res) => {
   try {
     const {
-      category = [],
-      level = [],
-      primaryLanguage = [],
+      category = "",
+      level = "",
+      primaryLanguage = "",
       sortBy = "price-lowtohigh",
+      page = 1,
+      limit = 10,
     } = req.query;
 
-    // console.log(req.query, "Courses Query Params");
-
     let filters = {};
-    if (category.length) {
-      filters.category = { $in: category.split(",") };
+
+    if (category) {
+      const arr = category.split(",").filter(Boolean);
+      if (arr.length) filters.category = { $in: arr };
     }
-    if (level.length) {
-      filters.level = { $in: level.split(",") };
+
+    if (level) {
+      const arr = level.split(",").filter(Boolean);
+      if (arr.length) filters.level = { $in: arr };
     }
-    if (primaryLanguage.length) {
-      filters.primaryLanguage = { $in: primaryLanguage.split(",") };
+
+    if (primaryLanguage) {
+      const arr = primaryLanguage.split(",").filter(Boolean);
+      if (arr.length) filters.primaryLanguage = { $in: arr };
     }
 
     let sortParam = {};
     switch (sortBy) {
       case "price-lowtohigh":
         sortParam.pricing = 1;
-
         break;
       case "price-hightolow":
         sortParam.pricing = -1;
-
         break;
       case "title-atoz":
         sortParam.title = 1;
-
         break;
       case "title-ztoa":
         sortParam.title = -1;
-
         break;
-
       default:
         sortParam.pricing = 1;
-        break;
     }
 
-    const coursesList = await Course.find(filters).sort(sortParam);
+    const skip = (page - 1) * limit;
+    const coursesList = await Course.find(filters)
+      .sort(sortParam)
+      .skip(skip)
+      .limit(Number(limit));
 
     res.status(200).json({
       success: true,
       data: coursesList,
+      pagination: { page: Number(page), limit: Number(limit) },
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(500).json({
       success: false,
-      message: "Some error occured!",
+      message: "Some error occurred!",
     });
   }
 };
