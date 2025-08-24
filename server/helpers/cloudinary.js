@@ -1,5 +1,6 @@
-require("dotenv").config();
-const cloudinary = require("cloudinary").v2;
+import { config } from "dotenv";
+config();
+import { v2 as cloudinary } from "cloudinary";
 
 //configure with env data
 cloudinary.config({
@@ -35,4 +36,4 @@ const deleteMediaFromCloudinary = async (publicId) => {
   }
 };
 
-module.exports = { uploadMediaToCloudinary, deleteMediaFromCloudinary };
+export default { uploadMediaToCloudinary, deleteMediaFromCloudinary };

@@ -5,7 +5,7 @@ function RouteGuard({ authenticated, user, element }) {
 
   const roleRedirects = {
     instructor: "/instructor",
-    user: "/home",
+    student: "/home",
   };
 
   // 1️ If not authenticated → only allow /auth/*

@@ -1,16 +1,15 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const session = require("express-session");
-const passport = require("passport");
-const authRoutes = require("./routes/auth-routes/index");
-const mediaRoutes = require("./routes/instructor-routes/media-routes");
-const instructorCourseRoutes = require("./routes/instructor-routes/course-routes");
-const studentViewCourseRoutes = require("./routes/student-routes/course-routes");
-const studentViewOrderRoutes = require("./routes/student-routes/order-routes");
-const studentCoursesRoutes = require("./routes/student-routes/student-courses-routes");
-const studentCourseProgressRoutes = require("./routes/student-routes/course-progress-routes");
+import { config } from "dotenv";
+config();
+import express, { json } from "express";
+import cors from "cors";
+import { connect } from "mongoose";
+import authRoutes from "./routes/auth-routes/index.js";
+import mediaRoutes from "./routes/instructor-routes/media-routes.js";
+import instructorCourseRoutes from "./routes/instructor-routes/course-routes.js";
+import studentViewCourseRoutes from "./routes/student-routes/course-routes.js";
+import studentViewOrderRoutes from "./routes/student-routes/order-routes.js";
+import studentCoursesRoutes from "./routes/student-routes/student-courses-routes.js";
+import studentCourseProgressRoutes from "./routes/student-routes/course-progress-routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -18,29 +17,17 @@ const MONGO_URI = process.env.MONGO_URI;
 
 app.use(
   cors({
-    // origin: ["http://localhost:5173", "http://localhost:5000", "https://accounts.google.com/o/oauth2"],
-    origin: ["http://localhost:5173", "https://accounts.google.com"],
+    origin: ["http://localhost:5173", "http://localhost:5000", "https://accounts.google.com/o/oauth2"],
     methods: ["GET", "POST", "DELETE", "PUT"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-app.use(
-  session({
-    secret: "mySecret",
-    resave: false,
-    saveUninitialized: true,
-  })
-);
-
-app.use(express.json());
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(json());
 
 //database connection
-mongoose
-  .connect(MONGO_URI)
-  .then(() => console.log("mongodb is connected"))
+connect(MONGO_URI)
+  .then(() => console.log("MongoDB is connected"))
   .catch((e) => console.log(e));
 
 //routes configuration
@@ -61,5 +48,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is now running on port ${PORT}`);
+  console.log(`Server is now running on port: ${PORT}`);
 });

@@ -1,5 +1,6 @@
-const Course = require("../../models/Course");
-const StudentCourses = require("../../models/StudentCourses");
+import Course from "../../models/Course.js";
+import { StudentCourses } from "../../models/StudentCourses.js";
+const { find, findById } = Course
 
 const getAllStudentViewCourses = async (req, res) => {
   try {
@@ -48,7 +49,7 @@ const getAllStudentViewCourses = async (req, res) => {
     }
 
     const skip = (page - 1) * limit;
-    const coursesList = await Course.find(filters)
+    const coursesList = await find(filters)
       .sort(sortParam)
       .skip(skip)
       .limit(Number(limit));
@@ -70,7 +71,7 @@ const getAllStudentViewCourses = async (req, res) => {
 const getStudentViewCourseDetails = async (req, res) => {
   try {
     const { id } = req.params;
-    const courseDetails = await Course.findById(id);
+    const courseDetails = await findById(id);
 
     if (!courseDetails) {
       return res.status(404).json({
@@ -96,7 +97,7 @@ const getStudentViewCourseDetails = async (req, res) => {
 const checkCoursePurchaseInfo = async (req, res) => {
   try {
     const { id, studentId } = req.params;
-    const studentCourses = await StudentCourses.findOne({
+    const studentCourses = await StudentCourses ({
       userId: studentId,
     });
 
@@ -115,7 +116,7 @@ const checkCoursePurchaseInfo = async (req, res) => {
   }
 };
 
-module.exports = {
+export default {
   getAllStudentViewCourses,
   getStudentViewCourseDetails,
   checkCoursePurchaseInfo,

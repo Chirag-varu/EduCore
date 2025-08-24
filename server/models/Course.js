@@ -1,13 +1,13 @@
-const mongoose = require("mongoose");
+import { Schema, model } from "mongoose";
 
-const LectureSchema = new mongoose.Schema({
+const LectureSchema = new Schema({
   title: String,
   videoUrl: String,
   public_id: String,
   freePreview: Boolean,
 });
 
-const CourseSchema = new mongoose.Schema({
+const CourseSchema = new Schema({
   instructorId: String,
   instructorName: String,
   date: Date,
@@ -24,13 +24,13 @@ const CourseSchema = new mongoose.Schema({
   students: [
     {
       studentId: String,
-      studentName: String,
+      studentName: String,  
       studentEmail: String,
       paidAmount: String,
     },
   ],
   curriculum: [LectureSchema],
   isPublised: Boolean,
-});
+}, {timestamps:true});
 
-module.exports = mongoose.model("Course", CourseSchema);
+export default model("Course", CourseSchema);

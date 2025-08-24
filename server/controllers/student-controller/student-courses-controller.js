@@ -1,4 +1,5 @@
-const StudentCourses = require("../../models/StudentCourses");
+// controller/student-courses-controller.js
+import { StudentCourses } from "../../models/StudentCourses.js";
 
 const getCoursesByStudentId = async (req, res) => {
   try {
@@ -9,7 +10,7 @@ const getCoursesByStudentId = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: studentBoughtCourses.courses,
+      data: studentBoughtCourses ? studentBoughtCourses.courses : [],
     });
   } catch (error) {
     console.log(error);
@@ -20,4 +21,5 @@ const getCoursesByStudentId = async (req, res) => {
   }
 };
 
-module.exports = { getCoursesByStudentId };
+// ✅ Export function directly
+export default getCoursesByStudentId;

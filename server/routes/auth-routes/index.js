@@ -1,11 +1,10 @@
-const express = require("express");
-const {
-  registerUser,
-  loginUser,
-  googleLogin
-} = require("../../controllers/auth-controller/index");
-const authenticateMiddleware = require("../../middleware/auth-middleware");
-const router = express.Router();
+import { Router } from "express";
+import authController from "../../controllers/auth-controller/index.js";
+
+const { registerUser, loginUser, googleLogin } = authController;
+
+import authenticateMiddleware from "../../middleware/auth-middleware.js";
+const router = Router();
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
@@ -22,4 +21,4 @@ router.get("/check-auth", authenticateMiddleware, (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;

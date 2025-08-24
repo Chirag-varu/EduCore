@@ -1,7 +1,7 @@
-const paypal = require("../../helpers/paypal");
-const Order = require("../../models/Order");
-const Course = require("../../models/Course");
-const StudentCourses = require("../../models/StudentCourses");
+import payment from "../../helpers/paypal.js";
+import Order from "../../models/Order.js";
+import findByIdAndUpdate from "../../models/Course.js";
+import { StudentCourses } from "../../models/StudentCourses.js";
 
 const createOrder = async (req, res) => {
   try {
@@ -54,7 +54,7 @@ const createOrder = async (req, res) => {
       ],
     };
 
-    paypal.payment.create(create_payment_json, async (error, paymentInfo) => {
+    payment.create(create_payment_json, async (error, paymentInfo) => {
       if (error) {
         console.log(error);
         return res.status(500).json({
@@ -108,7 +108,7 @@ const capturePaymentAndFinalizeOrder = async (req, res) => {
   try {
     const { paymentId, payerId, orderId } = req.body;
 
-    let order = await Order.findById(orderId);
+    let order = await Order(orderId);
 
     if (!order) {
       return res.status(404).json({
@@ -125,7 +125,7 @@ const capturePaymentAndFinalizeOrder = async (req, res) => {
     await order.save();
 
     //update out student course model
-    const studentCourses = await StudentCourses.findOne({
+    const studentCourses = await StudentCourses({
       userId: order.userId,
     });
 
@@ -159,7 +159,7 @@ const capturePaymentAndFinalizeOrder = async (req, res) => {
     }
 
     //update the course schema students
-    await Course.findByIdAndUpdate(order.courseId, {
+    await findByIdAndUpdate(order.courseId, {
       $addToSet: {
         students: {
           studentId: order.userId,
@@ -184,4 +184,4 @@ const capturePaymentAndFinalizeOrder = async (req, res) => {
   }
 };
 
-module.exports = { createOrder, capturePaymentAndFinalizeOrder };
+export default { createOrder, capturePaymentAndFinalizeOrder };

@@ -1,12 +1,14 @@
-require("dotenv").config();
-const User = require("../../models/User");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const express = require("express");
-const router = express.Router();
+import "dotenv/config";
+import User from "../../models/User.js";
+import pkg from "bcryptjs";
+const { hash, compare } = pkg;
+import jwt from "jsonwebtoken";
+const { sign, verify } = jwt;
+import { Router } from "express";
+const router = Router();
 
 // Google auth implementation
-const { OAuth2Client } = require("google-auth-library");
+import { OAuth2Client } from "google-auth-library";
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const googleLogin = async (req, res) => {
@@ -23,7 +25,7 @@ const googleLogin = async (req, res) => {
     let user = await User.findOne({ userEmail: payload.email });
     if (!user) {
       const password = "password"; // Use "password" as password for simplicity
-      const hashPassword = await bcrypt.hash(password, 10);
+      const hashPassword = await hash(password, 10);
       user = new User({
         userName: payload.name,
         userEmail: payload.email,
@@ -33,7 +35,7 @@ const googleLogin = async (req, res) => {
       await user.save();
     }
     // Generate JWT token
-    const accessToken = jwt.sign(
+    const accessToken = sign(
       {
         _id: user._id,
         userName: user.userName,
@@ -79,7 +81,7 @@ const registerUser = async (req, res) => {
     });
   }
 
-  const hashPassword = await bcrypt.hash(password, 10);
+  const hashPassword = await hash(password, 10);
   const newUser = new User({
     userName,
     userEmail,
@@ -101,14 +103,14 @@ const loginUser = async (req, res) => {
 
     const checkUser = await User.findOne({ userEmail });
 
-    if (!checkUser || !(await bcrypt.compare(password, checkUser.password))) {
+    if (!checkUser || !(await compare(password, checkUser.password))) {
       return res.status(401).json({
         success: false,
         message: "Invalid credentials",
       });
     }
 
-    const accessToken = jwt.sign(
+    const accessToken = sign(
       {
         _id: checkUser._id,
         userName: checkUser.userName,
@@ -140,4 +142,4 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, googleLogin };
+export default { registerUser, loginUser, googleLogin };

@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
+import { Schema, model } from "mongoose";
 
-const StudentCoursesSchema = new mongoose.Schema({
+const StudentCoursesSchema = new Schema({
   userId: String,
   courses: [
     {
@@ -14,4 +14,4 @@ const StudentCoursesSchema = new mongoose.Schema({
   ],
 });
 
-module.exports = mongoose.model("StudentCourses", StudentCoursesSchema);
+export const StudentCourses =  model("StudentCourses", StudentCoursesSchema);

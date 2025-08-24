@@ -1,13 +1,13 @@
-const CourseProgress = require("../../models/CourseProgress");
-const Course = require("../../models/Course");
-const StudentCourses = require("../../models/StudentCourses");
+import CourseProgress from "../../models/CourseProgress.js";
+import Course from "../../models/Course.js";
+import { StudentCourses } from "../../models/StudentCourses.js";
 
 //mark current lecture as viewed
 const markCurrentLectureAsViewed = async (req, res) => {
   try {
     const { userId, courseId, lectureId } = req.body;
 
-    let progress = await CourseProgress.findOne({ userId, courseId });
+    let progress = await CourseProgress({ userId, courseId });
     if (!progress) {
       progress = new CourseProgress({
         userId,
@@ -39,7 +39,7 @@ const markCurrentLectureAsViewed = async (req, res) => {
       await progress.save();
     }
 
-    const course = await Course.findById(courseId);
+    const course = await Course(courseId);
 
     if (!course) {
       return res.status(404).json({
@@ -79,7 +79,7 @@ const getCurrentCourseProgress = async (req, res) => {
   try {
     const { userId, courseId } = req.params;
 
-    const studentPurchasedCourses = await StudentCourses.findOne({ userId });
+    const studentPurchasedCourses = await StudentCourses({ userId });
 
     const isCurrentCoursePurchasedByCurrentUserOrNot =
       studentPurchasedCourses?.courses?.findIndex(
@@ -96,7 +96,7 @@ const getCurrentCourseProgress = async (req, res) => {
       });
     }
 
-    const currentUserCourseProgress = await CourseProgress.findOne({
+    const currentUserCourseProgress = await CourseProgress({
       userId,
       courseId,
     });
@@ -105,7 +105,7 @@ const getCurrentCourseProgress = async (req, res) => {
       !currentUserCourseProgress ||
       currentUserCourseProgress?.lecturesProgress?.length === 0
     ) {
-      const course = await Course.findById(courseId);
+      const course = await Course(courseId);
       if (!course) {
         return res.status(404).json({
           success: false,
@@ -124,7 +124,7 @@ const getCurrentCourseProgress = async (req, res) => {
       });
     }
 
-    const courseDetails = await Course.findById(courseId);
+    const courseDetails = await Course(courseId);
 
     res.status(200).json({
       success: true,
@@ -151,7 +151,7 @@ const resetCurrentCourseProgress = async (req, res) => {
   try {
     const { userId, courseId } = req.body;
 
-    const progress = await CourseProgress.findOne({ userId, courseId });
+    const progress = await CourseProgress({ userId, courseId });
 
     if (!progress) {
       return res.status(404).json({
@@ -180,7 +180,7 @@ const resetCurrentCourseProgress = async (req, res) => {
   }
 };
 
-module.exports = {
+export default {
   markCurrentLectureAsViewed,
   getCurrentCourseProgress,
   resetCurrentCourseProgress,

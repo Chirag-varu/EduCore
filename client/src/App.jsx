@@ -8,6 +8,8 @@ import StudentViewCommonLayout from "./components/student-view/common-layout";
 import StudentHomePage from "./pages/student/home";
 import NotFoundPage from "./pages/not-found";
 import AddNewCoursePage from "./pages/instructor/add-new-course";
+import Instructor from "./pages/instructor/instructor";
+import CreateCourse from "./pages/instructor/CreateCourse";
 import StudentViewCoursesPage from "./pages/student/courses";
 import StudentViewCourseDetailsPage from "./pages/student/course-details";
 import PaypalPaymentReturnPage from "./pages/student/payment-return";
@@ -50,6 +52,8 @@ function App() {
             />
           }
         />
+        <Route path="/instructor/home" element={<Instructor />} />
+        <Route path="/instructor/CreateCourse" element={<CreateCourse />} />
         <Route
           path="/instructor/create-new-course"
           element={

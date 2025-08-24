@@ -1,11 +1,10 @@
-const Course = require("../../models/Course");
+import Course from "../../models/Course.js";
 
 const addNewCourse = async (req, res) => {
   try {
     const courseData = req.body;
-    console.log('====================================');
-    console.log("received course data:", req.body);
-    console.log('====================================');
+    console.log("Received course data:", courseData);
+
     const newlyCreatedCourse = new Course(courseData);
     const saveCourse = await newlyCreatedCourse.save();
 
@@ -17,10 +16,10 @@ const addNewCourse = async (req, res) => {
       });
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(500).json({
       success: false,
-      message: "Some error occured!",
+      message: "Some error occurred!",
     });
   }
 };
@@ -34,10 +33,10 @@ const getAllCourses = async (req, res) => {
       data: coursesList,
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(500).json({
       success: false,
-      message: "Some error occured!",
+      message: "Some error occurred!",
     });
   }
 };
@@ -59,10 +58,10 @@ const getCourseDetailsByID = async (req, res) => {
       data: courseDetails,
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(500).json({
       success: false,
-      message: "Some error occured!",
+      message: "Some error occurred!",
     });
   }
 };
@@ -91,15 +90,15 @@ const updateCourseByID = async (req, res) => {
       data: updatedCourse,
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(500).json({
       success: false,
-      message: "Some error occured!",
+      message: "Some error occurred!",
     });
   }
 };
 
-module.exports = {
+export default {
   addNewCourse,
   getAllCourses,
   updateCourseByID,
