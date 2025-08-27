@@ -80,6 +80,14 @@ export async function fetchInstructorCourseDetailsService(id) {
   return data;
 }
 
+export async function fetchInstructorCourseStudentDetailsService(id) {
+  const { data } = await axiosInstance.get(
+    `/instructor/course/get/getStudentdetails/${id}`
+  );
+
+  return data;
+}
+
 export async function updateCourseByIdService(id, formData) {
   const { data } = await axiosInstance.put(
     `/instructor/course/update/${id}`,

@@ -51,7 +51,7 @@ export const initialSignUpFormData = {
 };
 
 export const languageOptions = [
-  { id: "english", label: "English" },
+  { id: "English", label: "English" },
   { id: "spanish", label: "Spanish" },
   { id: "french", label: "French" },
   { id: "german", label: "German" },
@@ -69,7 +69,7 @@ export const courseLevelOptions = [
   { id: "advanced", label: "Advanced" },
 ];
 
-export const courseCategories = [
+export const courseCategories = [ 
   { id: "web-development", label: "Web Development" },
   { id: "backend-development", label: "Backend Development" },
   { id: "data-science", label: "Data Science" },
@@ -154,21 +154,20 @@ export const courseLandingInitialFormData = {
   title: "",
   category: "",
   level: "",
-  primaryLanguage: "",
+  language: "",
   subtitle: "",
   description: "",
-  pricing: "",
+  price: "",
   objectives: "",
-  welcomeMessage: "",
-  image: "",
+  thumbnail: "",
 };
 
 export const courseCurriculumInitialFormData = [
   {
-    title: "",
+    lectureTitle: "",
     videoUrl: "",
-    freePreview: false,
-    public_id: "",
+    isPreviewFree: false,
+    publicId: "",
   },
 ];
 

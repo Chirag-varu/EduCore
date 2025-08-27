@@ -1,4 +1,5 @@
 import Course from "../../models/Course.js";
+import User from "../../models/User.js";
 
 const addNewCourse = async (req, res) => {
   try {
@@ -98,9 +99,39 @@ const updateCourseByID = async (req, res) => {
   }
 };
 
+const getStudentdetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const studentDetails = await User.findById(id)
+      .where("role")
+      .equals("student")
+      .select("-password  -role -__v");
+
+    if (!studentDetails) {
+      return res.status(404).json({
+        success: false,
+        message: "No Student details found",
+        data: null,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: studentDetails,
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({
+      success: false,
+      message: "Some error occured in getting student Details!",
+    });
+  }
+};
+
 export default {
   addNewCourse,
   getAllCourses,
   updateCourseByID,
   getCourseDetailsByID,
+  getStudentdetails
 };

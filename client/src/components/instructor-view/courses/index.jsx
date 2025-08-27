@@ -55,13 +55,13 @@ function InstructorCourses({ listOfCourses }) {
             <TableBody>
               {listOfCourses && listOfCourses.length > 0
                 ? listOfCourses.map((course) => (
-                    <TableRow>
+                    <TableRow key={course._id}>
                       <TableCell className="font-medium">
                         {course?.title}
                       </TableCell>
-                      <TableCell>{course?.students?.length}</TableCell>
+                      <TableCell>{course?.enrolledStudents?.length}</TableCell>
                       <TableCell>
-                        ${course?.students?.length * course?.pricing}
+                        ${course?.enrolledStudents?.length * course?.price}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button

@@ -1,13 +1,12 @@
 import Course from "../../models/Course.js";
 import { StudentCourses } from "../../models/StudentCourses.js";
-const { find, findById } = Course
 
 const getAllStudentViewCourses = async (req, res) => {
   try {
     const {
       category = "",
       level = "",
-      primaryLanguage = "",
+      language = "",
       sortBy = "price-lowtohigh",
       page = 1,
       limit = 10,
@@ -25,9 +24,9 @@ const getAllStudentViewCourses = async (req, res) => {
       if (arr.length) filters.level = { $in: arr };
     }
 
-    if (primaryLanguage) {
-      const arr = primaryLanguage.split(",").filter(Boolean);
-      if (arr.length) filters.primaryLanguage = { $in: arr };
+    if (language) {
+      const arr = language.split(",").filter(Boolean);
+      if (arr.length) filters.language = { $in: arr };
     }
 
     let sortParam = {};
@@ -49,7 +48,7 @@ const getAllStudentViewCourses = async (req, res) => {
     }
 
     const skip = (page - 1) * limit;
-    const coursesList = await find(filters)
+    const coursesList = await Course.find(filters)
       .sort(sortParam)
       .skip(skip)
       .limit(Number(limit));
@@ -71,7 +70,7 @@ const getAllStudentViewCourses = async (req, res) => {
 const getStudentViewCourseDetails = async (req, res) => {
   try {
     const { id } = req.params;
-    const courseDetails = await findById(id);
+    const courseDetails = await Course.findById(id);
 
     if (!courseDetails) {
       return res.status(404).json({
@@ -97,7 +96,7 @@ const getStudentViewCourseDetails = async (req, res) => {
 const checkCoursePurchaseInfo = async (req, res) => {
   try {
     const { id, studentId } = req.params;
-    const studentCourses = await StudentCourses ({
+    const studentCourses = await StudentCourses.findOne({
       userId: studentId,
     });
 

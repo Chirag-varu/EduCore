@@ -1,9 +1,21 @@
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { BarChart, Book, LogOut, Menu } from "lucide-react";
 import { useState } from "react";
 
-export default function InstructorNav({ activeTab, setActiveTab, handleLogout }) {
+export default function InstructorNav({
+  activeTab,
+  setActiveTab,
+  handleLogout,
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
 
@@ -38,17 +50,30 @@ export default function InstructorNav({ activeTab, setActiveTab, handleLogout })
       </Button>
 
       {/* Sidebar */}
-      <aside className={`${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 fixed md:relative inset-y-0 left-0 z-40 w-64 bg-white shadow-md transition-transform duration-300 ease-in-out`}>
+      <aside
+        className={`${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0 fixed md:relative inset-y-0 left-0 z-40 w-64 bg-white shadow-md transition-transform duration-300 ease-in-out`}
+      >
         <div className="p-4 h-full">
           <h2 className="text-2xl font-bold mb-4">Instructor View</h2>
           <nav>
             {menuItems.map((menuItem) => (
               <Button
-                className={`w-full justify-start mb-2 ${
-                  menuItem.value === "logout" ? "text-destructive hover:text-destructive" : ""
-                }`}
+                className={`w-full justify-start mb-2 
+                  ${
+                    menuItem.value === "logout"
+                      ? "text-destructive hover:text-destructive"
+                      : ""
+                  }
+                  ${
+                    activeTab === menuItem.value
+                      ? "bg-gray-200 dark:bg-gray-700 text-foreground"
+                      : ""
+                  }
+                `}
                 key={menuItem.value}
-                variant={activeTab === menuItem.value ? "secondary" : "ghost"}
+                variant="ghost"
                 onClick={
                   menuItem.value === "logout"
                     ? () => setLogoutOpen(true)

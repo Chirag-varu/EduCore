@@ -56,9 +56,9 @@ const seedDB = async () => {
         subtitle: "Learn MERN Stack from scratch",
         description:
           "A complete hands-on bootcamp covering MongoDB, Express.js, React, and Node.js.",
-        category: "Web Development",
+        category: "web-development",
         language: "English",
-        level: "Beginner",
+        level: "beginner",
         thumbnail: "https://placehold.co/600x400",
         promotionalVideo:
           "https://sample-videos.com/video123/mp4/720/big_buck_bunny.mp4",
@@ -68,7 +68,8 @@ const seedDB = async () => {
         lifetime: true,
         objectives:
           "Build and deploy full-stack applications using the MERN stack.",
-        enrolledStudents: [users[1]?._id || new mongoose.Types.ObjectId()],
+        // enrolledStudents: [users[1]?._id || new mongoose.Types.ObjectId()],
+        enrolledStudents: ["68a55e919dab646029238b81"], // hardcoded student id
         curriculum: lectures.map((lec) => lec._id), // attach seeded lectures
         isPublised: true,
       },
@@ -79,9 +80,9 @@ const seedDB = async () => {
         subtitle: "Master problem solving & coding interviews",
         description:
           "This course covers arrays, linked lists, trees, graphs, and algorithms with JavaScript.",
-        category: "Programming",
+        category: "data-science",
         language: "English",
-        level: "Intermediate",
+        level: "intermediate",
         thumbnail: "https://placehold.co/600x400",
         promotionalVideo:
           "https://sample-videos.com/video123/mp4/720/big_buck_bunny.mp4",
@@ -91,7 +92,7 @@ const seedDB = async () => {
         lifetime: true,
         objectives:
           "Crack coding interviews by mastering DS & Algo in JavaScript.",
-        enrolledStudents: [],
+        enrolledStudents: ["68a55e919dab646029238b81"], // hardcoded student id
         curriculum: [lectures[0]._id], // link only first lecture
         isPublised: false,
       },
