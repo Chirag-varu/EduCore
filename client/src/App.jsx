@@ -11,6 +11,7 @@ import AddNewCoursePage from "./pages/instructor/add-new-course";
 import Instructor from "./pages/instructor/instructor";
 import CreateCourse from "./pages/instructor/CreateCourse";
 import StudentViewCoursesPage from "./pages/student/courses";
+import AboutPage from "./pages/AboutUs/index";
 import StudentViewCourseDetailsPage from "./pages/student/course-details";
 import PaypalPaymentReturnPage from "./pages/student/payment-return";
 import StudentCoursesPage from "./pages/student/student-courses";
@@ -32,6 +33,7 @@ function App() {
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <Routes>
+          <Route path="/about" element={<AboutPage />} />
         <Route
           path="/auth"
           element={
