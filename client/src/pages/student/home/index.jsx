@@ -110,23 +110,40 @@ function StudentHomePage() {
                 <div
                   key={courseItem?._id}
                   onClick={() => handleCourseNavigate(courseItem?._id)}
-                  className="bg-white border rounded-2xl overflow-hidden shadow-md hover:shadow-xl cursor-pointer transition transform hover:-translate-y-2"
+                  className="bg-white border rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl cursor-pointer transition transform hover:-translate-y-2 hover:scale-[1.02] duration-300 ease-in-out"
                 >
                   <img
-                    src={courseItem?.image}
+                    src={courseItem?.thumbnail}
                     alt={courseItem?.title}
-                    className="w-full h-44 object-cover"
+                    className="w-full h-44 object-cover rounded-t-2xl hover:opacity-90 transition"
                   />
                   <div className="p-5">
-                    <h3 className="font-semibold text-lg mb-2 line-clamp-1">
+                    <h3 className="font-semibold text-lg mb-1 line-clamp-1">
                       {courseItem?.title}
                     </h3>
+                    <p className="text-sm text-gray-700 mb-2 line-clamp-2">
+                      {courseItem?.subtitle}
+                    </p>
                     <p className="text-sm text-gray-600 mb-3">
                       {courseItem?.instructorName}
                     </p>
-                    <p className="font-bold text-indigo-600 text-lg">
-                      ${courseItem?.pricing}
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <p className="font-extrabold text-lg bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+                        ${courseItem?.price}
+                      </p>
+
+                      <p
+                        className={`inline-block rounded-full px-3 py-1 text-xs font-semibold tracking-wide shadow-sm ${
+                          courseItem?.level === "beginner"
+                            ? "bg-green-100 text-green-800"
+                            : courseItem?.level === "intermediate"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {courseItem?.level?.toUpperCase()}
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))
