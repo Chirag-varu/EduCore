@@ -4,7 +4,6 @@ import { Button } from "../ui/button";
 import { useContext } from "react";
 import { AuthContext } from "@/context/auth-context";
 import EduCore_Logo from "@/assets/logoImg.png";
-import RouteGuard from "@/components/route-guard/index.jsx";
 
 function StudentViewCommonHeader() {
   const navigate = useNavigate();
@@ -18,40 +17,62 @@ function StudentViewCommonHeader() {
   }
 
   return (
-    <header className="flex items-center justify-between p-4 border-b relative">
-      <div className="flex items-center space-x-4">
-        <Link to="/home" className="flex items-center hover:text-black">
-          {/* <GraduationCap className="h-8 w-8 mr-4 " /> */}
-          <img src={EduCore_Logo} alt="" className="w-11" />
-          <span className="font-extrabold md:text-xl text-[14px]">EduCore</span>
+    <header className="flex items-center justify-between px-6 py-4 border-b bg-background shadow-sm">
+      {/* Left section - Logo & Nav */}
+      <div className="flex items-center space-x-6">
+        {/* Logo */}
+        <Link to="/home" className="flex items-center gap-2 hover:opacity-80 transition">
+          <img src={EduCore_Logo} alt="EduCore Logo" className="w-10 md:w-11" />
+          <span className="font-extrabold md:text-xl text-base text-foreground">
+            EduCore
+          </span>
         </Link>
-        <div className="flex items-center space-x-1">
+
+        {/* Nav buttons */}
+        <div className="flex items-center space-x-2">
           <Button
             variant="ghost"
             onClick={() => {
-              location.pathname.includes("/courses")
-                ? null
-                : navigate("/courses");
+              if (!location.pathname.includes("/courses")) {
+                navigate("/courses");
+              }
             }}
-            className="text-[14px] md:text-[16px] font-medium"
+            className="text-sm md:text-[16px] font-medium hover:bg-muted/40"
           >
             Explore Courses
           </Button>
+
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/about")}
+            className="text-sm md:text-[16px] font-medium hover:bg-muted/40"
+          >
+            About Us
+          </Button>
         </div>
       </div>
-      <div className="flex items-center space-x-4">
-        <div className="flex gap-4 items-center">
-          <div
-            onClick={() => navigate("/student-courses")}
-            className="flex cursor-pointer items-center gap-3"
-          >
-            <span className="font-extrabold md:text-xl text-[14px]">
-              {auth.user?.userName || "User"}
-            </span>
-            <TvMinimalPlay className="w-8 h-8 cursor-pointer" />
-          </div>
-          <Button onClick={handleLogout}>Sign Out</Button>
+
+      {/* Right section - User & Logout */}
+      <div className="flex items-center space-x-6">
+        {/* User Info */}
+        <div
+          onClick={() => navigate("/student-courses")}
+          className="flex cursor-pointer items-center gap-2 hover:opacity-80 transition"
+        >
+          <span className="font-bold md:text-lg text-sm text-foreground">
+            {auth.user?.userName || "User"}
+          </span>
+          <TvMinimalPlay className="w-6 h-6 md:w-8 md:h-8 text-primary" />
         </div>
+
+        {/* Logout */}
+        <Button
+          onClick={handleLogout}
+          variant="outline"
+          className="font-medium hover:bg-destructive hover:text-white transition"
+        >
+          Sign Out
+        </Button>
       </div>
     </header>
   );
