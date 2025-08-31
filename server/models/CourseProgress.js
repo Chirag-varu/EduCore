@@ -4,7 +4,7 @@ const LectureProgressSchema = new Schema({
   lectureId: String,
   viewed: Boolean,
   dateViewed: Date,
-});
+}, {timestamps:true});
 
 const CourseProgressSchema = new Schema({
   userId: String,
@@ -12,6 +12,6 @@ const CourseProgressSchema = new Schema({
   completed: Boolean,
   completionDate: Date,
   lecturesProgress: [LectureProgressSchema],
-});
+}, {timestamps:true});
 
 export default model("Progress", CourseProgressSchema);

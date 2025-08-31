@@ -1,17 +1,19 @@
 import { Schema, model } from "mongoose";
 
 const LectureSchema = new Schema({
-  title: String,
+  title: { type: String, required: true },
   videoUrl: String,
-  public_id: String,
-  freePreview: Boolean,
-});
+  publicId: String,
+  isPreviewFree: Boolean,
+}, { timestamps: true });
+
+export const Lecture = model("Lecture", LectureSchema);
 
 const CourseSchema = new Schema({
   instructorId: String,
   instructorName: String,
-  date: Date,
-  title: String,
+  date: { type: Date, default: Date.now },
+  title: { type: String, required: true },
   category: String,
   level: String,
   primaryLanguage: String,
@@ -24,13 +26,13 @@ const CourseSchema = new Schema({
   students: [
     {
       studentId: String,
-      studentName: String,  
+      studentName: String,
       studentEmail: String,
       paidAmount: String,
     },
   ],
-  curriculum: [LectureSchema],
-  isPublised: Boolean,
-}, {timestamps:true});
+  curriculum: [{ type: Schema.Types.ObjectId, ref: "Lecture" }], // reference lectures
+  isPublished: { type: Boolean, default: false },
+}, { timestamps: true });
 
 export default model("Course", CourseSchema);

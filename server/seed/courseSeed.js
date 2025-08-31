@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import { Course } from "../models/Courses.model.js";
-import { Lecture } from "../models/lecture.model.js";
+import { Course } from "../models/Courses.model.js"; 
+import Lecture from "../models/lecture.model.js";
 import User from "../models/User.js";
-import { StudentCourses } from "../models/StudentCourses.js"; // ✅ Import model
+import { StudentCourses } from "../models/StudentCourses.js";
 
 dotenv.config();
 
-const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/EduCore";
+const MONGO_URI = process.env.MONGO_URI || "";
 
 const seedDB = async () => {
   try {
@@ -17,7 +17,7 @@ const seedDB = async () => {
     // Clear old data
     await Course.deleteMany();
     await Lecture.deleteMany();
-    await StudentCourses.deleteMany(); // ✅ Clear old student courses
+    await StudentCourses.deleteMany();
 
     // Seed Lectures
     const lectures = await Lecture.insertMany([
@@ -45,14 +45,11 @@ const seedDB = async () => {
     ]);
     console.log("📺 Lectures Seeded");
 
-    // Optional: Get users
-    const users = await User.find({ role: "student" }).limit(2);
-
     // Seed Courses
     const courses = await Course.insertMany([
       {
         instructorId: "689dafb83d96d35705cfb0fc",
-        instructorName: "chirag varu",
+        instructorName: "Chirag Varu",
         title: "Full-Stack Web Development Bootcamp",
         subtitle: "Learn MERN Stack from scratch",
         description:
@@ -75,7 +72,7 @@ const seedDB = async () => {
       },
       {
         instructorId: "689dafb83d96d35705cfb0fc",
-        instructorName: "chirag varu",
+        instructorName: "Chirag Varu",
         title: "Data Structures & Algorithms in JavaScript",
         subtitle: "Master problem solving & coding interviews",
         description:

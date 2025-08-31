@@ -39,6 +39,9 @@ function StudentViewCourseProgressPage() {
 
   async function fetchCurrentCourseProgress() {
     const response = await getCurrentCourseProgressService(auth?.user?._id, id);
+    console.log('====== Hero ==============================');
+    console.log(response);
+    console.log('====================================');
     if (response?.success) {
       if (!response?.data?.isPurchased) {
         setLockCourse(true);
@@ -159,7 +162,7 @@ function StudentViewCourseProgressPage() {
             progressData={currentLecture}
           />
           <div className="p-6 bg-[#1c1d1f]">
-            <h2 className="text-2xl font-bold mb-2">{currentLecture?.title}</h2>
+            <h2 className="text-2xl font-bold mb-2">{currentLecture?.lectureTitle}</h2>
           </div>
         </div>
         <div
@@ -198,7 +201,7 @@ function StudentViewCourseProgressPage() {
                         ) : (
                           <Play className="h-4 w-4 " />
                         )}
-                        <span>{item?.title}</span>
+                        <span>{item?.lectureTitle}</span>
                       </div>
                     )
                   )}
@@ -222,8 +225,15 @@ function StudentViewCourseProgressPage() {
         <DialogContent className="sm:w-[425px]">
           <DialogHeader>
             <DialogTitle>You can't view this page</DialogTitle>
-            <DialogDescription>
-              Please purchase this course to get access
+            <DialogDescription className="flex flex-col gap-3">
+              <span>Please purchase this course to get access</span>
+              <Button
+                onClick={() => navigate("/student-courses")}
+                className="self-start"
+              >
+                <ChevronLeft className="h-3 w-3" />
+                Back to My Courses
+              </Button>
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
