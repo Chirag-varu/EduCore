@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import { Course } from "../models/Courses.model.js";
 import { Lecture } from "../models/lecture.model.js";
 import User from "../models/User.js";
+import { StudentCourses } from "../models/StudentCourses.js"; // ✅ Import model
+
 dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/EduCore";
@@ -10,12 +12,12 @@ const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/EduCore";
 const seedDB = async () => {
   try {
     await mongoose.connect(MONGO_URI);
-
     console.log("✅ MongoDB Connected");
 
     // Clear old data
     await Course.deleteMany();
     await Lecture.deleteMany();
+    await StudentCourses.deleteMany(); // ✅ Clear old student courses
 
     // Seed Lectures
     const lectures = await Lecture.insertMany([
@@ -41,17 +43,16 @@ const seedDB = async () => {
         isPreviewFree: false,
       },
     ]);
-
     console.log("📺 Lectures Seeded");
 
-    // Optional: Get users if you already have them
+    // Optional: Get users
     const users = await User.find({ role: "student" }).limit(2);
 
     // Seed Courses
-    const courses = [
+    const courses = await Course.insertMany([
       {
-        instructorId: users[0]?._id || new mongoose.Types.ObjectId(),
-        instructorName: users[0]?.name || "John Doe",
+        instructorId: "689dafb83d96d35705cfb0fc",
+        instructorName: "chirag varu",
         title: "Full-Stack Web Development Bootcamp",
         subtitle: "Learn MERN Stack from scratch",
         description:
@@ -68,14 +69,13 @@ const seedDB = async () => {
         lifetime: true,
         objectives:
           "Build and deploy full-stack applications using the MERN stack.",
-        // enrolledStudents: [users[1]?._id || new mongoose.Types.ObjectId()],
         enrolledStudents: ["68a55e919dab646029238b81"], // hardcoded student id
-        curriculum: lectures.map((lec) => lec._id), // attach seeded lectures
+        curriculum: lectures.map((lec) => lec._id),
         isPublised: true,
       },
       {
-        instructorId: users[1]?._id || new mongoose.Types.ObjectId(),
-        instructorName: users[1]?.name || "Jane Smith",
+        instructorId: "689dafb83d96d35705cfb0fc",
+        instructorName: "chirag varu",
         title: "Data Structures & Algorithms in JavaScript",
         subtitle: "Master problem solving & coding interviews",
         description:
@@ -92,14 +92,39 @@ const seedDB = async () => {
         lifetime: true,
         objectives:
           "Crack coding interviews by mastering DS & Algo in JavaScript.",
-        enrolledStudents: ["68a55e919dab646029238b81"], // hardcoded student id
-        curriculum: [lectures[0]._id], // link only first lecture
+        enrolledStudents: ["68a55e919dab646029238b81"],
+        curriculum: [lectures[0]._id],
         isPublised: false,
       },
-    ];
-
-    await Course.insertMany(courses);
+    ]);
     console.log("🎉 Courses Seeded Successfully");
+
+    // ✅ Seed StudentCourses collection
+    await StudentCourses.insertMany([
+      {
+        userId: "68a55e919dab646029238b81", // hardcoded student
+        courses: [
+          {
+            courseId: courses[0]._id.toString(),
+            title: courses[0].title,
+            instructorId: courses[0].instructorId.toString(),
+            instructorName: courses[0].instructorName,
+            dateOfPurchase: new Date(),
+            courseImage: courses[0].thumbnail,
+          },
+          {
+            courseId: courses[1]._id.toString(),
+            title: courses[1].title,
+            instructorId: courses[1].instructorId.toString(),
+            instructorName: courses[1].instructorName,
+            dateOfPurchase: new Date(),
+            courseImage: courses[1].thumbnail,
+          },
+        ],
+      },
+    ]);
+
+    console.log("🎓 StudentCourses Seeded Successfully");
 
     process.exit();
   } catch (error) {
