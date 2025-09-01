@@ -24,21 +24,21 @@ const seedDB = async () => {
       {
         lectureTitle: "Introduction to Web Development",
         videoUrl:
-          "https://sample-videos.com/video123/mp4/720/big_buck_bunny.mp4",
+          "https://www.w3schools.com/html/mov_bbb.mp4",
         publicId: "intro-web-dev",
         isPreviewFree: true,
       },
       {
         lectureTitle: "Setting up the Development Environment",
         videoUrl:
-          "https://sample-videos.com/video123/mp4/720/big_buck_bunny.mp4",
+          "https://www.w3schools.com/html/mov_bbb.mp4",
         publicId: "setup-env",
         isPreviewFree: false,
       },
       {
         lectureTitle: "Building REST APIs with Express",
         videoUrl:
-          "https://sample-videos.com/video123/mp4/720/big_buck_bunny.mp4",
+          "https://www.w3schools.com/html/mov_bbb.mp4",
         publicId: "express-api",
         isPreviewFree: false,
       },

@@ -48,7 +48,8 @@ function StudentViewCourseProgressPage() {
       } else {
         setStudentCurrentCourseProgress({
           courseDetails: response?.data?.courseDetails,
-          progress: response?.data?.progress,
+          lectures: response?.data?.lectures || response?.data?.courseDetails?.curriculum || [],
+          progress: response?.data?.progress
         });
 
         if (response?.data?.completed) {
@@ -188,7 +189,7 @@ function StudentViewCourseProgressPage() {
             <TabsContent value="content">
               <ScrollArea className="h-full">
                 <div className="p-4 space-y-4">
-                  {studentCurrentCourseProgress?.courseDetails?.curriculum.map(
+                  {studentCurrentCourseProgress?.lectures?.map(
                     (item) => (
                       <div
                         className="flex items-center space-x-2 text-sm text-white font-bold cursor-pointer"
