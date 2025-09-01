@@ -39,21 +39,21 @@ function StudentViewCourseProgressPage() {
 
   async function fetchCurrentCourseProgress() {
     const response = await getCurrentCourseProgressService(auth?.user?._id, id);
-    console.log('====== Hero ==============================');
-    console.log(response);
-    console.log('====================================');
     if (response?.success) {
       if (!response?.data?.isPurchased) {
         setLockCourse(true);
       } else {
         setStudentCurrentCourseProgress({
           courseDetails: response?.data?.courseDetails,
-          lectures: response?.data?.lectures || response?.data?.courseDetails?.curriculum || [],
-          progress: response?.data?.progress
+          lectures:
+            response?.data?.lectures ||
+            response?.data?.courseDetails?.curriculum ||
+            [],
+          progress: response?.data?.progress,
         });
 
         if (response?.data?.completed) {
-          setCurrentLecture(response?.data?.courseDetails?.curriculum[0]);
+          setCurrentLecture(response?.data?.lectures[0]);
           setShowCourseCompleteDialog(true);
           setShowConfetti(true);
 
@@ -61,7 +61,7 @@ function StudentViewCourseProgressPage() {
         }
 
         if (response?.data?.progress?.length === 0) {
-          setCurrentLecture(response?.data?.courseDetails?.curriculum[0]);
+          setCurrentLecture(response?.data?.lectures[0]);
         } else {
           console.log("logging here");
           const lastIndexOfViewedAsTrue = response?.data?.progress.reduceRight(
@@ -135,11 +135,16 @@ function StudentViewCourseProgressPage() {
             size="sm"
           >
             <ChevronLeft className="h-4 w-4 mr-2" />
-            Back to My Courses Page
+            Courses Page
           </Button>
-          <h1 className="text-lg font-bold hidden md:block">
-            {studentCurrentCourseProgress?.courseDetails?.title}
-          </h1>
+          <div className="flex flex-col">
+            <h1 className="text-lg font-bold hidden md:block">
+              {studentCurrentCourseProgress?.courseDetails?.title}
+            </h1>
+            <p className="text-sm font-semibold hidden md:block">
+              {studentCurrentCourseProgress?.courseDetails?.subtitle}
+            </p>
+          </div>
         </div>
         <Button onClick={() => setIsSideBarOpen(!isSideBarOpen)}>
           {isSideBarOpen ? (
@@ -163,7 +168,9 @@ function StudentViewCourseProgressPage() {
             progressData={currentLecture}
           />
           <div className="p-6 bg-[#1c1d1f]">
-            <h2 className="text-2xl font-bold mb-2">{currentLecture?.lectureTitle}</h2>
+            <h2 className="text-2xl font-bold mb-2">
+              {currentLecture?.lectureTitle}
+            </h2>
           </div>
         </div>
         <div
@@ -189,33 +196,93 @@ function StudentViewCourseProgressPage() {
             <TabsContent value="content">
               <ScrollArea className="h-full">
                 <div className="p-4 space-y-4">
-                  {studentCurrentCourseProgress?.lectures?.map(
-                    (item) => (
-                      <div
-                        className="flex items-center space-x-2 text-sm text-white font-bold cursor-pointer"
-                        key={item._id}
-                      >
-                        {studentCurrentCourseProgress?.progress?.find(
-                          (progressItem) => progressItem.lectureId === item._id
-                        )?.viewed ? (
-                          <Check className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <Play className="h-4 w-4 " />
-                        )}
-                        <span>{item?.lectureTitle}</span>
-                      </div>
-                    )
-                  )}
+                  <h2 className="text-xl font-bold">Leactues</h2>
+                  {studentCurrentCourseProgress?.lectures?.map((item) => (
+                    <div
+                      className="flex items-center space-x-2 text-sm text-white font-bold cursor-pointer"
+                      key={item._id}
+                    >
+                      {studentCurrentCourseProgress?.progress?.find(
+                        (progressItem) => progressItem.lectureId === item._id
+                      )?.viewed ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <Play className="h-4 w-4 " />
+                      )}
+                      <span>{item?.lectureTitle}</span>
+                    </div>
+                  ))}
                 </div>
               </ScrollArea>
             </TabsContent>
             <TabsContent value="overview" className="flex-1 overflow-hidden">
               <ScrollArea className="h-full">
-                <div className="p-4">
-                  <h2 className="text-xl font-bold mb-4">About this course</h2>
+                <div className="p-4 space-y-4">
+                  <h2 className="text-xl font-bold">About this course</h2>
                   <p className="text-gray-400">
                     {studentCurrentCourseProgress?.courseDetails?.description}
                   </p>
+
+                  <h2 className="text-xl font-bold">Objective</h2>
+                  <p className="text-gray-400">
+                    {studentCurrentCourseProgress?.courseDetails?.objectives}
+                  </p>
+
+                  <h2 className="text-xl font-bold">Instructor</h2>
+                  <p className="text-gray-400">
+                    {
+                      studentCurrentCourseProgress?.courseDetails
+                        ?.instructorName
+                    }
+                  </p>
+
+                  <h2 className="text-xl font-bold">Course Details</h2>
+                  <ul className="text-gray-400 space-y-1 list-disc pl-6">
+                    {/* <li>
+                      <span className="font-semibold">Subtitle:</span>{" "}
+                      {studentCurrentCourseProgress?.courseDetails?.subtitle}
+                    </li> */}
+                    <li>
+                      <span className="font-semibold">Category:</span>{" "}
+                      {studentCurrentCourseProgress?.courseDetails?.category}
+                    </li>
+                    <li>
+                      <span className="font-semibold">Language:</span>{" "}
+                      {studentCurrentCourseProgress?.courseDetails?.language}
+                    </li>
+                    <li>
+                      <span className="font-semibold">Level:</span>{" "}
+                      {studentCurrentCourseProgress?.courseDetails?.level}
+                    </li>
+                    {/* <li>
+                      <span className="font-semibold">Price:</span> ₹
+                      {studentCurrentCourseProgress?.courseDetails?.price}
+                    </li> */}
+                    <li>
+                      <span className="font-semibold">Certificate:</span>{" "}
+                      {studentCurrentCourseProgress?.courseDetails?.certificate
+                        ? "Yes"
+                        : "No"}
+                    </li>
+                    <li>
+                      <span className="font-semibold">Lifetime Access:</span>{" "}
+                      {studentCurrentCourseProgress?.courseDetails?.lifetime
+                        ? "Yes"
+                        : "No"}
+                    </li>
+                    {/* <li>
+                      <span className="font-semibold">Free Preview:</span>{" "}
+                      {studentCurrentCourseProgress?.courseDetails?.freePreview
+                        ? "Yes"
+                        : "No"}
+                    </li> */}
+                    <li>
+                      <span className="font-semibold">Course Created At:</span>{" "}
+                      {new Date(
+                        studentCurrentCourseProgress?.courseDetails?.createdAt
+                      ).toLocaleDateString()}
+                    </li>
+                  </ul>
                 </div>
               </ScrollArea>
             </TabsContent>
