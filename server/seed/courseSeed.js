@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { Course } from "../models/Courses.model.js"; 
 import Lecture from "../models/lecture.model.js";
-import User from "../models/User.js";
+// import User from "../models/User.js";
 import { StudentCourses } from "../models/StudentCourses.js";
 
 dotenv.config();

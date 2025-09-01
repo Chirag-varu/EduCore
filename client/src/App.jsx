@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import AuthPage from "./pages/auth";
+import Sign_up from "./pages/auth/signup";
 import RouteGuard from "./components/route-guard";
 import { useEffect, useContext } from "react";
 import { AuthContext } from "./context/auth-context";
@@ -33,12 +34,22 @@ function App() {
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <Routes>
-          <Route path="/about" element={<AboutPage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route
           path="/auth"
           element={
             <RouteGuard
               element={<AuthPage />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+            />
+          }
+        />
+        <Route
+          path="/auth/signup"
+          element={
+            <RouteGuard
+              element={<Sign_up />}
               authenticated={auth?.authenticate}
               user={auth?.user}
             />
