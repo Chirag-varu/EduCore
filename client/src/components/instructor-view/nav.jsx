@@ -8,7 +8,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { BarChart, Book, LogOut, Menu } from "lucide-react";
+import { BarChart, Book, LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
 
 export default function InstructorNav({
@@ -41,12 +41,12 @@ export default function InstructorNav({
     <>
       {/* Mobile Menu Button */}
       <Button
-        className="md:hidden fixed top-4 left-4 z-50"
+        className={`md:hidden fixed top-4 left-4 z-50 ${isOpen ? "ml-48" : ""}`}
         size="icon"
         variant="ghost"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <Menu className="h-5 w-5" />
+        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </Button>
 
       {/* Sidebar */}

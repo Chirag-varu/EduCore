@@ -39,9 +39,10 @@ function InstructorDashboardpage() {
     },
   ];
 
-  function handleLogout() {
-    resetCredentials();
+  async function handleLogout() {
+    await resetCredentials();
     sessionStorage.clear();
+    localStorage.clear();
   }
 
   return (

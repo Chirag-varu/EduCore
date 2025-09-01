@@ -98,6 +98,9 @@ export default function AuthProvider({ children }) {
   async function checkAuthUser() {
     try {
       const data = await checkAuthService();
+      console.log('====================================');
+      console.log(data);
+      console.log('====================================');
       if (data.success) {
         setAuth({
           authenticate: true,
