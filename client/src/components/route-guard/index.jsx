@@ -29,9 +29,9 @@ function RouteGuard({ authenticated, user, element }) {
   }
 
   // 4️ Default landing page when visiting `/`
-  if (pathname === "/" && authenticated) {
-    return <Navigate to="/home" replace />;
-  }
+  // if (pathname === "/" && authenticated) {
+  //   return <Navigate to="/home" replace />;
+  // }
 
   // Otherwise → allow (instructors can stay on /home if they go there manually)
   return element;

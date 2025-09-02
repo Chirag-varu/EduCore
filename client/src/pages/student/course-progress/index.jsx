@@ -63,7 +63,7 @@ function StudentViewCourseProgressPage() {
         if (response?.data?.progress?.length === 0) {
           setCurrentLecture(response?.data?.lectures[0]);
         } else {
-          console.log("logging here");
+          // console.log("logging here");
           const lastIndexOfViewedAsTrue = response?.data?.progress.reduceRight(
             (acc, obj, index) => {
               return acc === -1 && obj.viewed ? index : acc;

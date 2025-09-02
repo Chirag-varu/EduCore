@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import AuthPage from "./pages/auth";
 import Sign_up from "./pages/auth/signup";
 import RouteGuard from "./components/route-guard";
-import { useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "./context/auth-context";
 import InstructorDashboardpage from "./pages/instructor";
 import StudentViewCommonLayout from "./components/student-view/common-layout";
@@ -21,6 +21,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 
 function App() {
   const { auth, setAuth } = useContext(AuthContext);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -29,42 +30,17 @@ function App() {
     if (token && user) {
       setAuth({ token, user: JSON.parse(user), authenticate: true });
     }
+    setLoading(false);
   }, []);
+
+  if (loading) {
+    return <div>Loading...</div>; // or spinner
+  }
 
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <Routes>
         <Route path="/about" element={<AboutPage />} />
-        <Route
-          path="/auth"
-          element={
-            <RouteGuard
-              element={<AuthPage />}
-              authenticated={auth?.authenticate}
-              user={auth?.user}
-            />
-          }
-        />
-        <Route
-          path="/auth/signup"
-          element={
-            <RouteGuard
-              element={<Sign_up />}
-              authenticated={auth?.authenticate}
-              user={auth?.user}
-            />
-          }
-        />
-        <Route
-          path="/instructor"
-          element={
-            <RouteGuard
-              element={<InstructorDashboardpage />}
-              authenticated={auth?.authenticate}
-              user={auth?.user}
-            />
-          }
-        />
         <Route path="/instructor/home" element={<Instructor />} />
         <Route path="/instructor/CreateCourse" element={<CreateCourse />} />
         <Route
@@ -97,7 +73,6 @@ function App() {
             />
           }
         >
-          <Route path="" element={<StudentHomePage />} />
           <Route path="home" element={<StudentHomePage />} />
           <Route path="courses" element={<StudentViewCoursesPage />} />
           <Route
@@ -111,6 +86,36 @@ function App() {
             element={<StudentViewCourseProgressPage />}
           />
         </Route>
+        <Route
+          path="/auth"
+          element={
+            <RouteGuard
+              element={<AuthPage />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+            />
+          }
+        />
+        <Route
+          path="/auth/signup"
+          element={
+            <RouteGuard
+              element={<Sign_up />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+            />
+          }
+        />
+        <Route
+          path="/instructor"
+          element={
+            <RouteGuard
+              element={<InstructorDashboardpage />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+            />
+          }
+        />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </GoogleOAuthProvider>

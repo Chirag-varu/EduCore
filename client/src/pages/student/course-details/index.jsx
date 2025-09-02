@@ -202,6 +202,7 @@ function StudentViewCourseDetailsPage() {
                         ? () => handleSetFreePreview(curriculumItem)
                         : null
                     }
+                    key={index}
                   >
                     {curriculumItem?.freePreview ? (
                       <PlayCircle className="mr-2 h-4 w-4" />
