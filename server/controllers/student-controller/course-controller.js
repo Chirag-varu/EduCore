@@ -1,5 +1,6 @@
 import Course from "../../models/Course.js";
 import { StudentCourses } from "../../models/StudentCourses.js";
+import Lecture from "../../models/lecture.model.js";
 
 const getAllStudentViewCourses = async (req, res) => {
   try {
@@ -80,9 +81,14 @@ const getStudentViewCourseDetails = async (req, res) => {
       });
     }
 
+    const lectures = await Lecture.find({
+      _id: { $in: courseDetails.curriculum },
+    }).sort({ createdAt: 1 });
+
     res.status(200).json({
       success: true,
       data: courseDetails,
+      lectures
     });
   } catch (e) {
     console.log(e);
@@ -100,7 +106,8 @@ const checkCoursePurchaseInfo = async (req, res) => {
       userId: studentId,
     });
 
-    const ifStudentAlreadyBoughtCurrentCourse = studentCourses?.courses.find((item) => item.courseId === id) > -1;
+    const ifStudentAlreadyBoughtCurrentCourse =
+      studentCourses?.courses.find((item) => item.courseId === id) > -1;
     res.status(200).json({
       success: true,
       data: ifStudentAlreadyBoughtCurrentCourse,

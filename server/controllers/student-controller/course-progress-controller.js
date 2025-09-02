@@ -1,6 +1,6 @@
 import CourseProgress from "../../models/CourseProgress.js";
 import Course from "../../models/Course.js";
-import Lecture from "../../models/lecture.model.js"; // default export (fix OverwriteModelError)
+import Lecture from "../../models/lecture.model.js";
 import { StudentCourses } from "../../models/StudentCourses.js";
 
 // mark current lecture as viewed

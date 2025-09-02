@@ -5,8 +5,8 @@ export const StudentContext = createContext(null);
 export default function StudentProvider({ children }) {
   const [studentViewCoursesList, setStudentViewCoursesList] = useState([]);
   const [loadingState, setLoadingState] = useState(true);
-  const [studentViewCourseDetails, setStudentViewCourseDetails] =
-    useState(null);
+  const [studentViewCourseDetails, setStudentViewCourseDetails] = useState(null);
+  const [lectures, setLectures] = useState(null);
   const [currentCourseDetailsId, setCurrentCourseDetailsId] = useState(null);
   const [studentBoughtCoursesList, setStudentBoughtCoursesList] = useState([]);
   const [studentCurrentCourseProgress, setStudentCurrentCourseProgress] =
@@ -27,6 +27,8 @@ export default function StudentProvider({ children }) {
         setStudentBoughtCoursesList,
         studentCurrentCourseProgress,
         setStudentCurrentCourseProgress,
+        lectures,
+        setLectures
       }}
     >
       {children}

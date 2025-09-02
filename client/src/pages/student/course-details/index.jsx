@@ -29,6 +29,8 @@ function StudentViewCourseDetailsPage() {
     setCurrentCourseDetailsId,
     loadingState,
     setLoadingState,
+    lectures,
+    setLectures,
   } = useContext(StudentContext);
 
   const { auth } = useContext(AuthContext);
@@ -62,9 +64,11 @@ function StudentViewCourseDetailsPage() {
 
     if (response?.success) {
       setStudentViewCourseDetails(response?.data);
+      setLectures(response?.lectures);
       setLoadingState(false);
     } else {
       setStudentViewCourseDetails(null);
+      setLectures(null);
       setLoadingState(false);
     }
   }
@@ -87,10 +91,10 @@ function StudentViewCourseDetailsPage() {
       payerId: "",
       instructorId: studentViewCourseDetails?.instructorId,
       instructorName: studentViewCourseDetails?.instructorName,
-      courseImage: studentViewCourseDetails?.image,
+      courseImage: studentViewCourseDetails?.thumbnail,
       courseTitle: studentViewCourseDetails?.title,
       courseId: studentViewCourseDetails?._id,
-      coursePricing: studentViewCourseDetails?.pricing,
+      coursePricing: studentViewCourseDetails?.price,
     };
 
     console.log(paymentPayload, "paymentPayload");
@@ -120,6 +124,7 @@ function StudentViewCourseDetailsPage() {
   useEffect(() => {
     if (!location.pathname.includes("course/details"))
       setStudentViewCourseDetails(null),
+        setLectures(null),
         setCurrentCourseDetailsId(null),
         setCoursePurchaseId(null);
   }, [location.pathname]);
@@ -152,8 +157,8 @@ function StudentViewCourseDetailsPage() {
             {studentViewCourseDetails?.primaryLanguage}
           </span>
           <span>
-            {studentViewCourseDetails?.students.length}{" "}
-            {studentViewCourseDetails?.students.length <= 1
+            {studentViewCourseDetails?.enrolledStudents.length}{" "}
+            {studentViewCourseDetails?.enrolledStudents.length <= 1
               ? "Student"
               : "Students"}
           </span>
@@ -189,30 +194,26 @@ function StudentViewCourseDetailsPage() {
               <CardTitle>Course Curriculum</CardTitle>
             </CardHeader>
             <CardContent>
-              {studentViewCourseDetails?.curriculum?.map(
-                (curriculumItem, index) => (
-                  <li
-                    className={`${
-                      curriculumItem?.freePreview
-                        ? "cursor-pointer"
-                        : "cursor-not-allowed"
-                    } flex items-center mb-4`}
-                    onClick={
-                      curriculumItem?.freePreview
-                        ? () => handleSetFreePreview(curriculumItem)
-                        : null
-                    }
-                    key={index}
-                  >
-                    {curriculumItem?.freePreview ? (
-                      <PlayCircle className="mr-2 h-4 w-4" />
-                    ) : (
-                      <Lock className="mr-2 h-4 w-4" />
-                    )}
-                    <span>{curriculumItem?.title}</span>
-                  </li>
-                )
-              )}
+              {lectures?.map((curriculumItem, index) => (
+                <li
+                  key={index}
+                  className={`${
+                    index === 0 ? "cursor-pointer" : "cursor-default"
+                  } flex items-center mb-4`}
+                  onClick={
+                    index === 0
+                      ? () => handleSetFreePreview(curriculumItem)
+                      : null
+                  }
+                >
+                  {index === 0 ? (
+                    <PlayCircle className="mr-2 h-4 w-4" />
+                  ) : (
+                    <Lock className="mr-2 h-4 w-4" />
+                  )}
+                  <span>{curriculumItem?.lectureTitle}</span>
+                </li>
+              ))}
             </CardContent>
           </Card>
         </main>
@@ -221,20 +222,14 @@ function StudentViewCourseDetailsPage() {
             <CardContent className="p-6">
               <div className="aspect-video mb-4 rounded-lg flex items-center justify-center">
                 <VideoPlayer
-                  url={
-                    getIndexOfFreePreviewUrl !== -1
-                      ? studentViewCourseDetails?.curriculum[
-                          getIndexOfFreePreviewUrl
-                        ].videoUrl
-                      : ""
-                  }
+                  url={lectures?.length > 0 ? lectures[0].videoUrl : ""}
                   width="450px"
                   height="200px"
                 />
               </div>
               <div className="mb-4">
                 <span className="text-3xl font-bold">
-                  ${studentViewCourseDetails?.pricing}
+                  ${studentViewCourseDetails?.price}
                 </span>
               </div>
               <Button onClick={handleCreatePayment} className="w-full">
@@ -251,32 +246,49 @@ function StudentViewCourseDetailsPage() {
           setDisplayCurrentVideoFreePreview(null);
         }}
       >
-        <DialogContent className="w-[800px]">
-          <DialogHeader>
-            <DialogTitle>Course Preview</DialogTitle>
-          </DialogHeader>
-          <div className="aspect-video rounded-lg flex items-center justify-center">
+        <DialogContent className="max-w-[900px] p-6">
+          {/* Header with title + close button aligned */}
+          <div className="flex items-center justify-between mb-4">
+            <DialogTitle className="text-2xl font-bold">
+              Course Preview
+            </DialogTitle>
+            <DialogClose asChild>
+              <button
+                className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </DialogClose>
+          </div>
+
+          {/* Video preview */}
+          <div className="aspect-video rounded-xl overflow-hidden shadow-lg mb-4 bg-black">
             <VideoPlayer
-              url={displayCurrentVideoFreePreview}
-              width="450px"
-              height="200px"
+              url={lectures?.[0]?.videoUrl}
+              width="100%"
+              height="100%"
             />
           </div>
-          <div className="flex flex-col gap-2">
-            {studentViewCourseDetails?.curriculum
-              ?.filter((item) => item.freePreview)
-              .map((filteredItem) => (
-                <p
-                  onClick={() => handleSetFreePreview(filteredItem)}
-                  className="cursor-pointer text-[16px] font-medium"
-                >
-                  {filteredItem?.title}
-                </p>
-              ))}
+
+          {/* Lecture info */}
+          <div className="text-center space-y-1 mb-6">
+            <p className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              {lectures?.[0]?.lectureTitle}
+            </p>
+            <span className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+              Preview Video
+            </span>
           </div>
-          <DialogFooter className="sm:justify-start">
+
+          {/* Footer button */}
+          <DialogFooter className="sm:justify-center">
             <DialogClose asChild>
-              <Button type="button" variant="secondary">
+              <Button
+                type="button"
+                variant="secondary"
+                className="px-6 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+              >
                 Close
               </Button>
             </DialogClose>
