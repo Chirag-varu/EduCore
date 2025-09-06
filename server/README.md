@@ -23,3 +23,18 @@ to run the backend of our app run:
 ```bash 
 npm run dev
 ```
+
+### we also added redis so u may have to run it in another terminal:
+
+you can install or download it to ur local space but we recommend using docker in local and prod enviroment
+
+```bash
+docker run --name redis -p 6379:6379 -d redis
+docker start redis
+```
+
+to ckeck if it running:
+
+```bash
+docker exec -it redis redis-cli ping
+```
