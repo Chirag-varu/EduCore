@@ -41,9 +41,6 @@ const registerUser = async (req, res) => {
     }
 
     const otp = generateOTP();
-    console.log('====================================');
-    console.log(otp);
-    console.log('====================================');
     await redisClient.set(
       `otp:${userEmail}`,
       JSON.stringify({ otp, userName, userEmail, password, role }),
