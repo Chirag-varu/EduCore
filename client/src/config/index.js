@@ -40,6 +40,7 @@ export const signInFormControls = [
 ];
 
 export const initialSignInFormData = {
+  userName: "",
   userEmail: "",
   password: "",
 };

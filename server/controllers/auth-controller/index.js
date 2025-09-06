@@ -1,15 +1,127 @@
 import "dotenv/config";
 import User from "../../models/User.js";
 import pkg from "bcryptjs";
-const { hash, compare } = pkg;
 import jwt from "jsonwebtoken";
-const { sign, verify } = jwt;
-import { Router } from "express";
-const router = Router();
+import { generateOTP } from "../../helpers/generateOTP.js";
+import redisClient from "../../helpers/redisClient.js";
+import nodemailer from "nodemailer";
+
+const { hash, compare } = pkg;
+const { sign } = jwt;
 
 // Google auth implementation
 import { OAuth2Client } from "google-auth-library";
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const chekAuth = (req, res) => {
+  const user = req.user;
+
+  res.status(200).json({
+    success: true,
+    message: "Authenticated user!",
+    data: {
+      user,
+    },
+  });
+};
+
+const registerUser = async (req, res) => {
+  try {
+    const { userName, userEmail, password, role } = req.body;
+
+    const existingUser = await User.findOne({
+      $or: [{ userEmail }, { userName }],
+    });
+
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User name or user email already exists",
+      });
+    }
+
+    const otp = generateOTP();
+    console.log('====================================');
+    console.log(otp);
+    console.log('====================================');
+    await redisClient.set(
+      `otp:${userEmail}`,
+      JSON.stringify({ otp, userName, userEmail, password, role }),
+      { EX: 300 }
+    ); // Save OTP with other details for 5 min expiry
+
+    // Send email
+    const transporter = nodemailer.createTransport({
+      service: process.env.Email_Service,
+      auth: {
+        user: process.env.Email,
+        pass: process.env.Email_Password,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"EduCore" <${process.env.Email}>`,
+      to: userEmail,
+      subject: "Account verification OTP",
+      html: `
+      <div style="text-align:center; font-family:sans-serif;">
+        <h2>Email Verification</h2>
+        <p>Use the OTP below to verify your email address:</p>
+        <h1 style="background:#4f46e5; color:white; padding:15px; border-radius:8px;">${otp}</h1>
+        <p>This OTP will expire in <b>5 minutes</b>.</p>
+        <small>If you didn’t request this, please ignore the email.</small>
+      </div>
+    `,
+    });
+
+    res.json({ success: true, message: "OTP sent to email" });
+  } catch (error) {
+    console.error("Register User Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong during registration",
+    });
+  }
+};
+
+const verifyUser = async (req, res) => {
+  try {
+    const { userEmail, user_otp } = req.body;
+
+    const data = await redisClient.get(`otp:${userEmail}`);
+    if (!data) {
+      return res.status(400).json({ success: false, message: "OTP expired" });
+    }
+
+    const { otp, userName, password, role } = JSON.parse(data);
+    if (otp !== user_otp) {
+      return res.status(400).json({ success: false, message: "Invalid OTP" });
+    }
+
+    await redisClient.del(`otp:${userEmail}`); // OTP is correct → delete it
+
+    const hashPassword = await hash(password, 10);
+    const newUser = new User({
+      userName,
+      userEmail,
+      role,
+      password: hashPassword,
+    });
+
+    await newUser.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "Email verified, User registered successfully!",
+    });
+  } catch (error) {
+    console.error("Verify User Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong during verification",
+    });
+  }
+};
 
 const googleLogin = async (req, res) => {
   try {
@@ -67,36 +179,6 @@ const googleLogin = async (req, res) => {
   }
 };
 
-const registerUser = async (req, res) => {
-  const { userName, userEmail, password, role } = req.body;
-
-  const existingUser = await User.findOne({
-    $or: [{ userEmail }, { userName }],
-  });
-
-  if (existingUser) {
-    return res.status(400).json({
-      success: false,
-      message: "User name or user email already exists",
-    });
-  }
-
-  const hashPassword = await hash(password, 10);
-  const newUser = new User({
-    userName,
-    userEmail,
-    role,
-    password: hashPassword,
-  });
-
-  await newUser.save();
-
-  return res.status(201).json({
-    success: true,
-    message: "User registered successfully!",
-  });
-};
-
 const loginUser = async (req, res) => {
   try {
     const { userEmail, password } = req.body;
@@ -142,4 +224,4 @@ const loginUser = async (req, res) => {
   }
 };
 
-export default { registerUser, loginUser, googleLogin };
+export default { registerUser, loginUser, googleLogin, verifyUser, chekAuth };

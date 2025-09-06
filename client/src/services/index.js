@@ -2,11 +2,23 @@ import axiosInstance from "@/api/axiosInstance";
 import { AuthContext } from "@/context/auth-context";
 
 export async function registerService(formData) {
-  const { data } = await axiosInstance.post("/auth/register", {
-    ...formData,
-    role: "student",
-  });
+  try {
+    const { data } = await axiosInstance.post("/auth/register", {
+      ...formData,
+      role: "student",
+    });
+    return data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data.message);
+    } else {
+      throw new Error("Registration failed. Please try again.");
+    }
+  }
+}
 
+export async function verifyOTPService(formData) {
+  const { data } = await axiosInstance.post("/auth/verifyUser", formData);
   return data;
 }
 
@@ -21,22 +33,22 @@ export async function checkAuthService() {
   const { data } = await axiosInstance.get("/auth/check-auth");
 
   if (data.success) {
-      sessionStorage.setItem(
-        "accessToken",
-        JSON.stringify(data.data.accessToken)
-      );
-      localStorage.setItem("token", data.data.accessToken);
-      localStorage.setItem("user", JSON.stringify(data.data.user));
-      setAuth({
-        authenticate: true,
-        user: data.data.user,
-      });
-    } else {
-      setAuth({
-        authenticate: false,
-        user: null,
-      });
-    }
+    sessionStorage.setItem(
+      "accessToken",
+      JSON.stringify(data.data.accessToken)
+    );
+    localStorage.setItem("token", data.data.accessToken);
+    localStorage.setItem("user", JSON.stringify(data.data.user));
+    setAuth({
+      authenticate: true,
+      user: data.data.user,
+    });
+  } else {
+    setAuth({
+      authenticate: false,
+      user: null,
+    });
+  }
 
   return data;
 }

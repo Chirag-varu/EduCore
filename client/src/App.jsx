@@ -18,6 +18,7 @@ import PaypalPaymentReturnPage from "./pages/student/payment-return";
 import StudentCoursesPage from "./pages/student/student-courses";
 import StudentViewCourseProgressPage from "./pages/student/course-progress";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { Toaster } from "@/components/ui/toaster";
 
 function App() {
   const { auth, setAuth } = useContext(AuthContext);
@@ -119,6 +120,7 @@ function App() {
         />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      <Toaster />
     </GoogleOAuthProvider>
   );
 }

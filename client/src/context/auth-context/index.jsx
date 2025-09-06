@@ -1,6 +1,11 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { initialSignInFormData, initialSignUpFormData } from "@/config";
-import { checkAuthService, loginService, registerService } from "@/services";
+import {
+  checkAuthService,
+  loginService,
+  registerService,
+  verifyOTPService,
+} from "@/services";
 import { createContext, useEffect, useState } from "react";
 import React, { useContext } from "react";
 
@@ -17,25 +22,40 @@ export default function AuthProvider({ children }) {
 
   async function handleRegisterUser(event) {
     event.preventDefault();
-    const data = await registerService(signUpFormData);
+    try {
+      return await registerService(signUpFormData);
+    } catch (error) {
+      console.error("Registration failed:", error);
+      throw error; // Re-throw the error to be handled in the component
+    }
+    // return await registerService(signUpFormData);
+  }
+
+  async function handleOTPVerification(otpData) {
+    const data = await verifyOTPService(otpData);
 
     if (data.success) {
-      sessionStorage.setItem(
-        "accessToken",
-        JSON.stringify(data.data.accessToken)
-      );
-      localStorage.setItem("token", data.data.accessToken);
-      localStorage.setItem("user", JSON.stringify(data.data.user));
-      setAuth({
-        authenticate: true,
-        user: data.data.user,
+      // After successful OTP verification, login the user
+      const loginData = await loginService({
+        userEmail: otpData.userEmail,
+        password: signUpFormData.password,
       });
-    } else {
-      setAuth({
-        authenticate: false,
-        user: null,
-      });
+
+      if (loginData.success) {
+        sessionStorage.setItem(
+          "accessToken",
+          JSON.stringify(loginData.data.accessToken)
+        );
+        localStorage.setItem("token", loginData.data.accessToken);
+        localStorage.setItem("user", JSON.stringify(loginData.data.user));
+        setAuth({
+          authenticate: true,
+          user: loginData.data.user,
+        });
+      }
     }
+
+    return data;
   }
 
   async function handleLoginUser(e) {
@@ -98,9 +118,9 @@ export default function AuthProvider({ children }) {
   async function checkAuthUser() {
     try {
       const data = await checkAuthService();
-      console.log('====================================');
+      console.log("====================================");
       console.log(data);
-      console.log('====================================');
+      console.log("====================================");
       if (data.success) {
         setAuth({
           authenticate: true,
@@ -144,6 +164,7 @@ export default function AuthProvider({ children }) {
         signUpFormData,
         setSignUpFormData,
         handleRegisterUser,
+        handleOTPVerification,
         handleLoginUser,
         handleGoogleLogin,
         auth,
