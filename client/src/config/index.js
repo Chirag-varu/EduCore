@@ -73,6 +73,8 @@ export const courseLevelOptions = [
 export const courseCategories = [ 
   { id: "web-development", label: "Web Development" },
   { id: "backend-development", label: "Backend Development" },
+  { id: "frontend-development", label: "Frontend Development" },
+  { id: "fullstack-development", label: "Fullstack Development" },
   { id: "data-science", label: "Data Science" },
   { id: "machine-learning", label: "Machine Learning" },
   { id: "artificial-intelligence", label: "Artificial Intelligence" },
@@ -81,6 +83,18 @@ export const courseCategories = [
   { id: "mobile-development", label: "Mobile Development" },
   { id: "game-development", label: "Game Development" },
   { id: "software-engineering", label: "Software Engineering" },
+  { id: "devops", label: "DevOps" },
+  { id: "blockchain", label: "Blockchain" },
+  { id: "ui-ux-design", label: "UI/UX Design" },
+  { id: "programming-languages", label: "Programming Languages" },
+  { id: "database-systems", label: "Database Systems" },
+  { id: "networking", label: "Networking" },
+  { id: "big-data", label: "Big Data" },
+  { id: "software-testing", label: "Software Testing & QA" },
+  { id: "project-management", label: "Project Management" },
+  { id: "ethical-hacking", label: "Ethical Hacking" },
+  { id: "digital-marketing", label: "Digital Marketing" },
+  { id: "automation", label: "Automation & RPA" },
 ];
 
 export const courseLandingPageFormControls = [

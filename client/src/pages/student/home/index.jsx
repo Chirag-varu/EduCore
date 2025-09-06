@@ -10,6 +10,10 @@ import {
 import { AuthContext } from "@/context/auth-context";
 import { useNavigate } from "react-router-dom";
 import Studentfooter from "@/pages/student/Studentfooter";
+import { ValuesGrid } from "@/components/about/ValuesGrid";
+import { ImpactStats } from "@/components/about/ImpactStats";
+import { Testimonials } from "@/components/about/Testimonials";
+import { BentoPhilosophy } from "@/components/about/BentoPhilosophy";
 
 function StudentHomePage() {
   const { studentViewCoursesList, setStudentViewCoursesList } =
@@ -85,7 +89,7 @@ function StudentHomePage() {
           <h2 className="text-3xl font-bold mb-8 text-gray-900">
             Explore Categories
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
             {courseCategories.map((categoryItem) => (
               <Button
                 className="justify-center py-6 rounded-xl shadow-sm hover:shadow-lg hover:bg-blue-50 transition font-medium text-gray-800"
@@ -153,6 +157,17 @@ function StudentHomePage() {
               </div>
             )}
           </div>
+        </section>
+
+        <section id="testimonials" className="bg-gray-100">
+          <Testimonials />
+        </section>
+        <section id="values">
+          <ValuesGrid />
+        </section>
+        <ImpactStats />
+        <section id="philosophy">
+          <BentoPhilosophy />
         </section>
       </main>
 
