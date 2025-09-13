@@ -10,6 +10,7 @@ import StudentHomePage from "./pages/student/home";
 import NotFoundPage from "./pages/not-found";
 import AddNewCoursePage from "./pages/instructor/add-new-course";
 import Instructor from "./pages/instructor/instructor";
+import InstructorView from "./pages/instructor/instructor-view";
 import CreateCourse from "./pages/instructor/CreateCourse";
 import StudentViewCoursesPage from "./pages/student/courses";
 import AboutPage from "./pages/AboutUs/index";
@@ -41,6 +42,7 @@ function App() {
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <Routes>
+        <Route path="/instructor/:id" element={<InstructorView />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/instructor/home" element={<Instructor />} />
         <Route path="/instructor/CreateCourse" element={<CreateCourse />} />

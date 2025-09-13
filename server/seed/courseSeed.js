@@ -48,7 +48,7 @@ const seedDB = async () => {
     // Seed Courses
     const courses = await Course.insertMany([
       {
-        instructorId: "689dafb83d96d35705cfb0fc",
+        instructorId: new mongoose.Types.ObjectId("689dafb83d96d35705cfb0fc"),
         instructorName: "Chirag Varu",
         title: "Full-Stack Web Development Bootcamp",
         subtitle: "Learn MERN Stack from scratch",
@@ -71,7 +71,7 @@ const seedDB = async () => {
         isPublised: true,
       },
       {
-        instructorId: "689dafb83d96d35705cfb0fc",
+        instructorId: new mongoose.Types.ObjectId("689dafb83d96d35705cfb0fc"),
         instructorName: "Chirag Varu",
         title: "Data Structures & Algorithms in JavaScript",
         subtitle: "Master problem solving & coding interviews",
