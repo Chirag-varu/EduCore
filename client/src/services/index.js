@@ -1,6 +1,16 @@
 import axiosInstance from "@/api/axiosInstance";
 import { AuthContext } from "@/context/auth-context";
 
+// Export all chat services
+export {
+  getInstructorChatsService,
+  getStudentChatsService,
+  getChatByIdService,
+  getOrCreateCourseChatService,
+  sendMessageService,
+  markMessagesAsReadService
+} from "./chat-service.js";
+
 export async function registerService(formData) {
   try {
     const { data } = await axiosInstance.post("/auth/register", {

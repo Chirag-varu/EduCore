@@ -53,7 +53,7 @@ const NewsletterSubscriptionSchema = new Schema(
 );
 
 // Create indexes for faster queries
-NewsletterSubscriptionSchema.index({ email: 1 });
+// Note: No need to index email again as it's already indexed by unique: true
 NewsletterSubscriptionSchema.index({ userId: 1 });
 NewsletterSubscriptionSchema.index({ isActive: 1 });
 

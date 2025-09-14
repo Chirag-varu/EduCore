@@ -5,8 +5,8 @@ import { getInstructorChatsService, getChatByIdService } from '@/services';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Inbox, Search, RefreshCcw, MessageSquare } from 'lucide-react';
-import ChatList from './ChatList';
-import ChatInterface from './ChatInterface';
+import ChatList from '@/components/chat/ChatList';
+import ChatInterface from '@/components/chat/ChatInterface';
 
 const InstructorChatPage = () => {
   const [selectedChat, setSelectedChat] = useState(null);

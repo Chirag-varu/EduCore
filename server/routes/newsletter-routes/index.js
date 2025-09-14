@@ -1,5 +1,5 @@
 import express from 'express';
-import { authMiddleware } from '../../middleware/auth-middleware.js';
+import authenticate from '../../middleware/auth-middleware.js';
 import subscriptionController from '../../controllers/newsletter/subscription-controller.js';
 import newsletterController from '../../controllers/newsletter/newsletter-controller.js';
 
@@ -11,7 +11,7 @@ router.post('/unsubscribe', subscriptionController.unsubscribeFromNewsletter);
 router.get('/confirm/:token', subscriptionController.confirmSubscription);
 
 // Protected routes for administrators
-router.use('/admin', authMiddleware);
+router.use('/admin', authenticate);
 router.get('/admin/subscriptions', subscriptionController.getSubscriptions);
 
 // Newsletter management (admin only)
