@@ -30,6 +30,7 @@ const CourseSchema = new Schema(
     image: String,
     welcomeMessage: String,
     pricing: Number,
+    hours: { type: Number, default: 0 }, // Course duration in hours
     objectives: String,
     students: [
       {

@@ -79,6 +79,7 @@ const addCourseComment = async (req, res) => {
       comment,
       title,
       userAvatar,
+      isVerifiedPurchase: true, // All reviews require enrollment verification
     });
 
     const savedComment = await newComment.save();

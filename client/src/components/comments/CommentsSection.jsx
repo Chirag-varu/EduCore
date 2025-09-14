@@ -5,14 +5,19 @@ import { useToast } from '@/hooks/use-toast';
 
 import CommentForm from './CommentForm';
 import CommentItem from './CommentItem';
-import { MessageSquare, AlertCircle } from 'lucide-react';
+import ReviewSummary from './ReviewSummary';
+import { MessageSquare, AlertCircle, ChevronDown, Filter, SortAsc, SortDesc } from 'lucide-react';
 
 const CommentsSection = ({ courseId }) => {
   const [comments, setComments] = useState([]);
+  const [filteredComments, setFilteredComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [hasUserReviewed, setHasUserReviewed] = useState(false);
   const [isUserEnrolled, setIsUserEnrolled] = useState(false);
+  const [sortOption, setSortOption] = useState('newest'); // 'newest', 'highest', 'lowest'
+  const [filterRating, setFilterRating] = useState(0); // 0 = all ratings, 1-5 for specific ratings
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const { toast } = useToast();
   const { auth } = useContext(AuthContext);
   
@@ -59,6 +64,33 @@ const CommentsSection = ({ courseId }) => {
     }
   };
   
+  // Apply filtering and sorting
+  const applyFiltersAndSort = (commentsArray) => {
+    // First apply rating filter
+    let result = commentsArray;
+    
+    if (filterRating > 0) {
+      result = result.filter(comment => comment.rating === filterRating);
+    }
+    
+    // Then apply sorting
+    switch (sortOption) {
+      case 'newest':
+        return [...result].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      case 'highest':
+        return [...result].sort((a, b) => b.rating - a.rating);
+      case 'lowest':
+        return [...result].sort((a, b) => a.rating - b.rating);
+      default:
+        return result;
+    }
+  };
+  
+  // Update filtered comments whenever comments, filter or sort options change
+  useEffect(() => {
+    setFilteredComments(applyFiltersAndSort(comments));
+  }, [comments, filterRating, sortOption]);
+  
   useEffect(() => {
     if (courseId) {
       fetchComments();
@@ -79,7 +111,9 @@ const CommentsSection = ({ courseId }) => {
       );
       
       // Add the new comment to the list
-      setComments([res.data.data, ...comments]);
+      const updatedComments = [res.data.data, ...comments];
+      setComments(updatedComments);
+      setFilteredComments(applyFiltersAndSort(updatedComments));
       setHasUserReviewed(true);
       
       toast({
@@ -115,9 +149,11 @@ const CommentsSection = ({ courseId }) => {
       );
       
       // Update the comment in the list
-      setComments(comments.map(c => 
+      const updatedComments = comments.map(c => 
         c._id === commentId ? res.data.data : c
-      ));
+      );
+      setComments(updatedComments);
+      setFilteredComments(applyFiltersAndSort(updatedComments));
       
       toast({
         title: "Success",
@@ -147,7 +183,9 @@ const CommentsSection = ({ courseId }) => {
       });
       
       // Remove the comment from the list
-      setComments(comments.filter(c => c._id !== commentId));
+      const updatedComments = comments.filter(c => c._id !== commentId);
+      setComments(updatedComments);
+      setFilteredComments(applyFiltersAndSort(updatedComments));
       setHasUserReviewed(false);
       
       toast({
@@ -213,6 +251,9 @@ const CommentsSection = ({ courseId }) => {
             </div>
           </div>
           
+          {/* Rating summary visualization */}
+          {comments.length > 0 && <ReviewSummary comments={comments} />}
+          
           {/* Add Comment Form */}
           {auth?.authenticate ? (
             isUserEnrolled ? (
@@ -239,19 +280,80 @@ const CommentsSection = ({ courseId }) => {
             </p>
           )}
           
+          {/* Sort and Filter Controls */}
+          {comments.length > 0 && (
+            <div className="flex flex-wrap justify-between items-center mb-4 mt-8 gap-2">
+              {/* Sort Options */}
+              <div className="flex items-center">
+                <SortAsc className="h-5 w-5 text-gray-500 mr-2" />
+                <label className="text-gray-600 mr-2">Sort by:</label>
+                <select
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value)}
+                  className="border border-gray-300 rounded-md px-2 py-1 bg-white text-sm"
+                >
+                  <option value="newest">Most Recent</option>
+                  <option value="highest">Highest Rating</option>
+                  <option value="lowest">Lowest Rating</option>
+                </select>
+              </div>
+              
+              {/* Filter By Rating */}
+              <div className="flex items-center">
+                <Filter className="h-5 w-5 text-gray-500 mr-2" />
+                <label className="text-gray-600 mr-2">Filter:</label>
+                <select 
+                  value={filterRating}
+                  onChange={(e) => setFilterRating(Number(e.target.value))}
+                  className="border border-gray-300 rounded-md px-2 py-1 bg-white text-sm"
+                >
+                  <option value={0}>All Ratings</option>
+                  <option value={5}>5 Stars</option>
+                  <option value={4}>4 Stars</option>
+                  <option value={3}>3 Stars</option>
+                  <option value={2}>2 Stars</option>
+                  <option value={1}>1 Star</option>
+                </select>
+                
+                {filterRating > 0 && (
+                  <button 
+                    onClick={() => setFilterRating(0)}
+                    className="ml-2 text-sm text-blue-600 hover:text-blue-800"
+                  >
+                    Clear Filter
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+          
           {/* Comments List */}
           <div className="mt-6">
             {comments.length > 0 ? (
-              comments.map(comment => (
-                <CommentItem 
-                  key={comment._id}
-                  comment={comment}
-                  currentUserId={auth?.user?._id}
-                  onEdit={handleEditComment}
-                  onDelete={handleDeleteComment}
-                  onReport={handleReportComment}
-                />
-              ))
+              filteredComments.length > 0 ? (
+                filteredComments.map(comment => (
+                  <CommentItem 
+                    key={comment._id}
+                    comment={comment}
+                    currentUserId={auth?.user?._id}
+                    onEdit={handleEditComment}
+                    onDelete={handleDeleteComment}
+                    onReport={handleReportComment}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-8 border-t border-gray-200">
+                  <p className="text-gray-500">
+                    No reviews match your current filter.
+                    <button 
+                      onClick={() => setFilterRating(0)}
+                      className="ml-2 text-blue-600 hover:underline"
+                    >
+                      View all reviews
+                    </button>
+                  </p>
+                </div>
+              )
             ) : (
               <div className="text-center py-8 border-t">
                 <p className="text-gray-500">No reviews yet. Be the first to review this course!</p>

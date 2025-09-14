@@ -45,6 +45,10 @@ const CourseCommentSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    isVerifiedPurchase: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );
