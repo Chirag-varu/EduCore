@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import VideoPlayer from "@/components/video-player";
 import { AuthContext } from "@/context/auth-context";
 import { StudentContext } from "@/context/student-context";
+import StudentChatDrawer from "@/components/chat/StudentChatDrawer";
 import {
   checkCoursePurchaseInfoService,
   createPaymentService,
@@ -236,6 +237,15 @@ function StudentViewCourseDetailsPage() {
               <Button onClick={handleCreatePayment} className="w-full">
                 Buy Now
               </Button>
+              
+              {auth?.authenticate && studentViewCourseDetails?.instructorId && (
+                <div className="mt-4 flex justify-center">
+                  <StudentChatDrawer
+                    courseId={studentViewCourseDetails?._id}
+                    instructorId={studentViewCourseDetails?.instructorId}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
         </aside>

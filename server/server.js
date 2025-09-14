@@ -12,6 +12,7 @@ import studentCoursesRoutes from "./routes/student-routes/student-courses-routes
 import studentCourseProgressRoutes from "./routes/student-routes/course-progress-routes.js";
 import videoDownloadRoutes from "./routes/student-routes/video-download-routes.js";
 import commentRoutes from "./routes/student-routes/comment-routes.js";
+import chatRoutes from "./routes/chat-routes/index.js";
 import newsletterRoutes from "./routes/newsletter-routes/index.js";
 import { startNewsletterScheduler } from "./helpers/newsletterScheduler.js";
 
@@ -48,6 +49,7 @@ app.use("/api/v1/student/courses-bought", studentCoursesRoutes);
 app.use("/api/v1/student/course-progress", studentCourseProgressRoutes);
 app.use("/api/v1/student/video", videoDownloadRoutes);
 app.use("/api/v1/comments", commentRoutes);
+app.use("/api/v1/chat", chatRoutes);
 app.use("/api/v1/newsletter", newsletterRoutes);
 
 app.use((err, req, res, next) => {

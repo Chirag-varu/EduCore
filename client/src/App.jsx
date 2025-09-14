@@ -4,6 +4,7 @@ import Sign_up from "./pages/auth/signup";
 import RouteGuard from "./components/route-guard";
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "./context/auth-context";
+import { ChatProvider } from "./context/chat-context";
 import InstructorDashboardpage from "./pages/instructor";
 import StudentViewCommonLayout from "./components/student-view/common-layout";
 import StudentHomePage from "./pages/student/home";
@@ -12,6 +13,7 @@ import AddNewCoursePage from "./pages/instructor/add-new-course";
 import Instructor from "./pages/instructor/instructor";
 import InstructorView from "./pages/instructor/instructor-view";
 import CreateCourse from "./pages/instructor/CreateCourse";
+import InstructorChatPage from "./pages/instructor/instructor-chat";
 import StudentViewCoursesPage from "./pages/student/courses";
 import AboutPage from "./pages/AboutUs/index";
 import StudentViewCourseDetailsPage from "./pages/student/course-details";
@@ -46,11 +48,22 @@ function App() {
 
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-      <Routes>
-        <Route path="/instructor/:id" element={<InstructorView />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/instructor/home" element={<Instructor />} />
-        <Route path="/instructor/CreateCourse" element={<CreateCourse />} />
+      <ChatProvider>
+        <Routes>
+          <Route path="/instructor/:id" element={<InstructorView />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/instructor/home" element={<Instructor />} />
+          <Route path="/instructor/CreateCourse" element={<CreateCourse />} />
+          <Route
+            path="/instructor/messages"
+            element={
+              <RouteGuard
+                element={<InstructorChatPage />}
+                authenticated={auth?.authenticate}
+                user={auth?.user}
+              />
+            }
+          />
         <Route
           path="/instructor/create-new-course"
           element={
@@ -178,6 +191,7 @@ function App() {
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <Toaster />
+      </ChatProvider>
     </GoogleOAuthProvider>
   );
 }

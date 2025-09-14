@@ -8,8 +8,9 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { BarChart, Book, LogOut, Menu, X } from "lucide-react";
+import { BarChart, Book, LogOut, Menu, MessageSquare, X } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function InstructorNav({
   activeTab,
@@ -29,6 +30,12 @@ export default function InstructorNav({
       icon: Book,
       label: "Courses",
       value: "courses",
+    },
+    {
+      icon: MessageSquare,
+      label: "Messages",
+      value: "messages",
+      href: "/instructor/messages",
     },
     {
       icon: LogOut,
@@ -59,37 +66,61 @@ export default function InstructorNav({
           <h2 className="text-2xl font-bold mb-4">Instructor View</h2>
           <nav>
             {menuItems.map((menuItem) => (
-              <Button
-                className={`w-full justify-start mb-2 
-                  ${
-                    menuItem.value === "logout"
-                      ? "text-destructive hover:text-destructive"
-                      : ""
-                  }
-                  ${
-                    activeTab === menuItem.value
-                      ? "bg-gray-200 dark:bg-gray-700 text-foreground"
-                      : ""
-                  }
-                `}
-                key={menuItem.value}
-                variant="ghost"
-                onClick={
-                  menuItem.value === "logout"
-                    ? () => setLogoutOpen(true)
-                    : () => {
-                        setActiveTab(menuItem.value);
-                        setIsOpen(false);
+              <div key={menuItem.value}>
+                {menuItem.href ? (
+                  <Link to={menuItem.href}>
+                    <Button
+                      className={`w-full justify-start mb-2 
+                        ${
+                          menuItem.value === "logout"
+                            ? "text-destructive hover:text-destructive"
+                            : ""
+                        }
+                      `}
+                      variant="ghost"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <menuItem.icon
+                        className={`mr-2 h-4 w-4 ${
+                          menuItem.value === "logout" ? "text-destructive" : ""
+                        }`}
+                      />
+                      {menuItem.label}
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button
+                    className={`w-full justify-start mb-2 
+                      ${
+                        menuItem.value === "logout"
+                          ? "text-destructive hover:text-destructive"
+                          : ""
                       }
-                }
-              >
-                <menuItem.icon
-                  className={`mr-2 h-4 w-4 ${
-                    menuItem.value === "logout" ? "text-destructive" : ""
-                  }`}
-                />
-                {menuItem.label}
-              </Button>
+                      ${
+                        activeTab === menuItem.value
+                          ? "bg-gray-200 dark:bg-gray-700 text-foreground"
+                          : ""
+                      }
+                    `}
+                    variant="ghost"
+                    onClick={
+                      menuItem.value === "logout"
+                        ? () => setLogoutOpen(true)
+                        : () => {
+                            setActiveTab(menuItem.value);
+                            setIsOpen(false);
+                          }
+                    }
+                  >
+                    <menuItem.icon
+                      className={`mr-2 h-4 w-4 ${
+                        menuItem.value === "logout" ? "text-destructive" : ""
+                      }`}
+                    />
+                    {menuItem.label}
+                  </Button>
+                )}
+              </div>
             ))}
           </nav>
 
