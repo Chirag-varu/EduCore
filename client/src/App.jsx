@@ -18,6 +18,11 @@ import StudentViewCourseDetailsPage from "./pages/student/course-details";
 import PaypalPaymentReturnPage from "./pages/student/payment-return";
 import StudentCoursesPage from "./pages/student/student-courses";
 import StudentViewCourseProgressPage from "./pages/student/course-progress";
+import ConfirmSubscription from "./pages/newsletter/ConfirmSubscription";
+import Unsubscribe from "./pages/newsletter/Unsubscribe";
+import NewsletterDashboard from "./pages/admin/NewsletterDashboard";
+import NewsletterForm from "./pages/admin/NewsletterForm";
+import SubscriberManagement from "./pages/admin/SubscriberManagement";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -53,6 +58,56 @@ function App() {
               element={<AddNewCoursePage />}
               authenticated={auth?.authenticate}
               user={auth?.user}
+            />
+          }
+        />
+        
+        {/* Newsletter public routes */}
+        <Route path="/newsletter/confirm/:token" element={<ConfirmSubscription />} />
+        <Route path="/newsletter/unsubscribe" element={<Unsubscribe />} />
+        
+        {/* Newsletter admin routes */}
+        <Route
+          path="/admin/newsletters"
+          element={
+            <RouteGuard
+              element={<NewsletterDashboard />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+              allowedRoles={["admin"]}
+            />
+          }
+        />
+        <Route
+          path="/admin/newsletters/create"
+          element={
+            <RouteGuard
+              element={<NewsletterForm />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+              allowedRoles={["admin"]}
+            />
+          }
+        />
+        <Route
+          path="/admin/newsletters/:id"
+          element={
+            <RouteGuard
+              element={<NewsletterForm />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+              allowedRoles={["admin"]}
+            />
+          }
+        />
+        <Route
+          path="/admin/subscribers"
+          element={
+            <RouteGuard
+              element={<SubscriberManagement />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+              allowedRoles={["admin"]}
             />
           }
         />

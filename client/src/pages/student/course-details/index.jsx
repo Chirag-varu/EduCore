@@ -20,6 +20,7 @@ import {
 import { CheckCircle, Globe, Lock, PlayCircle } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import CommentsSection from "@/components/comments/CommentsSection";
 
 function StudentViewCourseDetailsPage() {
   const {
@@ -239,6 +240,12 @@ function StudentViewCourseDetailsPage() {
           </Card>
         </aside>
       </div>
+      
+      {/* Course Reviews Section */}
+      <div className="mt-12 container mx-auto">
+        <CommentsSection courseId={id} />
+      </div>
+      
       <Dialog
         open={showFreePreviewDialog}
         onOpenChange={() => {
