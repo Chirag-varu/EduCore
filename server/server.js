@@ -10,6 +10,7 @@ import studentViewCourseRoutes from "./routes/student-routes/course-routes.js";
 import studentViewOrderRoutes from "./routes/student-routes/order-routes.js";
 import studentCoursesRoutes from "./routes/student-routes/student-courses-routes.js";
 import studentCourseProgressRoutes from "./routes/student-routes/course-progress-routes.js";
+import videoDownloadRoutes from "./routes/student-routes/video-download-routes.js";
 import commentRoutes from "./routes/student-routes/comment-routes.js";
 import newsletterRoutes from "./routes/newsletter-routes/index.js";
 import { startNewsletterScheduler } from "./helpers/newsletterScheduler.js";
@@ -45,6 +46,7 @@ app.use("/api/v1/student/course", studentViewCourseRoutes);
 app.use("/api/v1/student/order", studentViewOrderRoutes);
 app.use("/api/v1/student/courses-bought", studentCoursesRoutes);
 app.use("/api/v1/student/course-progress", studentCourseProgressRoutes);
+app.use("/api/v1/student/video", videoDownloadRoutes);
 app.use("/api/v1/comments", commentRoutes);
 app.use("/api/v1/newsletter", newsletterRoutes);
 

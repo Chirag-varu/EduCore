@@ -166,6 +166,8 @@ function StudentViewCourseProgressPage() {
             url={currentLecture?.videoUrl}
             onProgressUpdate={setCurrentLecture}
             progressData={currentLecture}
+            courseId={studentCurrentCourseProgress?.courseDetails?._id}
+            allowDownload={studentCurrentCourseProgress?.courseDetails?.isPurchased}
           />
           <div className="p-6 bg-[#1c1d1f]">
             <h2 className="text-2xl font-bold mb-2">

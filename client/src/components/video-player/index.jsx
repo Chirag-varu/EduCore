@@ -2,7 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import ReactPlayer from "react-player";
 import { Slider } from "../ui/slider";
 import { Button } from "../ui/button";
+import { useToast } from "@/hooks/use-toast";
 import {
+  Download,
   Maximize,
   Minimize,
   Pause,
@@ -12,6 +14,7 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
+import { downloadVideoService } from "@/services/videoDownloadService";
 
 function VideoPlayer({
   width = "100%",
@@ -19,7 +22,10 @@ function VideoPlayer({
   url,
   onProgressUpdate,
   progressData,
+  courseId,
+  allowDownload = false,
 }) {
+  const { toast } = useToast();
   const [playing, setPlaying] = useState(false);
   const [volume, setVolume] = useState(0.5);
   const [muted, setMuted] = useState(false);
@@ -66,6 +72,32 @@ function VideoPlayer({
 
   function handleVolumeChange(newValue) {
     setVolume(newValue[0]);
+  }
+  
+  async function handleDownload() {
+    if (!progressData || !courseId) {
+      toast({
+        title: "Download Failed",
+        description: "Missing lecture information. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      toast({
+        title: "Download Starting",
+        description: "Your video download will begin shortly.",
+      });
+      
+      await downloadVideoService(courseId, progressData._id);
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: error.response?.data?.message || "An error occurred during download.",
+        variant: "destructive",
+      });
+    }
   }
 
   function pad(string) {
@@ -214,6 +246,17 @@ function VideoPlayer({
                 {formatTime(played * (playerRef?.current?.getDuration() || 0))}/{" "}
                 {formatTime(playerRef?.current?.getDuration() || 0)}
               </div>
+              {allowDownload && progressData && (
+                <Button
+                  className="text-white bg-transparent hover:text-white hover:bg-gray-700"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDownload()}
+                  title="Download video"
+                >
+                  <Download className="h-6 w-6" />
+                </Button>
+              )}
               <Button
                 className="text-white bg-transparent hover:text-white hover:bg-gray-700"
                 variant="ghost"
