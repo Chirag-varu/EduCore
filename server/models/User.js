@@ -5,6 +5,8 @@ const UserSchema = new Schema({
   userEmail: String,
   password: String,
   role: String,
+  resetToken: { type: String },
+  resetTokenExpiry: { type: Date }
 });
 
 export default model("User", UserSchema);

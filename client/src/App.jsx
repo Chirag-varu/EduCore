@@ -27,6 +27,8 @@ import NewsletterForm from "./pages/admin/NewsletterForm";
 import SubscriberManagement from "./pages/admin/SubscriberManagement";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "@/components/ui/toaster";
+import ForgotPasswordPage from "./pages/auth/ForgotPassword";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 
 function App() {
   const { auth, setAuth } = useContext(AuthContext);
@@ -135,6 +137,10 @@ function App() {
           }
         />
         <Route
+          path="/auth/resetPassword/:token"
+          element={<ResetPasswordPage />}
+/>
+        <Route
           path="/"
           element={
             <RouteGuard
@@ -163,6 +169,16 @@ function App() {
           element={
             <RouteGuard
               element={<AuthPage />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+            />
+          }
+        />
+        <Route
+          path="/auth/forgotPassword"
+          element={
+            <RouteGuard
+              element={<ForgotPasswordPage />}
               authenticated={auth?.authenticate}
               user={auth?.user}
             />
