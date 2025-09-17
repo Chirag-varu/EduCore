@@ -5,9 +5,87 @@ import jwt from "jsonwebtoken";
 import { generateOTP } from "../../helpers/generateOTP.js";
 import redisClient from "../../helpers/redisClient.js";
 import nodemailer from "nodemailer";
-
+import crypto from "crypto";
 const { hash, compare } = pkg;
 const { sign } = jwt;
+
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ userEmail:email });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenExpiry = Date.now() + 3600000; // 1h expiry
+
+    user.resetToken = resetToken;
+    user.resetTokenExpiry = resetTokenExpiry;
+    await user.save();
+
+    // Send email with reset link
+    const resetLink = `${process.env.CLIENT_URL}/auth/resetPassword/${resetToken}`;
+
+    const transporter = nodemailer.createTransport({
+      service: process.env.Email_Service,
+      auth: {
+        user: process.env.Email,
+        pass: process.env.Email_Password,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"EduCore" <${process.env.Email}>`,
+      to: email,
+      subject: "Password Reset",
+      html: `
+        <div style="font-family:sans-serif;">
+          <h2>Password Reset</h2>
+          <p>Click below link to reset your password:</p>
+          <a href="${resetLink}" style="background:#4f46e5; color:white; padding:10px 15px; border-radius:5px; text-decoration:none;">
+            Reset Password
+          </a>
+          <p>This link will expire in 1 hour.</p>
+        </div>
+      `,
+    });
+
+    res.json({ success: true, message: "Reset link sent to email" });
+  } catch (error) {
+    console.error("Forgot Password Error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    const user = await User.findOne({
+      resetToken: token,
+      resetTokenExpiry: { $gt: Date.now() }, // check expiry
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: "Invalid or expired token" });
+    }
+
+    const hashedPassword = await hash(password, 10);
+    user.password = hashedPassword;
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    await user.save();
+
+    res.json({ success: true, message: "Password reset successful" });
+  } catch (error) {
+    console.error("Reset Password Error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 
 // Google auth implementation
 import { OAuth2Client } from "google-auth-library";
@@ -221,4 +299,4 @@ const loginUser = async (req, res) => {
   }
 };
 
-export default { registerUser, loginUser, googleLogin, verifyUser, chekAuth };
+export default { registerUser, loginUser, googleLogin, verifyUser, chekAuth, forgotPassword, resetPassword };
