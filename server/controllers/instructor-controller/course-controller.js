@@ -1,5 +1,6 @@
 import Course from "../../models/Course.js";
 import User from "../../models/User.js";
+import mongoose from "mongoose";
 
 const addNewCourse = async (req, res) => {
   try {
@@ -128,10 +129,42 @@ const getStudentdetails = async (req, res) => {
   }
 };
 
+// Get instructor profile and their courses
+const getInstructorProfileAndCourses = async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Find instructor details
+    const instructor = await User.findById(id)
+      .where("role").equals("instructor")
+      .select("-password -__v");
+    if (!instructor) {
+      return res.status(404).json({
+        success: false,
+        message: "Instructor not found!",
+      });
+    }
+  // Find all courses by this instructor
+  // const courses = await Course.find({ instructorId: mongoose.Types.ObjectId(id) });
+  const courses = await Course.find({ instructorId: id });
+    res.status(200).json({
+      success: true,
+      instructor,
+      courses,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({
+      success: false,
+      message: "Some error occurred!",
+    });
+  }
+};
+
 export default {
   addNewCourse,
   getAllCourses,
   updateCourseByID,
   getCourseDetailsByID,
-  getStudentdetails
+  getStudentdetails,
+  getInstructorProfileAndCourses,
 };

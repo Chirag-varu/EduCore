@@ -4,19 +4,27 @@ import Sign_up from "./pages/auth/signup";
 import RouteGuard from "./components/route-guard";
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "./context/auth-context";
+import { ChatProvider } from "./context/chat-context";
 import InstructorDashboardpage from "./pages/instructor";
 import StudentViewCommonLayout from "./components/student-view/common-layout";
 import StudentHomePage from "./pages/student/home";
 import NotFoundPage from "./pages/not-found";
 import AddNewCoursePage from "./pages/instructor/add-new-course";
 import Instructor from "./pages/instructor/instructor";
+import InstructorView from "./pages/instructor/instructor-view";
 import CreateCourse from "./pages/instructor/CreateCourse";
+import InstructorChatPage from "./pages/instructor/instructor-chat";
 import StudentViewCoursesPage from "./pages/student/courses";
 import AboutPage from "./pages/AboutUs/index";
 import StudentViewCourseDetailsPage from "./pages/student/course-details";
 import PaypalPaymentReturnPage from "./pages/student/payment-return";
 import StudentCoursesPage from "./pages/student/student-courses";
 import StudentViewCourseProgressPage from "./pages/student/course-progress";
+import ConfirmSubscription from "./pages/newsletter/ConfirmSubscription";
+import Unsubscribe from "./pages/newsletter/Unsubscribe";
+import NewsletterDashboard from "./pages/admin/NewsletterDashboard";
+import NewsletterForm from "./pages/admin/NewsletterForm";
+import SubscriberManagement from "./pages/admin/SubscriberManagement";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "@/components/ui/toaster";
 import ForgotPasswordPage from "./pages/auth/ForgotPassword";
@@ -42,10 +50,22 @@ function App() {
 
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-      <Routes>
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/instructor/home" element={<Instructor />} />
-        <Route path="/instructor/CreateCourse" element={<CreateCourse />} />
+      <ChatProvider>
+        <Routes>
+          <Route path="/instructor/:id" element={<InstructorView />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/instructor/home" element={<Instructor />} />
+          <Route path="/instructor/CreateCourse" element={<CreateCourse />} />
+          <Route
+            path="/instructor/messages"
+            element={
+              <RouteGuard
+                element={<InstructorChatPage />}
+                authenticated={auth?.authenticate}
+                user={auth?.user}
+              />
+            }
+          />
         <Route
           path="/instructor/create-new-course"
           element={
@@ -53,6 +73,56 @@ function App() {
               element={<AddNewCoursePage />}
               authenticated={auth?.authenticate}
               user={auth?.user}
+            />
+          }
+        />
+        
+        {/* Newsletter public routes */}
+        <Route path="/newsletter/confirm/:token" element={<ConfirmSubscription />} />
+        <Route path="/newsletter/unsubscribe" element={<Unsubscribe />} />
+        
+        {/* Newsletter admin routes */}
+        <Route
+          path="/admin/newsletters"
+          element={
+            <RouteGuard
+              element={<NewsletterDashboard />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+              allowedRoles={["admin"]}
+            />
+          }
+        />
+        <Route
+          path="/admin/newsletters/create"
+          element={
+            <RouteGuard
+              element={<NewsletterForm />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+              allowedRoles={["admin"]}
+            />
+          }
+        />
+        <Route
+          path="/admin/newsletters/:id"
+          element={
+            <RouteGuard
+              element={<NewsletterForm />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+              allowedRoles={["admin"]}
+            />
+          }
+        />
+        <Route
+          path="/admin/subscribers"
+          element={
+            <RouteGuard
+              element={<SubscriberManagement />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+              allowedRoles={["admin"]}
             />
           }
         />
@@ -137,6 +207,7 @@ function App() {
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <Toaster />
+      </ChatProvider>
     </GoogleOAuthProvider>
   );
 }

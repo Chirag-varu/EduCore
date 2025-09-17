@@ -4,6 +4,8 @@ const LectureProgressSchema = new Schema({
   lectureId: String,
   viewed: Boolean,
   dateViewed: Date,
+  downloaded: Boolean,
+  dateDownloaded: Date
 }, {timestamps:true});
 
 const CourseProgressSchema = new Schema({

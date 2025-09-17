@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import VideoPlayer from "@/components/video-player";
 import { AuthContext } from "@/context/auth-context";
 import { StudentContext } from "@/context/student-context";
+import StudentChatDrawer from "@/components/chat/StudentChatDrawer";
 import {
   checkCoursePurchaseInfoService,
   createPaymentService,
@@ -20,6 +21,7 @@ import {
 import { CheckCircle, Globe, Lock, PlayCircle } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import CommentsSection from "@/components/comments/CommentsSection";
 
 function StudentViewCourseDetailsPage() {
   const {
@@ -235,10 +237,25 @@ function StudentViewCourseDetailsPage() {
               <Button onClick={handleCreatePayment} className="w-full">
                 Buy Now
               </Button>
+              
+              {auth?.authenticate && studentViewCourseDetails?.instructorId && (
+                <div className="mt-4 flex justify-center">
+                  <StudentChatDrawer
+                    courseId={studentViewCourseDetails?._id}
+                    instructorId={studentViewCourseDetails?.instructorId}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
         </aside>
       </div>
+      
+      {/* Course Reviews Section */}
+      <div className="mt-12 container mx-auto">
+        <CommentsSection courseId={id} />
+      </div>
+      
       <Dialog
         open={showFreePreviewDialog}
         onOpenChange={() => {

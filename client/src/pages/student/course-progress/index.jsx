@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VideoPlayer from "@/components/video-player";
+import StudentChatDrawer from "@/components/chat/StudentChatDrawer";
 import { AuthContext } from "@/context/auth-context";
 import { StudentContext } from "@/context/student-context";
 import {
@@ -145,6 +146,13 @@ function StudentViewCourseProgressPage() {
               {studentCurrentCourseProgress?.courseDetails?.subtitle}
             </p>
           </div>
+          
+          {auth?.authenticate && studentCurrentCourseProgress?.courseDetails?.instructorId && (
+            <StudentChatDrawer
+              courseId={studentCurrentCourseProgress?.courseDetails?._id}
+              instructorId={studentCurrentCourseProgress?.courseDetails?.instructorId}
+            />
+          )}
         </div>
         <Button onClick={() => setIsSideBarOpen(!isSideBarOpen)}>
           {isSideBarOpen ? (
@@ -166,6 +174,8 @@ function StudentViewCourseProgressPage() {
             url={currentLecture?.videoUrl}
             onProgressUpdate={setCurrentLecture}
             progressData={currentLecture}
+            courseId={studentCurrentCourseProgress?.courseDetails?._id}
+            allowDownload={studentCurrentCourseProgress?.courseDetails?.isPurchased}
           />
           <div className="p-6 bg-[#1c1d1f]">
             <h2 className="text-2xl font-bold mb-2">

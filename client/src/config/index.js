@@ -151,6 +151,13 @@ export const courseLandingPageFormControls = [
     placeholder: "Enter course pricing",
   },
   {
+    name: "hours",
+    label: "Course Hours",
+    componentType: "input",
+    type: "number",
+    placeholder: "Enter course duration in hours",
+  },
+  {
     name: "objectives",
     label: "Objectives",
     componentType: "textarea",
@@ -173,6 +180,7 @@ export const courseLandingInitialFormData = {
   subtitle: "",
   description: "",
   price: "",
+  hours: 0,
   objectives: "",
   thumbnail: "",
 };

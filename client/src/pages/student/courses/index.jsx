@@ -19,7 +19,7 @@ import {
 } from "@/services";
 import { ArrowUpDownIcon } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 
 function createSearchParamsHelper(filterParams) {
   const queryParams = [];
@@ -210,9 +210,13 @@ function StudentViewCoursesPage() {
                       </CardTitle>
                       <p className="text-sm text-gray-600 mb-1">
                         Created By{" "}
-                        <span className="font-bold">
+                        <Link
+                          to={`/instructor/${courseItem?.instructorId}`}
+                          className="font-bold text-blue-600 hover:underline"
+                          onClick={e => e.stopPropagation()}
+                        >
                           {courseItem?.instructorName}
-                        </span>
+                        </Link>
                       </p>
                       <p className="text-[16px] text-gray-600 mt-3 mb-2">
                         {`${courseItem?.curriculum?.length} ${
