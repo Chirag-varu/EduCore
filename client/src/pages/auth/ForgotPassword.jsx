@@ -2,74 +2,99 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
+import { requestPasswordResetService } from "@/services"; 
+import AuthNavbar from "@/components/auth/AuthNavbar";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; 
+import { CheckCircle2 } from "lucide-react";
+
 function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false); // You also need to add the loading state
+  const [loading, setLoading] = useState(false);
+  const [isEmailSent, setIsEmailSent] = useState(false);
 
   const { toast } = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Call backend API: POST /api/v1/auth/forgotPassword
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/v1/auth/forgotPassword",
-        { email },
-        { headers: { "Content-Type": "application/json" } }
-      );
+      const response = await requestPasswordResetService(email);
 
-      if (res.data.success) {
+      if (response.success) {
+        setIsEmailSent(true);
         toast({
           title: "✅ Email Sent",
-          description: "Check your inbox for the reset link",
+          description: "Check your inbox for the password reset link",
         });
       } else {
         toast({
           title: "❌ Failed",
-          description: res.data.message || "Unable to send reset email",
+          description: response.message || "Unable to send reset email",
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
         title: "❌ Error",
-        description: error.response?.data?.message || error.message,
+        description: error.message || "Something went wrong",
         variant: "destructive",
       });
+      console.log('====================================');
+      console.log(error);
+      console.log('====================================');
     } finally {
       setLoading(false);
     }
-  }; // <-- Add this closing brace
+  };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-full max-w-md p-6 border rounded-lg shadow">
-        <h1 className="text-xl font-bold mb-4">Forgot Password</h1>
-        <p className="text-sm text-muted-foreground mb-6">
-          Enter your email and we’ll send you a reset link.
-        </p>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Sending..." : "Send Reset Link"}
-          </Button>
-        </form>
+    <>
+      <AuthNavbar />
+      <div className="flex items-center justify-center min-h-[calc(100vh-73px)]">
+        <div className="w-full max-w-md p-6 border rounded-lg shadow">
+          <h1 className="text-xl font-bold mb-4">Forgot Password</h1>
+          
+          {isEmailSent ? (
+            <Alert className="bg-green-50 border-green-200 mb-4">
+              <CheckCircle2 className="h-5 w-5 text-green-600" />
+              <AlertTitle className="text-green-800 font-medium">Check your email</AlertTitle>
+              <AlertDescription className="text-green-700">
+                We've sent a password reset link to <span className="font-medium">{email}</span>. 
+                Please check your inbox and follow the instructions to reset your password.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <p className="text-sm text-muted-foreground mb-6">
+              Enter your email and we'll send you a reset link.
+            </p>
+          )}
+          
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isEmailSent}
+              />
+            </div>
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={loading || isEmailSent}
+            >
+              {loading ? "Sending..." : isEmailSent ? "Email Sent" : "Send Reset Link"}
+            </Button>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

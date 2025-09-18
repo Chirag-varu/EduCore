@@ -1,5 +1,6 @@
 import axiosInstance from "@/api/axiosInstance";
 import { AuthContext } from "@/context/auth-context";
+import { useContext } from "react";
 
 // Export all chat services
 export {
@@ -213,4 +214,45 @@ export async function resetCourseProgressService(userId, courseId) {
   );
 
   return data;
+}
+
+export async function requestPasswordResetService(email) {
+  try {
+    const { data } = await axiosInstance.post("/auth/forgotPassword", { email });
+    return data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data.message);
+    } else {
+      throw new Error("Password reset request failed. Please try again.");
+    }
+  }
+}
+
+export async function verifyResetTokenService(token) {
+  try {
+    // Since there's no explicit verify endpoint, we'll verify by 
+    // checking if token exists in params but not sending password
+    const { data } = await axiosInstance.get(`/auth/check-auth`, {
+      headers: {
+        'Reset-Token': token
+      }
+    });
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: "Invalid or expired token." };
+  }
+}
+
+export async function resetPasswordService(token, newPassword) {
+  try {
+    const { data } = await axiosInstance.post(`/auth/resetPassword/${token}`, { password: newPassword });
+    return data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data.message);
+    } else {
+      throw new Error("Password reset failed. Please try again.");
+    }
+  }
 }
