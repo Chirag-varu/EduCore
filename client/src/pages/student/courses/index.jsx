@@ -39,6 +39,7 @@ function StudentViewCoursesPage() {
   const [sort, setSort] = useState("price-lowtohigh");
   const [filters, setFilters] = useState({});
   const [searchParams, setSearchParams] = useSearchParams();
+  const [enrolledCourses, setEnrolledCourses] = useState({});
   const {
     studentViewCoursesList,
     setStudentViewCoursesList,
@@ -101,6 +102,23 @@ function StudentViewCoursesPage() {
       }
     }
   }
+  
+  // Function to check if student is enrolled in a course
+  async function checkEnrollmentStatus(courseId) {
+    if (auth?.user?._id) {
+      try {
+        const response = await checkCoursePurchaseInfoService(
+          courseId,
+          auth.user._id
+        );
+        return response?.success && response?.data;
+      } catch (error) {
+        console.error("Error checking enrollment status:", error);
+        return false;
+      }
+    }
+    return false;
+  }
 
   useEffect(() => {
     const buildQueryStringForFilters = createSearchParamsHelper(filters);
@@ -116,6 +134,31 @@ function StudentViewCoursesPage() {
     if (filters !== null && sort !== null)
       fetchAllStudentViewCourses(filters, sort);
   }, [filters, sort]);
+  
+  // Check enrollment status for all courses
+  async function fetchEnrollmentStatuses(courses) {
+    if (!auth?.user?._id || !courses?.length) return;
+    
+    const statuses = {};
+    
+    for (const course of courses) {
+      try {
+        const isEnrolled = await checkEnrollmentStatus(course._id);
+        statuses[course._id] = isEnrolled;
+      } catch (error) {
+        console.error(`Error checking enrollment for course ${course._id}:`, error);
+      }
+    }
+    
+    setEnrolledCourses(statuses);
+  }
+  
+  // Update enrollment statuses when course list changes
+  useEffect(() => {
+    if (studentViewCoursesList && studentViewCoursesList.length > 0) {
+      fetchEnrollmentStatuses(studentViewCoursesList);
+    }
+  }, [studentViewCoursesList, auth?.user?._id]);
 
   useEffect(() => {
     return () => {
@@ -225,9 +268,23 @@ function StudentViewCoursesPage() {
                             : "Lectures"
                         } - ${courseItem?.level.toUpperCase()} Level`}
                       </p>
-                      <p className="font-bold text-lg">
-                        ${courseItem?.price}
-                      </p>
+                      <div className="flex justify-between items-center">
+                        <p className="font-bold text-lg">
+                          ${courseItem?.price}
+                        </p>
+                        {enrolledCourses[courseItem?._id] && (
+                          <Button 
+                            variant="outline" 
+                            className="bg-green-100 text-green-700 hover:bg-green-200 border-green-300"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/course-progress/${courseItem?._id}`);
+                            }}
+                          >
+                            Continue
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

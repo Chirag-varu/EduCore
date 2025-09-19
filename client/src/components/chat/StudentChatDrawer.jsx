@@ -141,7 +141,7 @@ const StudentChatDrawer = ({ courseId, instructorId }) => {
         <Button
           variant="outline"
           size="sm"
-          className="relative flex items-center gap-2 bg-white shadow-sm border-gray-200 hover:bg-gray-50"
+          className="relative flex items-center gap-2 bg-white shadow-sm border-gray-200 hover:bg-gray-50 text-black"
         >
           <MessageSquare className="h-4 w-4" />
           <span>Chat with Instructor</span>

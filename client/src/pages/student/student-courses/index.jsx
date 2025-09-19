@@ -14,15 +14,24 @@ function StudentCoursesPage() {
   const navigate = useNavigate();
 
   async function fetchStudentBoughtCourses() {
-    const response = await fetchStudentBoughtCoursesService(auth?.user?._id);
-    if (response?.success) {
-      setStudentBoughtCoursesList(response?.data);
+    if (auth?.user?._id) {
+      const response = await fetchStudentBoughtCoursesService(auth.user._id);
+      if (response?.success) {
+        setStudentBoughtCoursesList(response?.data);
+        console.log("Fetched courses:", response.data);
+      } else {
+        console.error("Failed to fetch courses:", response?.message || "Unknown error");
+      }
+    } else {
+      console.error("Cannot fetch courses - user ID is missing");
     }
-    console.log(response);
   }
+  
   useEffect(() => {
-    fetchStudentBoughtCourses();
-  }, []);
+    if (auth?.user?._id) {
+      fetchStudentBoughtCourses();
+    }
+  }, [auth?.user?._id]);
 
   return (
     <div className="p-4">
@@ -30,14 +39,14 @@ function StudentCoursesPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5">
         {studentBoughtCoursesList && studentBoughtCoursesList.length > 0 ? (
           studentBoughtCoursesList.map((course) => (
-            <Card key={course.id} className="flex flex-col">
+            <Card key={course._id || course.id} className="flex flex-col">
               <CardContent className="p-4 flex-grow">
                 <img
-                  src={course?.courseImage}
-                  alt={course?.title}
+                  src={course?.courseImage || course?.thumbnail}
+                  alt={course?.courseTitle || course?.title}
                   className="h-52 w-full object-cover rounded-md mb-4"
                 />
-                <h3 className="font-bold mb-1">{course?.title}</h3>
+                <h3 className="font-bold mb-1">{course?.courseTitle || course?.title}</h3>
                 <p className="text-sm text-gray-700 mb-2">
                   {course?.instructorName}
                 </p>
@@ -45,7 +54,7 @@ function StudentCoursesPage() {
               <CardFooter>
                 <Button
                   onClick={() =>
-                    navigate(`/course-progress/${course?.courseId}`)
+                    navigate(`/course-progress/${course?.courseId || course?._id}`)
                   }
                   className="flex-1"
                 >

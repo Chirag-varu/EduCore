@@ -13,6 +13,7 @@ import { ClosingCta } from "@/components/about/ClosingCta";
 import { BentoPhilosophy } from "@/components/about/BentoPhilosophy";
 import { AboutNavigation } from "@/components/about/AboutNavigation";
 import DotGrid from "@/components/about/DotGrid/DotGrid";
+import StudentViewCommonHeader from "@/components/student-view/header";
 
 export default function AboutPage() {
   useEffect(() => {
@@ -21,6 +22,9 @@ export default function AboutPage() {
 
   return (
     <main className="relative font-sans min-h-screen overflow-hidden">
+      {/* Add Student View Common Header */}
+      <StudentViewCommonHeader />
+      
       {/* Dot background */}
       <div className="absolute inset-0 -z-10">
         <DotGrid

@@ -41,6 +41,7 @@ function StudentViewCourseDetailsPage() {
     useState(null);
   const [showFreePreviewDialog, setShowFreePreviewDialog] = useState(false);
   const [approvalUrl, setApprovalUrl] = useState("");
+  const [isEnrolled, setIsEnrolled] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
@@ -127,9 +128,40 @@ function StudentViewCourseDetailsPage() {
     if (!location.pathname.includes("course/details"))
       setStudentViewCourseDetails(null),
         setLectures(null),
-        setCurrentCourseDetailsId(null),
-        setCoursePurchaseId(null);
+        setCurrentCourseDetailsId(null);
   }, [location.pathname]);
+  
+  // Check if user is already enrolled in this course
+  async function checkEnrollmentStatus() {
+    if (auth?.user?._id && studentViewCourseDetails?._id) {
+      const response = await checkCoursePurchaseInfoService(
+        studentViewCourseDetails._id, 
+        auth.user._id
+      );
+      
+      if (response?.success) {
+        setIsEnrolled(response.data);
+      }
+    }
+  }
+  
+  // Handle course access (buy or continue)
+  function handleCourseAction() {
+    if (isEnrolled) {
+      // If enrolled, navigate to course progress
+      navigate(`/course-progress/${studentViewCourseDetails._id}`);
+    } else {
+      // If not enrolled, initiate payment
+      handleCreatePayment();
+    }
+  }
+  
+  // Check enrollment status when course details load
+  useEffect(() => {
+    if (studentViewCourseDetails?._id && auth?.user?._id) {
+      checkEnrollmentStatus();
+    }
+  }, [studentViewCourseDetails, auth?.user]);
 
   if (loadingState) return <Skeleton />;
 
@@ -234,8 +266,8 @@ function StudentViewCourseDetailsPage() {
                   ${studentViewCourseDetails?.price}
                 </span>
               </div>
-              <Button onClick={handleCreatePayment} className="w-full">
-                Buy Now
+              <Button onClick={handleCourseAction} className="w-full">
+                {isEnrolled ? "Continue Learning" : "Buy Now"}
               </Button>
               
               {auth?.authenticate && studentViewCourseDetails?.instructorId && (

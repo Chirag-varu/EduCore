@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "@/api/axiosInstance";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import StudentViewCommonHeader from "@/components/student-view/header";
 
 // Placeholder avatar generator
 const getAvatarUrl = (name) =>
@@ -55,9 +58,20 @@ const InstructorView = () => {
     );
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Instructor Profile Card */}
-      <div className="flex flex-col md:flex-row items-center gap-6 bg-white rounded-xl shadow-lg p-6 mb-10 border border-gray-100">
+    <>
+      <StudentViewCommonHeader />
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Back Button */}
+        <Button 
+          variant="outline"
+          className="mb-6 flex items-center gap-2"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="h-4 w-4" /> Back
+        </Button>
+        
+        {/* Instructor Profile Card */}
+        <div className="flex flex-col md:flex-row items-center gap-6 bg-white rounded-xl shadow-lg p-6 mb-10 border border-gray-100">
         <img
           src={getAvatarUrl(instructor.userName)}
           alt={instructor.userName}
@@ -144,6 +158,7 @@ const InstructorView = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 
