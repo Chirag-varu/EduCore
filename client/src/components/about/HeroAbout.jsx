@@ -9,9 +9,9 @@ export function HeroAbout() {
       {/* Subtle radial glow for depth */}
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/15 via-background/5 to-transparent opacity-70"></div>
 
-      <div className="mx-auto max-w-6xl px-6 py-24 md:py-32 relative z-10">
+      <div className="mx-auto max-w-6xl px-6 py-24 md:py-16 relative z-10">
         {/* Back button */}
-        <div className="absolute top-6 left-6">
+        {/* <div className="absolute top-6 left-6">
           <Link to="/home">
             <Button
               variant="outline"
@@ -22,7 +22,7 @@ export function HeroAbout() {
               Back
             </Button>
           </Link>
-        </div>
+        </div> */}
 
         <div className="flex flex-col items-center text-center gap-10">
           {/* Badge */}
