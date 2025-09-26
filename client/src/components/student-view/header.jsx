@@ -52,27 +52,40 @@ function StudentViewCommonHeader() {
         </div>
       </div>
 
-      {/* Right section - User & Logout */}
+      {/* Right section - User & Logout (only show if authenticated) */}
       <div className="flex items-center space-x-6">
-        {/* User Info */}
-        <div
-          onClick={() => navigate("/student-courses")}
-          className="flex cursor-pointer items-center gap-2 hover:opacity-80 transition"
-        >
-          <span className="font-bold md:text-lg text-sm text-foreground">
-            {auth.user?.userName || "User"}
-          </span>
-          <TvMinimalPlay className="w-6 h-6 md:w-8 md:h-8 text-primary" />
-        </div>
+        {auth.authenticate ? (
+          <>
+            {/* User Info */}
+            <div
+              onClick={() => navigate("/student-courses")}
+              className="flex cursor-pointer items-center gap-2 hover:opacity-80 transition"
+            >
+              <span className="font-bold md:text-lg text-sm text-foreground">
+                {auth.user?.userName || "User"}
+              </span>
+              <TvMinimalPlay className="w-6 h-6 md:w-8 md:h-8 text-primary" />
+            </div>
 
-        {/* Logout */}
-        <Button
-          onClick={handleLogout}
-          variant="outline"
-          className="font-medium hover:bg-destructive hover:text-white transition"
-        >
-          Sign Out
-        </Button>
+            {/* Logout */}
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              className="font-medium hover:bg-destructive hover:text-white transition"
+            >
+              Sign Out
+            </Button>
+          </>
+        ) : (
+          /* Show Sign In button for non-authenticated users */
+          <Button
+            onClick={() => navigate("/auth")}
+            variant="default"
+            className="font-medium"
+          >
+            Sign In
+          </Button>
+        )}
       </div>
     </header>
   );
