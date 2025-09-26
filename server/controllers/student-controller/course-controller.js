@@ -7,7 +7,7 @@ const getAllStudentViewCourses = async (req, res) => {
     const {
       category = "",
       level = "",
-      language = "",
+      primaryLanguage = "",
       sortBy = "price-lowtohigh",
       page = 1,
       limit = 10,
@@ -25,9 +25,15 @@ const getAllStudentViewCourses = async (req, res) => {
       if (arr.length) filters.level = { $in: arr };
     }
 
-    if (language) {
-      const arr = language.split(",").filter(Boolean);
-      if (arr.length) filters.language = { $in: arr };
+    if (primaryLanguage) {
+      const arr = primaryLanguage.split(",").filter(Boolean);
+      if (arr.length) {
+        // Check both primaryLanguage and language fields for backward compatibility
+        filters.$or = [
+          { primaryLanguage: { $in: arr } },
+          { language: { $in: arr } }
+        ];
+      }
     }
 
     let sortParam = {};
