@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import auth_image from "@/assets/auth_image.jpg";
 import { GoogleLogin } from "@react-oauth/google";
-import axios from "axios";
+import ApiConfig from "@/lib/ApiConfig";
 
 function AuthPage() {
   const {
@@ -23,17 +23,30 @@ function AuthPage() {
   const handleSignIn = async (e) => {
     e.preventDefault(); // prevent page reload
     try {
-      const res = await handleLoginUser(e);
+      // Use ApiConfig for login instead of context method
+      const response = await ApiConfig.auth.login({
+        userEmail: signInFormData.userEmail,
+        password: signInFormData.password
+      });
 
-      if (res?.success) {
+      if (ApiConfig.isSuccessResponse(response)) {
+        // Store user data and token (similar to what handleLoginUser does)
+        localStorage.setItem("token", response.data.accessToken);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        
+        // Update auth context if needed
+        if (handleLoginUser) {
+          await handleLoginUser({ preventDefault: () => {} });
+        }
+
         toast({
           title: "✅ Sign In Successful",
           description: "Welcome back!",
         });
       } else {
         toast({
-          title: "❌ Sign In Failed",
-          description: res?.message || "Invalid credentials. Please try again.",
+          title: "❌ Sign In Failed", 
+          description: ApiConfig.getErrorMessage(response),
           variant: "destructive",
         });
       }
@@ -53,27 +66,38 @@ function AuthPage() {
 
   const googleLoginSuccess = async (credential) => {
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/v1/auth/google/login",
-        { credential },
-        { headers: { "Content-Type": "application/json" } }
-      );
+      // Use ApiConfig for Google login - assuming there's a google login endpoint
+      const response = await ApiConfig.post("/auth/google/login", { credential });
 
-      const data = await handleGoogleLogin(res.data);
-      if (data) {
-        // window.location.href = "http://localhost:5173/home";
-        toast({ title: "✅ Google login successful" });
+      if (ApiConfig.isSuccessResponse(response)) {
+        // Store user data and token
+        if (response.data?.accessToken) {
+          localStorage.setItem("token", response.data.accessToken);
+        }
+        if (response.data?.user) {
+          localStorage.setItem("user", JSON.stringify(response.data.user));
+        }
+
+        // Update auth context if needed
+        if (handleGoogleLogin) {
+          await handleGoogleLogin(response);
+        }
+
+        toast({ 
+          title: "✅ Google login successful",
+          description: "Welcome to EduCore!"
+        });
       } else {
         toast({
           title: "❌ Google login failed",
-          description: data.message || "Failed to authenticate with Google",
+          description: ApiConfig.getErrorMessage(response),
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
         title: "❌ Error",
-        description: error.response?.data?.message || error.message,
+        description: error.message || "Failed to authenticate with Google",
         variant: "destructive",
       });
     }
