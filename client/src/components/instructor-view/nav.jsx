@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { BarChart, Book, LogOut, Menu, MessageSquare, X } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function InstructorNav({
   activeTab,
@@ -19,17 +19,21 @@ export default function InstructorNav({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const menuItems = [
     {
       icon: BarChart,
       label: "Dashboard",
       value: "dashboard",
+      href: "/instructor",
     },
     {
       icon: Book,
       label: "Courses",
       value: "courses",
+      href: "/instructor",
     },
     {
       icon: MessageSquare,
@@ -43,6 +47,40 @@ export default function InstructorNav({
       value: "logout",
     },
   ];
+
+  const handleNavigation = (menuItem) => {
+    if (menuItem.value === "logout") {
+      setLogoutOpen(true);
+      return;
+    }
+
+    if (menuItem.href) {
+      if (menuItem.href === "/instructor") {
+        // For dashboard and courses, navigate to main instructor page
+        navigate("/instructor");
+        // Set the appropriate tab based on the menu item
+        if (setActiveTab) {
+          setTimeout(() => setActiveTab(menuItem.value), 0);
+        }
+      } else {
+        // For other routes like messages, navigate directly
+        navigate(menuItem.href);
+      }
+    } else if (setActiveTab) {
+      setActiveTab(menuItem.value);
+    }
+    
+    setIsOpen(false);
+  };
+
+  const isCurrentPath = (menuItem) => {
+    if (menuItem.value === "messages") {
+      return location.pathname === "/instructor/messages";
+    } else if (menuItem.value === "dashboard" || menuItem.value === "courses") {
+      return location.pathname === "/instructor" && activeTab === menuItem.value;
+    }
+    return false;
+  };
 
   return (
     <>
@@ -67,59 +105,29 @@ export default function InstructorNav({
           <nav>
             {menuItems.map((menuItem) => (
               <div key={menuItem.value}>
-                {menuItem.href ? (
-                  <Link to={menuItem.href}>
-                    <Button
-                      className={`w-full justify-start mb-2 
-                        ${
-                          menuItem.value === "logout"
-                            ? "text-destructive hover:text-destructive"
-                            : ""
-                        }
-                      `}
-                      variant="ghost"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <menuItem.icon
-                        className={`mr-2 h-4 w-4 ${
-                          menuItem.value === "logout" ? "text-destructive" : ""
-                        }`}
-                      />
-                      {menuItem.label}
-                    </Button>
-                  </Link>
-                ) : (
-                  <Button
-                    className={`w-full justify-start mb-2 
-                      ${
-                        menuItem.value === "logout"
-                          ? "text-destructive hover:text-destructive"
-                          : ""
-                      }
-                      ${
-                        activeTab === menuItem.value
-                          ? "bg-gray-200 dark:bg-gray-700 text-foreground"
-                          : ""
-                      }
-                    `}
-                    variant="ghost"
-                    onClick={
+                <Button
+                  className={`w-full justify-start mb-2 
+                    ${
                       menuItem.value === "logout"
-                        ? () => setLogoutOpen(true)
-                        : () => {
-                            setActiveTab(menuItem.value);
-                            setIsOpen(false);
-                          }
+                        ? "text-destructive hover:text-destructive"
+                        : ""
                     }
-                  >
-                    <menuItem.icon
-                      className={`mr-2 h-4 w-4 ${
-                        menuItem.value === "logout" ? "text-destructive" : ""
-                      }`}
-                    />
-                    {menuItem.label}
-                  </Button>
-                )}
+                    ${
+                      isCurrentPath(menuItem)
+                        ? "bg-gray-200 dark:bg-gray-700 text-foreground"
+                        : ""
+                    }
+                  `}
+                  variant="ghost"
+                  onClick={() => handleNavigation(menuItem)}
+                >
+                  <menuItem.icon
+                    className={`mr-2 h-4 w-4 ${
+                      menuItem.value === "logout" ? "text-destructive" : ""
+                    }`}
+                  />
+                  {menuItem.label}
+                </Button>
               </div>
             ))}
           </nav>
