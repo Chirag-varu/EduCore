@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "@/api/axiosInstance";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import StudentViewCommonHeader from "@/components/student-view/header";
 
 // Placeholder avatar generator
 const getAvatarUrl = (name) =>
@@ -59,7 +58,6 @@ const InstructorView = () => {
 
   return (
     <>
-      <StudentViewCommonHeader />
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Back Button */}
         <Button 

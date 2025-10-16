@@ -69,6 +69,7 @@ const seedDB = async () => {
           "Build and deploy full-stack applications using the MERN stack.",
         curriculum: lectures.map((lec) => lec._id),
         isPublised: true,
+        enrolledStudents: [new mongoose.Types.ObjectId("689db59c3de3445393020261")],
       },
       {
         instructorId: new mongoose.Types.ObjectId(),
@@ -91,6 +92,7 @@ const seedDB = async () => {
           "Crack coding interviews by mastering DS & Algo in JavaScript.",
         curriculum: [lectures[0]._id],
         isPublised: true,
+        enrolledStudents: [new mongoose.Types.ObjectId("689db59c3de3445393020261")],
       },
       {
         instructorId: new mongoose.Types.ObjectId(),
@@ -109,6 +111,7 @@ const seedDB = async () => {
         objectives: "Learn Python fundamentals and build small projects.",
         curriculum: [lectures[1]._id],
         isPublised: true,
+        enrolledStudents: [new mongoose.Types.ObjectId("689db59c3de3445393020261")],
       },
       {
         instructorId: new mongoose.Types.ObjectId(),
@@ -127,6 +130,7 @@ const seedDB = async () => {
         objectives: "Create user-centered designs and prototypes.",
         curriculum: [lectures[2]._id],
         isPublised: true,
+        enrolledStudents: [new mongoose.Types.ObjectId("689db59c3de3445393020261")],
       },
       {
         instructorId: new mongoose.Types.ObjectId(),
@@ -145,6 +149,7 @@ const seedDB = async () => {
         objectives: "Architect high-quality React applications.",
         curriculum: [lectures[0]._id, lectures[1]._id],
         isPublised: true,
+        enrolledStudents: [new mongoose.Types.ObjectId("689db59c3de3445393020261")],
       },
     ];
 

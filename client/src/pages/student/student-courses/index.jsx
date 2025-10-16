@@ -6,7 +6,6 @@ import { fetchStudentBoughtCoursesService } from "@/services";
 import { Watch } from "lucide-react";
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import StudentViewCommonHeader from "@/components/student-view/header";
 
 function StudentCoursesPage() {
   const { auth } = useContext(AuthContext);
@@ -70,7 +69,6 @@ function StudentCoursesPage() {
 
   return (
     <>
-      <StudentViewCommonHeader />
       <div className="p-6 max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">My Courses</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5">
