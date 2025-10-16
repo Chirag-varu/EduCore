@@ -4,6 +4,7 @@ import { Course } from "../models/Courses.model.js";
 import Lecture from "../models/lecture.model.js";
 // import User from "../models/User.js";
 import { StudentCourses } from "../models/StudentCourses.js";
+import User from "../models/User.js";
 
 dotenv.config();
 
@@ -45,8 +46,8 @@ const seedDB = async () => {
     ]);
     console.log("📺 Lectures Seeded");
 
-    // Seed Courses
-    const courses = await Course.insertMany([
+    // Seed Courses - create multiple varied courses
+    const courseTemplates = [
       {
         instructorId: new mongoose.Types.ObjectId("689dafb83d96d35705cfb0fc"),
         instructorName: "Chirag Varu",
@@ -57,7 +58,7 @@ const seedDB = async () => {
         category: "web-development",
         language: "English",
         level: "beginner",
-        thumbnail: "https://placehold.co/600x400",
+        thumbnail: "https://placehold.co/600x400?text=Full-Stack",
         promotionalVideo:
           "https://sample-videos.com/video123/mp4/720/big_buck_bunny.mp4",
         price: 499,
@@ -66,21 +67,20 @@ const seedDB = async () => {
         lifetime: true,
         objectives:
           "Build and deploy full-stack applications using the MERN stack.",
-        enrolledStudents: ["68a55e919dab646029238b81"], // hardcoded student id
         curriculum: lectures.map((lec) => lec._id),
         isPublised: true,
       },
       {
-        instructorId: new mongoose.Types.ObjectId("689dafb83d96d35705cfb0fc"),
-        instructorName: "Chirag Varu",
+        instructorId: new mongoose.Types.ObjectId(),
+        instructorName: "Alice Martin",
         title: "Data Structures & Algorithms in JavaScript",
         subtitle: "Master problem solving & coding interviews",
         description:
           "This course covers arrays, linked lists, trees, graphs, and algorithms with JavaScript.",
-        category: "data-science",
+        category: "computer-science",
         language: "English",
         level: "intermediate",
-        thumbnail: "https://placehold.co/600x400",
+        thumbnail: "https://placehold.co/600x400?text=DSA",
         promotionalVideo:
           "https://sample-videos.com/video123/mp4/720/big_buck_bunny.mp4",
         price: 299,
@@ -89,39 +89,95 @@ const seedDB = async () => {
         lifetime: true,
         objectives:
           "Crack coding interviews by mastering DS & Algo in JavaScript.",
-        enrolledStudents: ["68a55e919dab646029238b81"],
         curriculum: [lectures[0]._id],
-        isPublised: false,
+        isPublised: true,
       },
-    ]);
+      {
+        instructorId: new mongoose.Types.ObjectId(),
+        instructorName: "David Lee",
+        title: "Python for Beginners",
+        subtitle: "Start coding with Python",
+        description: "Beginner-friendly course to learn Python programming.",
+        category: "programming",
+        language: "English",
+        level: "beginner",
+        thumbnail: "https://placehold.co/600x400?text=Python",
+        price: 199,
+        freePreview: true,
+        certificate: false,
+        lifetime: true,
+        objectives: "Learn Python fundamentals and build small projects.",
+        curriculum: [lectures[1]._id],
+        isPublised: true,
+      },
+      {
+        instructorId: new mongoose.Types.ObjectId(),
+        instructorName: "Sara Williams",
+        title: "UI/UX Design Fundamentals",
+        subtitle: "Design beautiful user experiences",
+        description: "Design principles, prototyping, and user testing.",
+        category: "design",
+        language: "English",
+        level: "beginner",
+        thumbnail: "https://placehold.co/600x400?text=UI%2FUX",
+        price: 149,
+        freePreview: false,
+        certificate: false,
+        lifetime: true,
+        objectives: "Create user-centered designs and prototypes.",
+        curriculum: [lectures[2]._id],
+        isPublised: true,
+      },
+      {
+        instructorId: new mongoose.Types.ObjectId(),
+        instructorName: "Michael Brown",
+        title: "Advanced React Patterns",
+        subtitle: "Build scalable React apps",
+        description: "Hooks, context, performance optimizations and patterns.",
+        category: "web-development",
+        language: "English",
+        level: "advanced",
+        thumbnail: "https://placehold.co/600x400?text=React",
+        price: 349,
+        freePreview: false,
+        certificate: true,
+        lifetime: true,
+        objectives: "Architect high-quality React applications.",
+        curriculum: [lectures[0]._id, lectures[1]._id],
+        isPublised: true,
+      },
+    ];
+
+    const courses = await Course.insertMany(courseTemplates);
     console.log("🎉 Courses Seeded Successfully");
 
-    // ✅ Seed StudentCourses collection
-    await StudentCourses.insertMany([
-      {
-        userId: "68a55e919dab646029238b81", // hardcoded student
-        courses: [
-          {
-            courseId: courses[0]._id.toString(),
-            title: courses[0].title,
-            instructorId: courses[0].instructorId.toString(),
-            instructorName: courses[0].instructorName,
-            dateOfPurchase: new Date(),
-            courseImage: courses[0].thumbnail,
-          },
-          {
-            courseId: courses[1]._id.toString(),
-            title: courses[1].title,
-            instructorId: courses[1].instructorId.toString(),
-            instructorName: courses[1].instructorName,
-            dateOfPurchase: new Date(),
-            courseImage: courses[1].thumbnail,
-          },
-        ],
-      },
-    ]);
+    // ✅ Enroll ALL users into ALL created courses (StudentCourses collection)
+    const users = await User.find({});
 
-    console.log("🎓 StudentCourses Seeded Successfully");
+    if (users.length === 0) {
+      console.log("No users found to enroll. Skipping enrollment step.");
+    } else {
+      const enrollPromises = users.map((user) => {
+        const coursesForUser = courses.map((c) => ({
+          courseId: c._id.toString(),
+          title: c.title,
+          instructorId: c.instructorId ? c.instructorId.toString() : "",
+          instructorName: c.instructorName || "",
+          dateOfPurchase: new Date(),
+          courseImage: c.thumbnail || "",
+        }));
+
+        // Upsert StudentCourses document for the user
+        return StudentCourses.findOneAndUpdate(
+          { userId: user._id.toString() },
+          { userId: user._id.toString(), courses: coursesForUser },
+          { upsert: true, new: true }
+        );
+      });
+
+      await Promise.all(enrollPromises);
+      console.log("🎓 All users enrolled into all seeded courses");
+    }
 
     process.exit();
   } catch (error) {

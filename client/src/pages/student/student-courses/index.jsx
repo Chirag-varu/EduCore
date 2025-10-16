@@ -42,58 +42,20 @@ function StudentCoursesPage() {
           else if (response.data && typeof response.data === 'object' && Object.keys(response.data).length > 0) {
             console.log("Setting single course as array:", [response.data]);
             setStudentBoughtCoursesList([response.data]);
-          }
-          // TESTING: Add mock data for testing if no real courses found
-          else {
-            console.log("Adding mock course data for testing");
-            // Add a demo course just to verify the UI works
-            const mockCourse = {
-              _id: "mock-course-1",
-              courseId: "mock-course-1",
-              title: "Introduction to Web Development",
-              courseTitle: "Introduction to Web Development",
-              instructorId: "instructor-1",
-              instructorName: "John Doe",
-              dateOfPurchase: new Date().toISOString(),
-              courseImage: "https://via.placeholder.com/300x200?text=Web+Development",
-              thumbnail: "https://via.placeholder.com/300x200?text=Web+Development",
-              price: 49.99
-            };
-            setStudentBoughtCoursesList([mockCourse]);
+          } else {
+            // No courses returned from API; set empty list and rely on UI to show empty state
+            console.log("No courses returned from API for user", auth.user._id);
+            setStudentBoughtCoursesList([]);
           }
         } else {
           console.error("Failed to fetch courses:", response?.message || "Unknown error");
-          // Add mock data even on API failure for testing
-          const mockCourse = {
-            _id: "mock-course-2",
-            courseId: "mock-course-2",
-            title: "Python Programming Basics",
-            courseTitle: "Python Programming Basics",
-            instructorId: "instructor-2",
-            instructorName: "Jane Smith",
-            dateOfPurchase: new Date().toISOString(),
-            courseImage: "https://via.placeholder.com/300x200?text=Python+Programming",
-            thumbnail: "https://via.placeholder.com/300x200?text=Python+Programming",
-            price: 39.99
-          };
-          setStudentBoughtCoursesList([mockCourse]);
+          // On API failure, set an empty list so the UI shows the empty state
+          setStudentBoughtCoursesList([]);
         }
       } catch (error) {
         console.error("Error fetching courses:", error);
-        // Add mock data even on error for testing
-        const mockCourse = {
-          _id: "mock-course-3",
-          courseId: "mock-course-3",
-          title: "UI/UX Design Fundamentals",
-          courseTitle: "UI/UX Design Fundamentals",
-          instructorId: "instructor-3",
-          instructorName: "Mike Johnson",
-          dateOfPurchase: new Date().toISOString(),
-          courseImage: "https://via.placeholder.com/300x200?text=UI/UX+Design",
-          thumbnail: "https://via.placeholder.com/300x200?text=UI/UX+Design",
-          price: 59.99
-        };
-        setStudentBoughtCoursesList([mockCourse]);
+        // On error, set an empty list so the UI shows the empty state
+        setStudentBoughtCoursesList([]);
       }
     } else {
       console.error("Cannot fetch courses - user ID is missing");
