@@ -86,9 +86,11 @@ export default function InstructorNav({
     <>
       {/* Mobile Menu Button */}
       <Button
-        className={`md:hidden fixed top-4 left-4 z-50 ${isOpen ? "ml-48" : ""}`}
+        className={`md:hidden fixed top-4 left-4 z-50 ${isOpen ? "ml-48" : ""} bg-white/80 backdrop-blur-sm`}
         size="icon"
         variant="ghost"
+        aria-label={isOpen ? "Close menu" : "Open menu"}
+        aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -102,29 +104,22 @@ export default function InstructorNav({
       >
         <div className="p-4 h-full">
           <h2 className="text-2xl font-bold mb-4">Instructor View</h2>
-          <nav>
+          <nav aria-label="Instructor navigation">
             {menuItems.map((menuItem) => (
               <div key={menuItem.value}>
                 <Button
-                  className={`w-full justify-start mb-2 
-                    ${
-                      menuItem.value === "logout"
-                        ? "text-destructive hover:text-destructive"
-                        : ""
-                    }
-                    ${
-                      isCurrentPath(menuItem)
-                        ? "bg-gray-200 dark:bg-gray-700 text-foreground"
-                        : ""
-                    }
+                  className={`w-full justify-start mb-2 text-left px-3 py-2 rounded-md 
+                    ${menuItem.value === "logout" ? "text-destructive hover:text-destructive" : ""}
+                    ${isCurrentPath(menuItem) ? "bg-gray-100 dark:bg-gray-700 text-foreground" : "hover:bg-muted/20"}
                   `}
                   variant="ghost"
                   onClick={() => handleNavigation(menuItem)}
+                  aria-current={isCurrentPath(menuItem) ? "page" : undefined}
+                  aria-label={menuItem.label}
                 >
                   <menuItem.icon
-                    className={`mr-2 h-4 w-4 ${
-                      menuItem.value === "logout" ? "text-destructive" : ""
-                    }`}
+                    className={`mr-2 h-4 w-4 ${menuItem.value === "logout" ? "text-destructive" : ""}`}
+                    aria-hidden="true"
                   />
                   {menuItem.label}
                 </Button>
