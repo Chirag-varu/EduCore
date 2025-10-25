@@ -32,6 +32,10 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "@/components/ui/toaster";
 import ForgotPasswordPage from "./pages/auth/ForgotPassword";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import QuizCreator from "./pages/instructor/QuizCreator";
+import AssignmentCreator from "./pages/instructor/AssignmentCreator";
+import QuizTaking from "./pages/student/QuizTaking";
+import AssignmentSubmission from "./pages/student/AssignmentSubmission";
 
 function App() {
   const { auth, setAuth } = useContext(AuthContext);
@@ -172,6 +176,52 @@ function App() {
             />
           }
         />
+        
+        {/* Assessment routes for instructors */}
+        <Route
+          path="/instructor/quiz/create/:courseId"
+          element={
+            <RouteGuard
+              element={<QuizCreator />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+              allowedRoles={["instructor"]}
+            />
+          }
+        />
+        <Route
+          path="/instructor/quiz/:quizId/edit"
+          element={
+            <RouteGuard
+              element={<QuizCreator />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+              allowedRoles={["instructor"]}
+            />
+          }
+        />
+        <Route
+          path="/instructor/assignment/create/:courseId"
+          element={
+            <RouteGuard
+              element={<AssignmentCreator />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+              allowedRoles={["instructor"]}
+            />
+          }
+        />
+        <Route
+          path="/instructor/assignment/:assignmentId/edit"
+          element={
+            <RouteGuard
+              element={<AssignmentCreator />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+              allowedRoles={["instructor"]}
+            />
+          }
+        />
         <Route
           path="/auth/resetPassword/:token"
           element={<ResetPasswordPage />}
@@ -198,6 +248,16 @@ function App() {
           <Route
             path="course-progress/:id"
             element={<StudentViewCourseProgressPage />}
+          />
+          
+          {/* Assessment routes for students */}
+          <Route
+            path="quiz/:quizId"
+            element={<QuizTaking />}
+          />
+          <Route
+            path="assignment/:assignmentId"
+            element={<AssignmentSubmission />}
           />
         </Route>
         <Route

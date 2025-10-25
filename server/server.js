@@ -16,6 +16,8 @@ import commentRoutes from "./routes/student-routes/comment-routes.js";
 import chatRoutes from "./routes/chat-routes/index.js";
 import newsletterRoutes from "./routes/newsletter-routes/index.js";
 import adminRoutes from "./routes/admin-routes/index.js";
+import instructorAssessmentRoutes from "./routes/instructor-routes/assessment-routes.js";
+import studentAssessmentRoutes from "./routes/student-routes/assessment-routes.js";
 import { startNewsletterScheduler } from "./helpers/newsletterScheduler.js";
 import { generalLimiter, authLimiter, apiLimiter, uploadLimiter } from "./middleware/rate-limit.js";
 
@@ -93,6 +95,8 @@ app.use("/api/v1/comments", commentRoutes);
 app.use("/api/v1/chat", chatRoutes);
 app.use("/api/v1/newsletter", newsletterRoutes);
 app.use("/api/v1/admin", apiLimiter, adminRoutes);
+app.use("/api/v1/instructor/assessment", apiLimiter, instructorAssessmentRoutes);
+app.use("/api/v1/student/assessment", apiLimiter, studentAssessmentRoutes);
 
 app.use((err, req, res, next) => {
   console.log(err.stack);
