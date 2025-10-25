@@ -1,5 +1,6 @@
 import InstructorCourses from "@/components/instructor-view/courses";
 import InstructorDashboard from "@/components/instructor-view/dashboard";
+import EnhancedInstructorDashboard from "@/components/instructor-view/dashboard/enhanced-dashboard";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { AuthContext } from "@/context/auth-context";
@@ -29,7 +30,7 @@ function InstructorDashboardpage() {
       icon: BarChart,
       label: "Dashboard",
       value: "dashboard",
-      component: <InstructorDashboard listOfCourses={instructorCoursesList} />,
+      component: <EnhancedInstructorDashboard listOfCourses={instructorCoursesList} />,
     },
     {
       icon: Book,

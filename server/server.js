@@ -15,6 +15,7 @@ import videoDownloadRoutes from "./routes/student-routes/video-download-routes.j
 import commentRoutes from "./routes/student-routes/comment-routes.js";
 import chatRoutes from "./routes/chat-routes/index.js";
 import newsletterRoutes from "./routes/newsletter-routes/index.js";
+import adminRoutes from "./routes/admin-routes/index.js";
 import { startNewsletterScheduler } from "./helpers/newsletterScheduler.js";
 import { generalLimiter, authLimiter, apiLimiter, uploadLimiter } from "./middleware/rate-limit.js";
 
@@ -91,6 +92,7 @@ app.use("/api/v1/student/video", apiLimiter, videoDownloadRoutes);
 app.use("/api/v1/comments", commentRoutes);
 app.use("/api/v1/chat", chatRoutes);
 app.use("/api/v1/newsletter", newsletterRoutes);
+app.use("/api/v1/admin", apiLimiter, adminRoutes);
 
 app.use((err, req, res, next) => {
   console.log(err.stack);

@@ -12,6 +12,52 @@ export {
   markMessagesAsReadService
 } from "./chat-service.js";
 
+// Admin Services
+export async function getAllUsersService(params) {
+  const { data } = await axiosInstance.get(`/admin/users`, { params });
+  return data;
+}
+
+export async function getUserDetailsService(userId) {
+  const { data } = await axiosInstance.get(`/admin/users/${userId}`);
+  return data;
+}
+
+export async function updateUserRoleService(userId, role) {
+  const { data } = await axiosInstance.put(`/admin/users/${userId}/role`, { role });
+  return data;
+}
+
+export async function toggleUserStatusService(userId, isActive) {
+  const { data } = await axiosInstance.put(`/admin/users/${userId}/status`, { isActive });
+  return data;
+}
+
+export async function getCoursesForModerationService(params) {
+  const { data } = await axiosInstance.get(`/admin/courses`, { params });
+  return data;
+}
+
+export async function approveCourseService(courseId, adminNote) {
+  const { data } = await axiosInstance.put(`/admin/courses/${courseId}/approve`, { adminNote });
+  return data;
+}
+
+export async function rejectCourseService(courseId, reason, adminNote) {
+  const { data } = await axiosInstance.put(`/admin/courses/${courseId}/reject`, { reason, adminNote });
+  return data;
+}
+
+export async function getPlatformAnalyticsService(timeframe = '30') {
+  const { data } = await axiosInstance.get(`/admin/analytics?timeframe=${timeframe}`);
+  return data;
+}
+
+export async function getModerationSummaryService() {
+  const { data } = await axiosInstance.get(`/admin/moderation/summary`);
+  return data;
+}
+
 export async function registerService(formData) {
   try {
     const { data } = await axiosInstance.post("/auth/register", {

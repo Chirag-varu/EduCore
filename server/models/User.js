@@ -34,6 +34,10 @@ const UserSchema = new Schema({
   resetTokenExpiry: { 
     type: Date,
     default: null
+  },
+  isActive: {
+    type: Boolean,
+    default: true
   }
 }, {
   timestamps: true

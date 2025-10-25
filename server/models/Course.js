@@ -42,6 +42,17 @@ const CourseSchema = new Schema(
     ],
     curriculum: [{ type: Schema.Types.ObjectId, ref: "Lecture" }], // reference lectures
     isPublished: { type: Boolean, default: false },
+    moderationStatus: { 
+      type: String, 
+      enum: ['pending', 'approved', 'rejected'], 
+      default: 'pending' 
+    },
+    adminNote: String,
+    rejectionReason: String,
+    approvedAt: Date,
+    approvedBy: { type: Schema.Types.ObjectId, ref: "User" },
+    rejectedAt: Date,
+    rejectedBy: { type: Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );

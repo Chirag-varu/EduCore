@@ -25,6 +25,9 @@ import Unsubscribe from "./pages/newsletter/Unsubscribe";
 import NewsletterDashboard from "./pages/admin/NewsletterDashboard";
 import NewsletterForm from "./pages/admin/NewsletterForm";
 import SubscriberManagement from "./pages/admin/SubscriberManagement";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import UserManagement from "./pages/admin/UserManagement";
+import CourseModeration from "./pages/admin/CourseModeration";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "@/components/ui/toaster";
 import ForgotPasswordPage from "./pages/auth/ForgotPassword";
@@ -82,6 +85,39 @@ function App() {
         <Route path="/newsletter/unsubscribe" element={<Unsubscribe />} />
         
         {/* Newsletter admin routes */}
+        <Route
+          path="/admin"
+          element={
+            <RouteGuard
+              element={<AdminDashboard />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+              allowedRoles={["admin"]}
+            />
+          }
+        />
+        <Route
+          path="/admin/user-management"
+          element={
+            <RouteGuard
+              element={<UserManagement />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+              allowedRoles={["admin"]}
+            />
+          }
+        />
+        <Route
+          path="/admin/course-moderation"
+          element={
+            <RouteGuard
+              element={<CourseModeration />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+              allowedRoles={["admin"]}
+            />
+          }
+        />
         <Route
           path="/admin/newsletters"
           element={
