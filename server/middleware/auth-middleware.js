@@ -17,8 +17,17 @@ const authenticate = (req, res, next) => {
 
   const token = authHeader.split(" ")[1];
 
+  // Ensure JWT_SECRET is properly configured
+  if (!process.env.JWT_SECRET) {
+    console.error("JWT_SECRET environment variable is not configured");
+    return res.status(500).json({
+      success: false,
+      message: "Server configuration error",
+    });
+  }
+
   try {
-    const payload = verifyToken(token, process.env.JWT_SECRET || "jogo_jjk");
+    const payload = verifyToken(token, process.env.JWT_SECRET);
 
     req.user = payload;
 

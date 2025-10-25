@@ -1,6 +1,6 @@
 {
-  "name": "EduCore",
-  "version": "1.4.0",
+  "name": "educore",
+  "version": "1.15.4",
   "description": "EduCore is a comprehensive educational platform designed to facilitate learning and teaching through a variety of tools and resources.",
   "scripts": {
     "dev": "node start-dev.js",
@@ -10,7 +10,7 @@
     "b:pt": "node server/bump-version.js patch",
     "b:mn": "node server/bump-version.js minor",
     "b:mj": "node server/bump-version.js major",
-    "seed": "node server/seed_data/seed.js"
+    "seed": "node server/seed/courseSeed.js"
   },
   "repository": {
     "type": "git",

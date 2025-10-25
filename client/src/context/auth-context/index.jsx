@@ -7,7 +7,7 @@ import {
   verifyOTPService,
 } from "@/services";
 import { createContext, useEffect, useState } from "react";
-import React, { useContext } from "react";
+import PropTypes from "prop-types";
 
 export const AuthContext = createContext(null);
 
@@ -20,8 +20,7 @@ export default function AuthProvider({ children }) {
   });
   const [loading, setLoading] = useState(true);
 
-  async function handleRegisterUser(event) {
-    // event.preventDefault();
+  async function handleRegisterUser() {
     try {
       return await registerService(signUpFormData);
     } catch (error) {
@@ -176,3 +175,8 @@ export default function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
+
+// PropTypes validation
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};

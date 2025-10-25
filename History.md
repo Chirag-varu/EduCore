@@ -1,5 +1,24 @@
 # HISTORY.md
 
+# 1.15.4 / 2025-10-25
+- Security: **CRITICAL FIX** - Removed hardcoded JWT secret fallback in authentication middleware
+- Security: Added comprehensive environment variable validation on server startup
+- Security: Implemented rate limiting for authentication, API, and upload endpoints
+- Security: Added Helmet.js for security headers (CSP, HSTS, XSS protection)
+- Database: Enhanced User model with proper validation, indexing, and data integrity
+- Validation: Created comprehensive input validation utilities for secure data handling
+- Code Quality: Fixed React PropTypes validation issues in auth context
+- Code Quality: Restored StrictMode in React application for better development experience
+- Dependencies: Added security packages (express-rate-limit, helmet, prop-types)
+- Documentation: Created comprehensive security audit report and testing plan
+
+# 1.15.3 / 2025-10-25
+- Documentation: Comprehensive project status report and todo list created
+- Documentation: Updated README files for improved accuracy and completeness  
+- Maintenance: Project health assessment completed - clean working tree confirmed
+- Architecture: Documented role-based access control and API structure
+- Development: Environment configuration verified and development workflow optimized
+
 # 1.15.2 / 2025-08-17
 - Change: instructor page improved 
 - Added hamburger and logout dialog box
