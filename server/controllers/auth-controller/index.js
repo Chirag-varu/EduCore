@@ -6,6 +6,7 @@ import { generateOTP } from "../../helpers/generateOTP.js";
 import redisClient from "../../helpers/redisClient.js";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
+import { validatePassword, validateEmail, validateUsername } from "../../helpers/validation.js";
 const { hash, compare } = pkg;
 const { sign } = jwt;
 
@@ -65,6 +66,15 @@ const resetPassword = async (req, res) => {
     const { token } = req.params;
     const { password } = req.body;
 
+    // Validate new password strength
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: passwordValidation.message,
+      });
+    }
+
     const user = await User.findOne({
       resetToken: token,
       resetTokenExpiry: { $gt: Date.now() }, // check expiry
@@ -106,6 +116,31 @@ const chekAuth = (req, res) => {
 const registerUser = async (req, res) => {
   try {
     const { userName, userEmail, password, role } = req.body;
+
+    // Validate input fields
+    const emailValidation = validateEmail(userEmail);
+    if (!emailValidation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: emailValidation.message,
+      });
+    }
+
+    const usernameValidation = validateUsername(userName);
+    if (!usernameValidation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: usernameValidation.message,
+      });
+    }
+
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: passwordValidation.message,
+      });
+    }
 
     const existingUser = await User.findOne({
       $or: [{ userEmail }, { userName }],

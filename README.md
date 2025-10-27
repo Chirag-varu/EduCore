@@ -6,11 +6,11 @@
 
 ## 🚀 Status
 
-**Current Version:** 1.15.3  
-**Status:** Stable production-ready release  
-**Last Updated:** October 25, 2025  
+**Current Version:** 1.15.4  
+**Status:** Stable production-ready release with enhanced security  
+**Last Updated:** October 27, 2025  
 
-The project is feature-complete with a robust architecture supporting role-based access control, real-time features, and comprehensive course management capabilities.
+The project is feature-complete with a robust architecture supporting role-based access control, real-time features, comprehensive course management capabilities, and enterprise-grade security implementations.
 
 ---
 
@@ -25,11 +25,20 @@ The project is feature-complete with a robust architecture supporting role-based
 - **Media Management**: Cloudinary integration for video/image uploads and streaming
 
 ### 🔐 Security & Authentication  
-- **JWT Authentication**: Secure token-based authentication system
+- **JWT Authentication**: Secure token-based authentication with fail-safe configuration
+- **Password Complexity**: Enforced strong password requirements (8+ chars, uppercase, lowercase, numbers, special chars)
+- **Rate Limiting**: Advanced rate limiting on authentication endpoints to prevent brute force attacks
+- **Input Validation**: Comprehensive server-side validation for all user inputs
 - **Google OAuth**: Social login integration for enhanced user experience
 - **OTP Verification**: Email-based verification for account security
-- **Password Reset**: Secure password recovery system
+- **Password Reset**: Secure password recovery system with time-limited tokens
 - **Role-based Access**: Granular permissions based on user roles
+
+### 🧪 Testing & Quality Assurance
+- **Jest Testing Framework**: Comprehensive test suite with 21+ passing tests
+- **Unit Tests**: Authentication, validation, and model testing
+- **Security Auditing**: Regular security assessments and vulnerability management
+- **Code Quality**: ES6+ modules with proper error handling and validation
 
 ### 📱 User Experience
 - **Responsive Design**: Mobile-first approach with Tailwind CSS
@@ -53,7 +62,27 @@ The project is feature-complete with a robust architecture supporting role-based
 
 ---
 
-## 📂 Setup Instructions
+## � Recent Improvements (v1.15.4)
+
+### Security Enhancements
+- ✅ **Fixed Critical JWT Security**: Removed hardcoded fallback secrets
+- ✅ **Password Complexity**: Implemented comprehensive password strength validation
+- ✅ **Rate Limiting**: Added protection against brute force attacks on auth endpoints
+- ✅ **Input Validation**: Enhanced server-side validation with detailed error messages
+
+### Development & Testing
+- ✅ **Jest Testing Framework**: Configured testing environment with 21+ unit tests
+- ✅ **Model Validation**: Enhanced Course and Lecture models with comprehensive validation
+- ✅ **Code Quality**: Improved error handling and data validation across the application
+
+### Database & Performance
+- ✅ **Database Indexing**: Added strategic indexes for improved query performance
+- ✅ **Virtual Properties**: Added computed fields for better data access
+- ✅ **Model Methods**: Implemented utility methods for common operations
+
+---
+
+## �📂 Setup Instructions
 
 ### 1. Clone the repository
 
@@ -90,9 +119,22 @@ or
 npm run dev
 ```
 
-### we also added redis so u may have to run it in another terminal:
+### 5. Running Tests
 
-you can install or download it to ur local space but we recommend using docker in local and prod enviroment
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode (server only)
+cd server && npm run test:watch
+
+# Run specific test files
+cd server && npm test -- auth.test.js
+```
+
+### 6. Redis Setup (Required)
+
+You can install or download it to your local space but we recommend using Docker in local and prod environment:
 
 ```bash
 docker run --name redis -p 6379:6379 -d redis

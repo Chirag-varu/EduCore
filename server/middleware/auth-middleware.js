@@ -29,14 +29,42 @@ const authenticate = (req, res, next) => {
   try {
     const payload = verifyToken(token, process.env.JWT_SECRET);
 
+    // Additional token validation
+    if (!payload.userId || !payload.role) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token payload",
+      });
+    }
+
+    // Check token expiry explicitly (JWT library handles this, but good to be explicit)
+    if (payload.exp && Date.now() >= payload.exp * 1000) {
+      return res.status(401).json({
+        success: false,
+        message: "Token expired",
+      });
+    }
+
     req.user = payload;
 
     next();
   } catch (e) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid token",
-    });
+    if (e.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        success: false,
+        message: "Token expired",
+      });
+    } else if (e.name === 'JsonWebTokenError') {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token",
+      });
+    } else {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication failed",
+      });
+    }
   }
 };
 

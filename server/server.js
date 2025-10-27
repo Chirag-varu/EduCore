@@ -20,6 +20,7 @@ import instructorAssessmentRoutes from "./routes/instructor-routes/assessment-ro
 import studentAssessmentRoutes from "./routes/student-routes/assessment-routes.js";
 import { startNewsletterScheduler } from "./helpers/newsletterScheduler.js";
 import { generalLimiter, authLimiter, apiLimiter, uploadLimiter } from "./middleware/rate-limit.js";
+import { sanitizeInput, validateRequestSize, apiSecurityHeaders } from "./middleware/input-validation.js";
 
 // Environment variable validation
 const requiredEnvVars = [
@@ -71,7 +72,14 @@ app.use(
 // Apply general rate limiting to all requests
 app.use(generalLimiter);
 
-app.use(json());
+// Apply security headers for API responses
+app.use(apiSecurityHeaders);
+
+// Input validation and sanitization
+app.use(sanitizeInput);
+app.use(validateRequestSize);
+
+app.use(json({ limit: '10mb' }));
 
 //database connection
 connect(MONGO_URI)
