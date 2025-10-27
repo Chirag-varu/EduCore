@@ -1,22 +1,32 @@
 
-# EduCore Server
+# 🚀 EduCore Server
 
 This directory contains the backend (server) for the EduCore application, built with **Node.js**, **Express**, and **MongoDB Atlas**. The backend provides RESTful APIs, authentication, business logic, and integrations for the EduCore platform.
 
+## 📊 Server Overview
+
+| Aspect | Details |
+|--------|---------|
+| **Framework** | Express.js with ES6+ modules |
+| **Database** | MongoDB Atlas with Mongoose ODM |
+| **Authentication** | JWT + Google OAuth 2.0 |
+| **Testing** | Jest with 31+ passing tests |
+| **Security** | Rate limiting, input validation, security headers |
+| **Caching** | Redis for performance optimization |
+
 ---
 
-## Table of Contents
+## 📋 Table of Contents
 
-- [Project Structure](#project-structure)
-- [Features](#features)
-- [Setup & Installation](#setup--installation)
-- [Environment Variables](#environment-variables)
-- [Running the Server](#running-the-server)
-- [Redis Setup](#redis-setup)
-- [Scripts](#scripts)
-- [API Documentation](#api-documentation)
-- [Contributing](#contributing)
-- [License](#license)
+| Section | Description |
+|---------|-------------|
+| [🏗️ Project Structure](#️-project-structure) | Server directory organization |
+| [✨ Features](#-features) | Backend capabilities and integrations |
+| [📦 Setup & Installation](#-setup--installation) | Installation and configuration |
+| [🔧 Environment Variables](#-environment-variables) | Required environment configuration |
+| [🚀 Running the Server](#-running-the-server) | Start commands and options |
+| [🧪 Testing](#-testing) | Test suite and coverage |
+| [📡 API Documentation](#-api-documentation) | API endpoints and usage |
 
 ---
 
@@ -91,6 +101,27 @@ npm run dev
 ```
 
 The server will start on the port specified in your `.env` file (default: 5000).
+
+---
+
+## 🧪 Testing
+
+The server includes a comprehensive test suite using Jest and Supertest.
+
+| Test Command | Purpose | Description |
+|--------------|---------|-------------|
+| `npm test` | Run all tests | Execute complete test suite (31+ tests) |
+| `npm run test:watch` | Watch mode | Run tests in watch mode for development |
+| `npm test -- --coverage` | Coverage report | Generate detailed test coverage analysis |
+
+### Test Categories
+
+| Category | Coverage | Description |
+|----------|----------|-------------|
+| **Authentication** | ✅ Complete | JWT validation, password complexity, rate limiting |
+| **Validation** | ✅ Complete | Input sanitization, field validation, security checks |
+| **Models** | ✅ Complete | Course and Lecture schema validation |
+| **Security** | ✅ Complete | Security middleware and input protection |
 
 ---
 
