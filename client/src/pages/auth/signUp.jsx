@@ -9,14 +9,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import auth_image from "@/assets/auth_image.jpg";
 import { GoogleLogin } from "@react-oauth/google";
+import PasswordStrengthIndicator from "@/components/ui/password-strength-indicator";
 
 function Sign_up() {
   const {
-    signUpFormData,
+    signUpFormData, 
     setSignUpFormData,
     handleRegisterUser,
     handleOTPVerification,
-    handleGoogleLogin,
+    // handleGoogleLogin, // Not used in this component
   } = useContext(AuthContext);
 
   const { toast } = useToast();
@@ -213,6 +214,7 @@ function Sign_up() {
                             })
                           }
                         />
+                        <PasswordStrengthIndicator password={signUpFormData.password} />
                       </div>
 
                       {/* Submit */}

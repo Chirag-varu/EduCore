@@ -1,6 +1,7 @@
 import Course from "../../models/Course.js";
 import User from "../../models/User.js";
 import mongoose from "mongoose";
+import { invalidateCache } from "../../helpers/performance.js";
 
 const addNewCourse = async (req, res) => {
   try {
@@ -11,6 +12,9 @@ const addNewCourse = async (req, res) => {
     const saveCourse = await newlyCreatedCourse.save();
 
     if (saveCourse) {
+      // Invalidate course listing cache when new course is added
+      await invalidateCache("courses:*");
+      
       res.status(201).json({
         success: true,
         message: "Course saved successfully",

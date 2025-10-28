@@ -1,6 +1,7 @@
 import Course from "../../models/Course.js";
 import { StudentCourses } from "../../models/StudentCourses.js";
 import Lecture from "../../models/lecture.model.js";
+import { cacheQuery, generateCoursesCacheKey, monitorQuery } from "../../helpers/performance.js";
 
 const getAllStudentViewCourses = async (req, res) => {
   try {
@@ -55,10 +56,22 @@ const getAllStudentViewCourses = async (req, res) => {
     }
 
     const skip = (page - 1) * limit;
-    const coursesList = await Course.find(filters)
-      .sort(sortParam)
-      .skip(skip)
-      .limit(Number(limit));
+    
+    // Use caching for course listing (5 minute cache)
+    const cacheKey = generateCoursesCacheKey(filters, sortParam, page, limit);
+    const coursesList = await cacheQuery(
+      cacheKey,
+      async () => {
+        return await monitorQuery(
+          'getAllStudentViewCourses',
+          () => Course.find(filters)
+            .sort(sortParam)
+            .skip(skip)
+            .limit(Number(limit))
+        );
+      },
+      300 // 5 minutes TTL
+    );
 
     res.status(200).json({
       success: true,

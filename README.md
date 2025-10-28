@@ -22,9 +22,9 @@
 | Attribute | Details |
 |-----------|---------|
 | **Project Name** | EduCore - Modern Learning Management System |
-| **Version** | 1.15.4 |
+| **Version** | 1.15.5 |
 | **Status** | ✅ Stable production-ready release with enhanced security |
-| **Last Updated** | October 27, 2025 |
+| **Last Updated** | October 28, 2025 |
 | **Architecture** | Full-stack with role-based access control |
 | **License** | MIT |
 | **Repository** | [GitHub - EduCore](https://github.com/Chirag-varu/EduCore) |
@@ -82,6 +82,26 @@ The project is feature-complete with a robust architecture supporting role-based
 | **Real-time Updates** | Live notifications and progress updates | ✅ |
 | **Newsletter System** | Automated scheduling and management | ✅ |
 | **Accessibility** | WCAG compliant with Radix UI primitives | ✅ |
+
+---
+
+## 🆕 Recent Security Enhancements (v1.15.5 - October 28, 2025)
+
+### Enhanced Authentication & Security
+- **🔐 JWT Security Hardening**: Removed hardcoded fallback secrets, enforced strong JWT configurations
+- **🔒 Password Complexity**: Real-time password strength validation with visual feedback
+- **🛡️ Rate Limiting**: Comprehensive brute force protection on all authentication endpoints
+- **⚡ Environment Validation**: Startup validation for all security-critical environment variables
+- **📊 Client-side Validation**: Interactive password strength indicator with requirements checklist
+
+### Security Improvements Summary
+| Security Layer | Enhancement | Impact |
+|----------------|-------------|---------|
+| **Authentication** | JWT secret validation, no fallback defaults | 🔴 Critical vulnerability fixed |
+| **Password Policy** | 8+ chars, mixed case, numbers, special chars | 🟡 Security compliance improved |
+| **Rate Protection** | 10 attempts/15min auth, 3 attempts/hour reset | 🟡 Brute force mitigation |
+| **Environment Config** | Comprehensive validation on server startup | 🟢 Production readiness |
+| **User Experience** | Real-time password feedback and validation | 🟢 Security awareness |
 
 ---
 

@@ -28,7 +28,19 @@ const requiredEnvVars = [
   'JWT_SECRET',
   'CLOUDINARY_CLOUD_NAME',
   'CLOUDINARY_API_KEY',
-  'CLOUDINARY_API_SECRET'
+  'CLOUDINARY_API_SECRET',
+  'PAYPAL_CLIENT_ID',
+  'PAYPAL_SECRET_ID',
+  'CLIENT_URL',
+  'Email_Service',
+  'Email',
+  'Email_Password',
+  'GOOGLE_CLIENT_ID'
+];
+
+const optionalEnvVars = [
+  'PORT',
+  'REDIS_URL'
 ];
 
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
@@ -38,6 +50,31 @@ if (missingEnvVars.length > 0) {
   missingEnvVars.forEach(envVar => console.error(`   - ${envVar}`));
   console.error('Please check your .env file and ensure all required variables are set.');
   process.exit(1);
+}
+
+// Security validation for sensitive variables
+if (process.env.JWT_SECRET && process.env.JWT_SECRET.length < 32) {
+  console.error('❌ JWT_SECRET must be at least 32 characters long for security');
+  process.exit(1);
+}
+
+if (process.env.NODE_ENV === 'production') {
+  // Additional production-specific validations
+  if (process.env.JWT_SECRET === 'your-super-secret-jwt-key-here') {
+    console.error('❌ JWT_SECRET cannot use default value in production');
+    process.exit(1);
+  }
+  
+  if (!process.env.CLIENT_URL.startsWith('https://')) {
+    console.warn('⚠️  CLIENT_URL should use HTTPS in production');
+  }
+}
+
+// Log optional variables that are missing (warnings only)
+const missingOptionalVars = optionalEnvVars.filter(envVar => !process.env[envVar]);
+if (missingOptionalVars.length > 0) {
+  console.warn('⚠️  Optional environment variables not set (using defaults):');
+  missingOptionalVars.forEach(envVar => console.warn(`   - ${envVar}`));
 }
 
 console.log('✅ Environment variables validated successfully');

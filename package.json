@@ -1,6 +1,6 @@
 {
   "name": "educore",
-  "version": "1.15.4",
+  "version": "1.15.5",
   "description": "EduCore is a comprehensive educational platform designed to facilitate learning and teaching through a variety of tools and resources.",
   "scripts": {
     "dev": "node start-dev.js",

@@ -9,6 +9,8 @@ import { verifyResetTokenService, resetPasswordService } from "@/services";
 import AuthNavbar from "@/components/auth/AuthNavbar";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CheckCircle2, AlertCircle } from "lucide-react";
+import PasswordStrengthIndicator from "@/components/ui/password-strength-indicator";
+import { validatePasswordStrength } from "@/lib/password-validation";
 
 function ResetPasswordPage() {
   const { token } = useParams();
@@ -34,6 +36,17 @@ function ResetPasswordPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate password strength
+    const passwordValidation = validatePasswordStrength(password);
+    if (!passwordValidation.isValid) {
+      toast({
+        title: "❌ Weak Password",
+        description: "Please choose a stronger password that meets all requirements",
+        variant: "destructive",
+      });
+      return;
+    }
 
     if (password !== confirmPassword) {
       toast({
@@ -116,6 +129,7 @@ function ResetPasswordPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+                <PasswordStrengthIndicator password={password} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="confirmPassword">Confirm New Password</Label>
