@@ -1,5 +1,5 @@
 // controller/student-courses-controller.js
-import { StudentCourses } from "../../models/StudentCourses.js";
+import StudentCourses from "../../models/StudentCourses.js";
 import Course from "../../models/Course.js";
 import mongoose from "mongoose";
 

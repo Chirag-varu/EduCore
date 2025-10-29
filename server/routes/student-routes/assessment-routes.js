@@ -20,7 +20,7 @@ import {
   getAssignmentResults,
   getStudentAssignmentHistory
 } from '../../controllers/student-controller/assignment-controller.js';
-import { authenticateToken } from '../../middleware/auth-middleware.js';
+import authenticate from '../../middleware/auth-middleware.js';
 
 const router = express.Router();
 
@@ -33,7 +33,7 @@ const upload = multer({
 });
 
 // Apply authentication middleware
-router.use(authenticateToken);
+router.use(authenticate);
 
 // Quiz routes
 router.get('/quiz/course/:courseId', getStudentQuizzes);

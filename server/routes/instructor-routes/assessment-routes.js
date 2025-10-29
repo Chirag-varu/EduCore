@@ -20,12 +20,12 @@ import {
   bulkGradeSubmissions,
   toggleAssignmentPublication
 } from '../../controllers/instructor-controller/assignment-controller.js';
-import { authenticateToken } from '../../middleware/auth-middleware.js';
+import authenticate from '../../middleware/auth-middleware.js';
 
 const router = express.Router();
 
 // Apply authentication middleware
-router.use(authenticateToken);
+router.use(authenticate);
 
 // Quiz routes
 router.post('/quiz', createQuiz);

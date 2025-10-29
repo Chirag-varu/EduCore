@@ -20,7 +20,8 @@ import instructorAssessmentRoutes from "./routes/instructor-routes/assessment-ro
 import studentAssessmentRoutes from "./routes/student-routes/assessment-routes.js";
 import { startNewsletterScheduler } from "./helpers/newsletterScheduler.js";
 import { generalLimiter, authLimiter, apiLimiter, uploadLimiter } from "./middleware/rate-limit.js";
-import { sanitizeInput, validateRequestSize, apiSecurityHeaders } from "./middleware/input-validation.js";
+import { sanitizeInput, validateRequestSize } from "./middleware/input-validation.js";
+import { apiSecurityHeaders } from "./middleware/security.js";
 
 // Environment variable validation
 const requiredEnvVars = [

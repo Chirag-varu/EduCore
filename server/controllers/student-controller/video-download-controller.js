@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { StudentCourses } from '../../models/StudentCourses.js';
+import StudentCourses from "../../models/StudentCourses.js";
 import Course from '../../models/Course.js';
 import Lecture from '../../models/lecture.model.js';
 import CourseProgress from '../../models/CourseProgress.js';
