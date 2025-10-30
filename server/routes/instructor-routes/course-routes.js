@@ -5,6 +5,7 @@ import {
   getCourseAnalytics, 
   getStudentDetailsForInstructor 
 } from "../../controllers/instructor-controller/analytics-controller.js";
+import { authenticate } from "../../middleware/auth-middleware.js";
 const { addNewCourse, getAllCourses, getCourseDetailsByID, updateCourseByID, getStudentdetails } = courseController;
 const router = Router();
 
@@ -19,8 +20,8 @@ router.put("/update/:id", updateCourseByID);
 router.get("/get/getStudentdetails/:id", getStudentdetails);
 
 // Analytics routes
-router.get("/analytics/:instructorId", getInstructorAnalytics);
-router.get("/analytics/course/:courseId", getCourseAnalytics);
-router.get("/student/:studentId/course/:courseId", getStudentDetailsForInstructor);
+router.get("/analytics/:instructorId", authenticate, getInstructorAnalytics);
+router.get("/analytics/course/:courseId", authenticate, getCourseAnalytics);
+router.get("/student/:studentId/course/:courseId", authenticate, getStudentDetailsForInstructor);
 
 export default router;

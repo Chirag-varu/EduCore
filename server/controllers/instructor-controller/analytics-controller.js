@@ -33,7 +33,7 @@ export const getInstructorAnalytics = async (req, res) => {
             date: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
             courseId: '$courseId'
           },
-          revenue: { $sum: '$coursePricing' },
+          revenue: { $sum: { $toDouble: '$coursePricing' } },
           enrollments: { $sum: 1 }
         }
       },
@@ -80,7 +80,7 @@ export const getInstructorAnalytics = async (req, res) => {
           {
             $group: {
               _id: null,
-              total: { $sum: '$coursePricing' }
+              total: { $sum: { $toDouble: '$coursePricing' } }
             }
           }
         ]);
@@ -149,7 +149,7 @@ export const getInstructorAnalytics = async (req, res) => {
         $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
           enrollments: { $sum: 1 },
-          revenue: { $sum: '$coursePricing' }
+          revenue: { $sum: { $toDouble: '$coursePricing' } }
         }
       },
       { $sort: { '_id': 1 } }
@@ -231,7 +231,7 @@ export const getCourseAnalytics = async (req, res) => {
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
-          revenue: { $sum: '$coursePricing' },
+          revenue: { $sum: { $toDouble: '$coursePricing' } },
           enrollments: { $sum: 1 }
         }
       },

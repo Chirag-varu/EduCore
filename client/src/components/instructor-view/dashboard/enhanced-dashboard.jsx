@@ -81,7 +81,11 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
 
   useEffect(() => {
     if (auth?.user?.userId) {
+      console.log('Auth user found, fetching analytics:', auth.user);
       fetchAnalytics();
+    } else {
+      console.log('No auth user found, setting loading to false');
+      setLoading(false);
     }
     calculateBasicStats();
   }, [auth?.user?.userId, selectedTimeframe, listOfCourses]);
@@ -89,15 +93,23 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
+      console.log('Fetching analytics for user:', auth.user.userId);
       const response = await axiosInstance.get(
         `/api/v1/instructor/course/analytics/${auth.user.userId}?timeframe=${selectedTimeframe}`
       );
       
+      console.log('Analytics response:', response.data);
+      
       if (response.data.success) {
         setAnalytics(response.data.data);
+      } else {
+        console.error('Analytics API returned error:', response.data.message);
+        setAnalytics(null);
       }
     } catch (error) {
       console.error('Error fetching analytics:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      setAnalytics(null);
     } finally {
       setLoading(false);
     }
@@ -193,6 +205,79 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
     return (
       <div className="flex items-center justify-center py-8">
         <div className="text-muted-foreground">Loading analytics...</div>
+      </div>
+    );
+  }
+
+  // Show fallback if no analytics data but not loading
+  if (!loading && !analytics && auth?.user?.userId) {
+    return (
+      <div className="space-y-6">
+        {/* Header with timeframe selector */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold">Dashboard Analytics</h2>
+            <p className="text-muted-foreground">Overview of your teaching performance</p>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center py-8">
+          <div className="text-center">
+            <div className="text-muted-foreground mb-2">Unable to load analytics data</div>
+            <Button onClick={fetchAnalytics} variant="outline">
+              Retry
+            </Button>
+          </div>
+        </div>
+
+        {/* Show basic stats even if analytics fails */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Students</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalStudents}</div>
+              <p className="text-xs text-muted-foreground">Across all courses</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatCurrency(stats.totalProfit)}</div>
+              <p className="text-xs text-muted-foreground">From course sales</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Courses</CardTitle>
+              <BookOpen className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{listOfCourses.length}</div>
+              <p className="text-xs text-muted-foreground">
+                {listOfCourses.filter(c => c.isPublished).length} published
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Show fallback if no user authenticated
+  if (!loading && !auth?.user?.userId) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="text-center">
+          <div className="text-muted-foreground">Please log in to view analytics</div>
+        </div>
       </div>
     );
   }
