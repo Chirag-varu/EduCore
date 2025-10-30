@@ -1,7 +1,7 @@
 import Chat from "../../models/Chat.js";
 import Course from "../../models/Course.js";
 import User from "../../models/User.js";
-import { StudentCourses } from "../../models/StudentCourses.js";
+import StudentCourses from "../../models/StudentCourses.js";
 
 // Get all chats for an instructor
 const getInstructorChats = async (req, res) => {

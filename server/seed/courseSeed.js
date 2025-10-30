@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import { Course } from "../models/Courses.model.js"; 
 import Lecture from "../models/lecture.model.js";
 // import User from "../models/User.js";
-import { StudentCourses } from "../models/StudentCourses.js";
+import StudentCourses from "../models/StudentCourses.js";
 import User from "../models/User.js";
 
 dotenv.config();

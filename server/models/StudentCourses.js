@@ -14,4 +14,4 @@ const StudentCoursesSchema = new Schema({
   ],
 });
 
-export const StudentCourses =  model("StudentCourses", StudentCoursesSchema);
+export default model("StudentCourses", StudentCoursesSchema);

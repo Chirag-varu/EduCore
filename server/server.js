@@ -20,18 +20,22 @@ import instructorAssessmentRoutes from "./routes/instructor-routes/assessment-ro
 import studentAssessmentRoutes from "./routes/student-routes/assessment-routes.js";
 import { startNewsletterScheduler } from "./helpers/newsletterScheduler.js";
 import { generalLimiter, authLimiter, apiLimiter, uploadLimiter } from "./middleware/rate-limit.js";
-import { sanitizeInput, validateRequestSize, apiSecurityHeaders } from "./middleware/input-validation.js";
+import { sanitizeInput, validateRequestSize } from "./middleware/input-validation.js";
+import { apiSecurityHeaders } from "./middleware/security.js";
 
 // Environment variable validation
-const requiredEnvVars = [
+const coreRequiredEnvVars = [
   'MONGO_URI',
   'JWT_SECRET',
+  'CLIENT_URL'
+];
+
+const featureEnvVars = [
   'CLOUDINARY_CLOUD_NAME',
   'CLOUDINARY_API_KEY',
   'CLOUDINARY_API_SECRET',
   'PAYPAL_CLIENT_ID',
   'PAYPAL_SECRET_ID',
-  'CLIENT_URL',
   'Email_Service',
   'Email',
   'Email_Password',
@@ -43,13 +47,20 @@ const optionalEnvVars = [
   'REDIS_URL'
 ];
 
-const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+const missingCoreVars = coreRequiredEnvVars.filter(envVar => !process.env[envVar]);
+const missingFeatureVars = featureEnvVars.filter(envVar => !process.env[envVar]);
 
-if (missingEnvVars.length > 0) {
-  console.error('❌ Missing required environment variables:');
-  missingEnvVars.forEach(envVar => console.error(`   - ${envVar}`));
+if (missingCoreVars.length > 0) {
+  console.error('❌ Missing critical environment variables:');
+  missingCoreVars.forEach(envVar => console.error(`   - ${envVar}`));
   console.error('Please check your .env file and ensure all required variables are set.');
   process.exit(1);
+}
+
+if (missingFeatureVars.length > 0) {
+  console.warn('⚠️  Missing feature environment variables (some features may be disabled):');
+  missingFeatureVars.forEach(envVar => console.warn(`   - ${envVar}`));
+  console.warn('Check the .env.example file for complete configuration.');
 }
 
 // Security validation for sensitive variables

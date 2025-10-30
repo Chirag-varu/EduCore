@@ -43,8 +43,7 @@ const UserSchema = new Schema({
   timestamps: true
 });
 
-// Index for better query performance
-UserSchema.index({ userEmail: 1 });
+// Index for better query performance (userEmail already has unique index from schema definition)
 UserSchema.index({ resetToken: 1 });
 
 export default model("User", UserSchema);

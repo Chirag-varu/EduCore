@@ -15,12 +15,12 @@ import {
   deleteCourse,
   getModerationSummary
 } from '../../controllers/admin-controller/course-moderation-controller.js';
-import { authenticateToken } from '../../middleware/auth-middleware.js';
+import authenticate from '../../middleware/auth-middleware.js';
 
 const router = express.Router();
 
 // Apply authentication middleware to all admin routes
-router.use(authenticateToken);
+router.use(authenticate);
 
 // User Management Routes
 router.get('/users', getAllUsers);

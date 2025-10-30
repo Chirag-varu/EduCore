@@ -1,7 +1,7 @@
 import payment from "../../helpers/paypal.js";
 import Order from "../../models/Order.js";
 import findByIdAndUpdate from "../../models/Course.js";
-import { StudentCourses } from "../../models/StudentCourses.js";
+import StudentCourses from "../../models/StudentCourses.js";
 
 const createOrder = async (req, res) => {
   try {

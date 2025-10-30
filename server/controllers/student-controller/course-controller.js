@@ -1,5 +1,5 @@
 import Course from "../../models/Course.js";
-import { StudentCourses } from "../../models/StudentCourses.js";
+import StudentCourses from "../../models/StudentCourses.js";
 import Lecture from "../../models/lecture.model.js";
 import { cacheQuery, generateCoursesCacheKey, monitorQuery } from "../../helpers/performance.js";
 
