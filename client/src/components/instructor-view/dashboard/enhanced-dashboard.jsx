@@ -72,27 +72,45 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
   const { auth } = useAuth();
   const [analytics, setAnalytics] = useState(null);
   const [selectedTimeframe, setSelectedTimeframe] = useState('30');
-  const [loading, setLoading] = useState(true);
+  const [loadingStates, setLoadingStates] = useState({
+    analytics: true,
+    stats: true,
+    initial: true
+  });
   const [stats, setStats] = useState({
     totalStudents: 0,
     totalProfit: 0,
     studentList: [],
   });
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (auth?.user?.userId) {
-      console.log('Auth user found, fetching analytics:', auth.user);
-      fetchAnalytics();
-    } else {
-      console.log('No auth user found, setting loading to false');
-      setLoading(false);
-    }
-    calculateBasicStats();
+    const initializeDashboard = async () => {
+      setLoadingStates(prev => ({ ...prev, initial: true, analytics: true, stats: true }));
+      setError(null);
+      
+      if (auth?.user?.userId) {
+        console.log('Auth user found, fetching analytics:', auth.user);
+        await Promise.all([
+          fetchAnalytics(),
+          calculateBasicStats()
+        ]);
+      } else {
+        console.log('No auth user found, only calculating basic stats');
+        setLoadingStates(prev => ({ ...prev, analytics: false }));
+        await calculateBasicStats();
+      }
+      
+      setLoadingStates(prev => ({ ...prev, initial: false }));
+    };
+
+    initializeDashboard();
   }, [auth?.user?.userId, selectedTimeframe, listOfCourses]);
 
   const fetchAnalytics = async () => {
     try {
-      setLoading(true);
+      setLoadingStates(prev => ({ ...prev, analytics: true }));
+      setError(null);
       console.log('Fetching analytics for user:', auth.user.userId);
       const response = await axiosInstance.get(
         `/api/v1/instructor/course/analytics/${auth.user.userId}?timeframe=${selectedTimeframe}`
@@ -105,44 +123,62 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
       } else {
         console.error('Analytics API returned error:', response.data.message);
         setAnalytics(null);
+        setError('Unable to load analytics data');
       }
     } catch (error) {
       console.error('Error fetching analytics:', error);
       console.error('Error details:', error.response?.data || error.message);
       setAnalytics(null);
+      setError('Failed to fetch analytics. Please check your connection.');
     } finally {
-      setLoading(false);
+      setLoadingStates(prev => ({ ...prev, analytics: false }));
     }
   };
 
   const calculateBasicStats = async () => {
-    let totalStudents = 0;
-    let totalProfit = 0;
-    let studentList = [];
+    try {
+      setLoadingStates(prev => ({ ...prev, stats: true }));
+      let totalStudents = 0;
+      let totalProfit = 0;
+      let studentList = [];
 
-    for (const course of listOfCourses) {
-      const studentCount = course.enrolledStudents?.length || 0;
-      totalStudents += studentCount;
-      totalProfit += (course.price || 0) * studentCount;
+      for (const course of listOfCourses) {
+        const studentCount = course.enrolledStudents?.length || 0;
+        totalStudents += studentCount;
+        totalProfit += (course.price || 0) * studentCount;
 
-      if (studentCount > 0) {
-        const students = await Promise.all(
-          course.enrolledStudents.map(async (studentID) => {
-            const studentDetails =
-              await fetchInstructorCourseStudentDetailsService(studentID);
+        if (studentCount > 0) {
+          const students = await Promise.all(
+            course.enrolledStudents.map(async (studentID) => {
+              try {
+                const studentDetails =
+                  await fetchInstructorCourseStudentDetailsService(studentID);
 
-            return {
-              courseTitle: course.title,
-              studentName: studentDetails?.data?.userName || "N/A",
-              studentEmail: studentDetails?.data?.userEmail || "N/A",
-            };
-          })
-        );
-        studentList.push(...students);
+                return {
+                  courseTitle: course.title,
+                  studentName: studentDetails?.data?.userName || "N/A",
+                  studentEmail: studentDetails?.data?.userEmail || "N/A",
+                };
+              } catch (error) {
+                console.error(`Error fetching student ${studentID}:`, error);
+                return {
+                  courseTitle: course.title,
+                  studentName: "N/A",
+                  studentEmail: "N/A",
+                };
+              }
+            })
+          );
+          studentList.push(...students);
+        }
       }
-    }
 
-    setStats({ totalStudents, totalProfit, studentList });
+      setStats({ totalStudents, totalProfit, studentList });
+    } catch (error) {
+      console.error('Error calculating basic stats:', error);
+    } finally {
+      setLoadingStates(prev => ({ ...prev, stats: false }));
+    }
   };
 
   const formatCurrency = (amount) => {
@@ -201,16 +237,35 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
     },
   ];
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="text-muted-foreground">Loading analytics...</div>
+  // Loading skeleton component
+  const LoadingSkeleton = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div className="space-y-2">
+          <div className="h-8 w-64 bg-muted rounded animate-pulse"></div>
+          <div className="h-4 w-96 bg-muted rounded animate-pulse"></div>
+        </div>
+        <div className="h-10 w-32 bg-muted rounded animate-pulse"></div>
       </div>
-    );
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="p-6 border rounded-lg space-y-3">
+            <div className="h-4 w-24 bg-muted rounded animate-pulse"></div>
+            <div className="h-8 w-16 bg-muted rounded animate-pulse"></div>
+            <div className="h-3 w-32 bg-muted rounded animate-pulse"></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  if (loadingStates.initial) {
+    return <LoadingSkeleton />;
   }
 
   // Show fallback if no analytics data but not loading
-  if (!loading && !analytics && auth?.user?.userId) {
+  if (!loadingStates.analytics && !analytics && auth?.user?.userId) {
     return (
       <div className="space-y-6">
         {/* Header with timeframe selector */}
@@ -219,16 +274,40 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
             <h2 className="text-2xl font-bold">Dashboard Analytics</h2>
             <p className="text-muted-foreground">Overview of your teaching performance</p>
           </div>
+          <Select value={selectedTimeframe} onValueChange={setSelectedTimeframe} disabled={loadingStates.analytics}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">Last 7 days</SelectItem>
+              <SelectItem value="30">Last 30 days</SelectItem>
+              <SelectItem value="90">Last 3 months</SelectItem>
+              <SelectItem value="365">Last year</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <div className="flex items-center justify-center py-8">
-          <div className="text-center">
-            <div className="text-muted-foreground mb-2">Unable to load analytics data</div>
-            <Button onClick={fetchAnalytics} variant="outline">
-              Retry
-            </Button>
+        {error && (
+          <div className="flex items-center justify-center py-6">
+            <div className="text-center">
+              <div className="text-destructive mb-2">{error}</div>
+              <Button onClick={fetchAnalytics} variant="outline" disabled={loadingStates.analytics}>
+                {loadingStates.analytics ? "Retrying..." : "Retry"}
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
+
+        {!error && (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <div className="text-muted-foreground mb-2">Unable to load analytics data</div>
+              <Button onClick={fetchAnalytics} variant="outline" disabled={loadingStates.analytics}>
+                {loadingStates.analytics ? "Loading..." : "Retry"}
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Show basic stats even if analytics fails */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -238,8 +317,17 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalStudents}</div>
-              <p className="text-xs text-muted-foreground">Across all courses</p>
+              {loadingStates.stats ? (
+                <div className="space-y-2">
+                  <div className="h-8 w-16 bg-muted rounded animate-pulse"></div>
+                  <div className="h-3 w-24 bg-muted rounded animate-pulse"></div>
+                </div>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">{stats.totalStudents}</div>
+                  <p className="text-xs text-muted-foreground">Across all courses</p>
+                </>
+              )}
             </CardContent>
           </Card>
           
@@ -249,8 +337,17 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(stats.totalProfit)}</div>
-              <p className="text-xs text-muted-foreground">From course sales</p>
+              {loadingStates.stats ? (
+                <div className="space-y-2">
+                  <div className="h-8 w-20 bg-muted rounded animate-pulse"></div>
+                  <div className="h-3 w-24 bg-muted rounded animate-pulse"></div>
+                </div>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">{formatCurrency(stats.totalProfit)}</div>
+                  <p className="text-xs text-muted-foreground">From course sales</p>
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -272,7 +369,7 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
   }
 
   // Show fallback if no user authenticated
-  if (!loading && !auth?.user?.userId) {
+  if (!loadingStates.initial && !auth?.user?.userId) {
     return (
       <div className="flex items-center justify-center py-8">
         <div className="text-center">
@@ -314,10 +411,19 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
               <item.icon className={`h-4 w-4 ${item.color}`} />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{item.value}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {item.change}
-              </p>
+              {loadingStates.analytics || loadingStates.stats ? (
+                <div className="space-y-2">
+                  <div className="h-8 w-16 bg-muted rounded animate-pulse"></div>
+                  <div className="h-3 w-24 bg-muted rounded animate-pulse"></div>
+                </div>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">{item.value}</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {item.change}
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
         ))}
@@ -333,11 +439,17 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <SimpleChart 
-              data={revenueChartData} 
-              title="Daily Revenue" 
-              color="#10b981"
-            />
+            {loadingStates.analytics ? (
+              <div className="h-32 flex items-center justify-center">
+                <div className="animate-pulse text-muted-foreground">Loading chart...</div>
+              </div>
+            ) : (
+              <SimpleChart 
+                data={revenueChartData} 
+                title="Daily Revenue" 
+                color="#10b981"
+              />
+            )}
           </CardContent>
         </Card>
 
@@ -349,11 +461,17 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <SimpleChart 
-              data={enrollmentChartData} 
-              title="Daily Enrollments" 
-              color="#3b82f6"
-            />
+            {loadingStates.analytics ? (
+              <div className="h-32 flex items-center justify-center">
+                <div className="animate-pulse text-muted-foreground">Loading chart...</div>
+              </div>
+            ) : (
+              <SimpleChart 
+                data={enrollmentChartData} 
+                title="Daily Enrollments" 
+                color="#3b82f6"
+              />
+            )}
           </CardContent>
         </Card>
       </div>
@@ -367,33 +485,53 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {analytics?.topCourses?.slice(0, 5).map((course, index) => (
-              <div key={course._id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
-                    {index + 1}
-                  </div>
-                  <div>
-                    <div className="font-medium">{course.title}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {course.enrollments} enrollments • {course.completionRate}% completion
+          {loadingStates.analytics ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-muted animate-pulse"></div>
+                    <div className="space-y-2">
+                      <div className="h-4 w-32 bg-muted rounded animate-pulse"></div>
+                      <div className="h-3 w-24 bg-muted rounded animate-pulse"></div>
                     </div>
                   </div>
+                  <div className="text-right space-y-2">
+                    <div className="h-4 w-16 bg-muted rounded animate-pulse"></div>
+                    <div className="h-5 w-12 bg-muted rounded animate-pulse"></div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <div className="font-medium">{formatCurrency(course.revenue)}</div>
-                  <Badge variant={course.isPublished ? "default" : "secondary"}>
-                    {course.isPublished ? "Published" : "Draft"}
-                  </Badge>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {analytics?.topCourses?.slice(0, 5).map((course, index) => (
+                <div key={course._id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <div className="font-medium">{course.title}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {course.enrollments} enrollments • {course.completionRate}% completion
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium">{formatCurrency(course.revenue)}</div>
+                    <Badge variant={course.isPublished ? "default" : "secondary"}>
+                      {course.isPublished ? "Published" : "Draft"}
+                    </Badge>
+                  </div>
                 </div>
-              </div>
-            )) || (
-              <div className="text-center py-6 text-muted-foreground">
-                No course data available
-              </div>
-            )}
-          </div>
+              )) || (
+                <div className="text-center py-6 text-muted-foreground">
+                  No course data available
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -421,29 +559,50 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {stats.studentList.slice(0, 10).map((student, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">
-                      {student.studentName}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {student.studentEmail}
-                    </TableCell>
-                    <TableCell>{student.courseTitle}</TableCell>
-                    <TableCell>
-                      <Badge variant="default">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Enrolled
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {stats.studentList.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
-                      No students enrolled yet
-                    </TableCell>
-                  </TableRow>
+                {loadingStates.stats ? (
+                  [...Array(5)].map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell>
+                        <div className="h-4 w-24 bg-muted rounded animate-pulse"></div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="h-4 w-32 bg-muted rounded animate-pulse"></div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="h-4 w-20 bg-muted rounded animate-pulse"></div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="h-6 w-16 bg-muted rounded animate-pulse"></div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <>
+                    {stats.studentList.slice(0, 10).map((student, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">
+                          {student.studentName}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {student.studentEmail}
+                        </TableCell>
+                        <TableCell>{student.courseTitle}</TableCell>
+                        <TableCell>
+                          <Badge variant="default">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Enrolled
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {stats.studentList.length === 0 && !loadingStates.stats && (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
+                          No students enrolled yet
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
                 )}
               </TableBody>
             </Table>
