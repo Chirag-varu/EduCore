@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { filterOptions, sortOptions } from "@/config";
 import { AuthContext } from "@/context/auth-context";
 import { StudentContext } from "@/context/student-context";
+import AddToCartButton from "@/components/ui/add-to-cart-button";
 import {
   checkCoursePurchaseInfoService,
   fetchStudentViewCourseListService,
@@ -268,7 +269,7 @@ function StudentViewCoursesPage() {
                             : "Lectures"
                         } - ${courseItem?.level.toUpperCase()} Level`}
                       </p>
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center mb-3">
                         <p className="font-bold text-lg">
                           ${courseItem?.price}
                         </p>
@@ -285,6 +286,17 @@ function StudentViewCoursesPage() {
                           </Button>
                         )}
                       </div>
+                      
+                      {/* Add to Cart button for non-enrolled courses */}
+                      {!enrolledCourses[courseItem?._id] && (
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <AddToCartButton 
+                            course={courseItem} 
+                            size="sm"
+                            className="w-full"
+                          />
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

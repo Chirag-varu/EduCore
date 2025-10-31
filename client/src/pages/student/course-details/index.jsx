@@ -13,6 +13,8 @@ import VideoPlayer from "@/components/video-player";
 import { AuthContext } from "@/context/auth-context";
 import { StudentContext } from "@/context/student-context";
 import StudentChatDrawer from "@/components/chat/StudentChatDrawer";
+import AddToCartButton from "@/components/ui/add-to-cart-button";
+import { useCart } from "@/context/cart-context";
 import {
   checkCoursePurchaseInfoService,
   createPaymentService,
@@ -266,9 +268,24 @@ function StudentViewCourseDetailsPage() {
                   ${studentViewCourseDetails?.price}
                 </span>
               </div>
-              <Button onClick={handleCourseAction} className="w-full">
-                {isEnrolled ? "Continue Learning" : "Buy Now"}
-              </Button>
+              
+              {/* Show different buttons based on enrollment status */}
+              {isEnrolled ? (
+                <Button onClick={handleCourseAction} className="w-full">
+                  Continue Learning
+                </Button>
+              ) : (
+                <div className="space-y-3">
+                  <Button onClick={handleCourseAction} className="w-full">
+                    Buy Now
+                  </Button>
+                  <AddToCartButton 
+                    course={studentViewCourseDetails} 
+                    variant="outline"
+                    className="w-full"
+                  />
+                </div>
+              )}
               
               {auth?.authenticate && studentViewCourseDetails?.instructorId && (
                 <div className="mt-4 flex justify-center">

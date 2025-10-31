@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 import { useContext, useState, useEffect, useRef } from "react";
 import { AuthContext } from "@/context/auth-context";
 import EduCore_Logo from "@/assets/logoImg.png";
+import CartIcon from "@/components/ui/cart-icon";
 
 function StudentViewCommonHeader() {
   const navigate = useNavigate();
@@ -110,10 +111,13 @@ function StudentViewCommonHeader() {
           </div>
         </div>
 
-        {/* Right section - User & Logout (only show if authenticated) */}
+        {/* Right section - Cart, User & Logout (only show if authenticated) */}
         <div className="flex items-center space-x-4">
           {auth.authenticate ? (
             <>
+              {/* Cart Icon */}
+              <CartIcon />
+              
               {/* User Info */}
               <div
                 onClick={() => navigate("/student-courses")}

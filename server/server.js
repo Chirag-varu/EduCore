@@ -10,6 +10,7 @@ import instructorCourseRoutes from "./routes/instructor-routes/course-routes.js"
 import studentViewCourseRoutes from "./routes/student-routes/course-routes.js";
 import studentViewOrderRoutes from "./routes/student-routes/order-routes.js";
 import studentCoursesRoutes from "./routes/student-routes/student-courses-routes.js";
+import studentCartRoutes from "./routes/student-routes/cart-routes.js";
 import studentCourseProgressRoutes from "./routes/student-routes/course-progress-routes.js";
 import videoDownloadRoutes from "./routes/student-routes/video-download-routes.js";
 import commentRoutes from "./routes/student-routes/comment-routes.js";
@@ -143,6 +144,7 @@ app.use("/api/v1/auth", authLimiter, authRoutes);
 app.use("/api/v1/media", uploadLimiter, mediaRoutes);
 app.use("/api/v1/instructor/course", apiLimiter, instructorCourseRoutes);
 app.use("/api/v1/student/course", apiLimiter, studentViewCourseRoutes);
+app.use("/api/v1/student/cart", apiLimiter, studentCartRoutes);
 app.use("/api/v1/student/order", apiLimiter, studentViewOrderRoutes);
 app.use("/api/v1/student/courses-bought", apiLimiter, studentCoursesRoutes);
 app.use("/api/v1/student/course-progress", apiLimiter, studentCourseProgressRoutes);

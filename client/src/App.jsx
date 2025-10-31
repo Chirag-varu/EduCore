@@ -20,6 +20,8 @@ import StudentViewCourseDetailsPage from "./pages/student/course-details";
 import PaypalPaymentReturnPage from "./pages/student/payment-return";
 import StudentCoursesPage from "./pages/student/student-courses";
 import StudentViewCourseProgressPage from "./pages/student/course-progress";
+import CartPage from "./pages/student/cart";
+import CheckoutPage from "./pages/student/checkout";
 import ConfirmSubscription from "./pages/newsletter/ConfirmSubscription";
 import Unsubscribe from "./pages/newsletter/Unsubscribe";
 import NewsletterDashboard from "./pages/admin/NewsletterDashboard";
@@ -239,6 +241,8 @@ function App() {
           <Route path="" element={<StudentHomePage />} />
           <Route path="home" element={<StudentHomePage />} />
           <Route path="courses" element={<StudentViewCoursesPage />} />
+          <Route path="cart" element={<CartPage />} />
+          <Route path="checkout" element={<CheckoutPage />} />
           <Route
             path="course/details/:id"
             element={<StudentViewCourseDetailsPage />}

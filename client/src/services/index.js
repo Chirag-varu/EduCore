@@ -302,3 +302,34 @@ export async function resetPasswordService(token, newPassword) {
     }
   }
 }
+
+// Cart Services
+export async function getCartService() {
+  const { data } = await axiosInstance.get(`/student/cart`);
+  return data;
+}
+
+export async function getCartCountService() {
+  const { data } = await axiosInstance.get(`/student/cart/count`);
+  return data;
+}
+
+export async function addToCartService(courseId) {
+  const { data } = await axiosInstance.post(`/student/cart/add`, { courseId });
+  return data;
+}
+
+export async function removeFromCartService(courseId) {
+  const { data } = await axiosInstance.delete(`/student/cart/remove/${courseId}`);
+  return data;
+}
+
+export async function clearCartService() {
+  const { data } = await axiosInstance.delete(`/student/cart/clear`);
+  return data;
+}
+
+export async function checkItemInCartService(courseId) {
+  const { data } = await axiosInstance.get(`/student/cart/check/${courseId}`);
+  return data;
+}
