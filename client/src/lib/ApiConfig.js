@@ -102,6 +102,17 @@ const ApiConfig = {
       ),
 
     /**
+     * Login with Google OAuth credential
+     * @param {string} credential - Google ID token credential from @react-oauth/google
+     * @returns {Promise} - Login response with token and user data
+     */
+    googleLogin: (credential) =>
+      apiWrapper(
+        () => axiosInstance.post("/auth/google/login", { credential }),
+        "Google login failed. Please try again."
+      ),
+
+    /**
      * Verify user account with OTP
      * @param {Object} formData - Verification data
      * @param {string} formData.email - User's email

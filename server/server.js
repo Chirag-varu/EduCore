@@ -110,9 +110,25 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false, // Required for some video players
 }));
 
+// CORS configuration - allow client URL from env and common local dev ports
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:5000",
+  "https://accounts.google.com/o/oauth2",
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5000", "https://accounts.google.com/o/oauth2"],
+    origin: (origin, callback) => {
+      // Allow non-browser requests (e.g., curl, server-to-server)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      // Also allow other vite fallback ports 5175-5179 if they occur
+      if (/^http:\/\/localhost:517[3-9]$/.test(origin)) return callback(null, true);
+      return callback(new Error(`CORS not allowed for origin: ${origin}`), false);
+    },
     methods: ["GET", "POST", "DELETE", "PUT"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })

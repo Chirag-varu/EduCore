@@ -9,7 +9,7 @@
 // BASE CONFIGURATION
 // =============================================================================
 
-const BASE_URL = window?.env?.BACKEND_URL || "http://localhost:5000/api";
+const BASE_URL = window?.env?.BACKEND_URL || "http://localhost:5000/api/v1";
 
 // =============================================================================
 // API ROUTES CONFIGURATION

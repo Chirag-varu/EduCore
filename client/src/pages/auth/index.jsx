@@ -66,8 +66,8 @@ function AuthPage() {
 
   const googleLoginSuccess = async (credential) => {
     try {
-      // Use ApiConfig for Google login - assuming there's a google login endpoint
-      const response = await ApiConfig.post("/auth/google/login", { credential });
+      // Use dedicated Google login endpoint from ApiConfig
+      const response = await ApiConfig.auth.googleLogin(credential);
 
       if (ApiConfig.isSuccessResponse(response)) {
         // Store user data and token
