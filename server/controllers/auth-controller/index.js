@@ -282,6 +282,7 @@ const googleLogin = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("Google login error:", error?.message || error);
     res.status(400).json({
       success: false,
       message: "Google authentication failed",
