@@ -5,7 +5,7 @@ import {
   getCourseAnalytics, 
   getStudentDetailsForInstructor 
 } from "../../controllers/instructor-controller/analytics-controller.js";
-import { authenticate } from "../../middleware/auth-middleware.js";
+import authenticate from "../../middleware/auth-middleware.js";
 const { addNewCourse, getAllCourses, getCourseDetailsByID, updateCourseByID, getStudentdetails } = courseController;
 const router = Router();
 

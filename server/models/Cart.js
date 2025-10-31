@@ -121,7 +121,6 @@ CartSchema.statics.createCartForUser = function(userId) {
 };
 
 // Indexes for better performance
-CartSchema.index({ userId: 1 });
 CartSchema.index({ 'items.courseId': 1 });
 CartSchema.index({ lastModified: -1 });
 
