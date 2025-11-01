@@ -7,6 +7,8 @@ import AuthProvider from "./context/auth-context/index.jsx";
 import InstructorProvider from "./context/instructor-context/index.jsx";
 import StudentProvider from "./context/student-context/index.jsx";
 import CartProvider from "./context/cart-context/index.jsx";
+// Initialize global API interceptors (auth refresh, error handling, logging)
+import "./lib/ApiInterceptors";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

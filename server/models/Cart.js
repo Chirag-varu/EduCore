@@ -113,7 +113,8 @@ CartSchema.methods.isItemInCart = function(courseId) {
 
 // Static methods
 CartSchema.statics.findCartByUserId = function(userId) {
-  return this.findOne({ userId }).populate('items.courseId', 'title price thumbnail instructorName');
+  // Populate with fields that exist on Course model
+  return this.findOne({ userId }).populate('items.courseId', 'title pricing image instructorName');
 };
 
 CartSchema.statics.createCartForUser = function(userId) {

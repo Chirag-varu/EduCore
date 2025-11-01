@@ -1,7 +1,8 @@
 import axios from "axios";
 
+// Always target the same-origin /api proxy path; Vite proxies to the server in development
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.MODE === "development" ? "http://localhost:5000/api/v1" : "/api/v1",
+  baseURL: "/api/v1",
 });
 
 axiosInstance.interceptors.request.use(

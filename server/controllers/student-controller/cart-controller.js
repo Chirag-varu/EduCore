@@ -1,17 +1,34 @@
 import Cart from "../../models/Cart.js";
 import Course from "../../models/Course.js";
 import StudentCourses from "../../models/StudentCourses.js";
+import mongoose from "mongoose";
 
 // Get user's cart
 const getCart = async (req, res) => {
   try {
-    const userId = req.user._id; // From auth middleware
+    const userId = req.user?._id || req.user?.userId; // From auth middleware
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
     
     let cart = await Cart.findCartByUserId(userId);
     
     // Create cart if it doesn't exist
     if (!cart) {
       cart = await Cart.createCartForUser(userId);
+    } else if (Array.isArray(cart.items) && cart.items.length > 1) {
+      // Ensure no duplicates exist (legacy carts)
+      const before = cart.items.length;
+      const seen = new Set();
+      cart.items = cart.items.filter(it => {
+        const key = String(it.courseId);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      if (cart.items.length !== before) {
+        await cart.save();
+      }
     }
     
     res.status(200).json({
@@ -30,8 +47,12 @@ const getCart = async (req, res) => {
 // Add item to cart
 const addToCart = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user?._id || req.user?.userId;
     const { courseId } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
     
     if (!courseId) {
       return res.status(400).json({
@@ -40,8 +61,13 @@ const addToCart = async (req, res) => {
       });
     }
     
-    // Check if course exists
-    const course = await Course.findById(courseId);
+    // Validate course id
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+      return res.status(400).json({ success: false, message: "Invalid course id" });
+    }
+
+  // Check if course exists (use lean to support legacy fields like `price`/`thumbnail`)
+  const course = await Course.findById(courseId).lean();
     if (!course) {
       return res.status(404).json({
         success: false,
@@ -51,7 +77,7 @@ const addToCart = async (req, res) => {
     
     // Check if user already owns this course
     const studentCourses = await StudentCourses.findOne({
-      userId,
+      userId: String(userId),
       "courses.courseId": courseId
     });
     
@@ -68,6 +94,18 @@ const addToCart = async (req, res) => {
       cart = await Cart.createCartForUser(userId);
     }
     
+    // De-duplicate any existing duplicates just in case
+    if (Array.isArray(cart.items) && cart.items.length > 1) {
+      const seen = new Set();
+      cart.items = cart.items.filter(it => {
+        const key = String(it.courseId);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      await cart.save();
+    }
+
     // Check if course is already in cart
     if (cart.isItemInCart(courseId)) {
       return res.status(400).json({
@@ -76,12 +114,17 @@ const addToCart = async (req, res) => {
       });
     }
     
-    // Add course to cart
+    // Add course to cart (normalize field names from Course model)
+    const resolvedPrice = typeof course?.pricing === 'number'
+      ? course.pricing
+      : (typeof course?.price === 'number' ? course.price : 0);
+
     await cart.addItem({
       courseId: course._id,
       courseTitle: course.title,
-      courseImage: course.thumbnail,
-      coursePrice: course.price || 0,
+      // Provide a safe fallback image string to satisfy schema requirement
+      courseImage: course.image || course.thumbnail || "placeholder",
+      coursePrice: resolvedPrice,
       instructorId: course.instructorId,
       instructorName: course.instructorName
     });
@@ -94,7 +137,10 @@ const addToCart = async (req, res) => {
     
   } catch (error) {
     console.error("Error adding to cart:", error);
-    
+
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ success: false, message: error.message });
+    }
     if (error.message === "Course already exists in cart") {
       return res.status(400).json({
         success: false,
@@ -112,7 +158,10 @@ const addToCart = async (req, res) => {
 // Remove item from cart
 const removeFromCart = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user?._id || req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
     const { courseId } = req.params;
     
     if (!courseId) {
@@ -160,7 +209,10 @@ const removeFromCart = async (req, res) => {
 // Clear entire cart
 const clearCart = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user?._id || req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
     
     // Find user's cart
     let cart = await Cart.findCartByUserId(userId);
@@ -189,7 +241,10 @@ const clearCart = async (req, res) => {
 // Get cart item count
 const getCartCount = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user?._id || req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
     
     const cart = await Cart.findCartByUserId(userId);
     const count = cart ? cart.totalItems : 0;
@@ -211,10 +266,13 @@ const getCartCount = async (req, res) => {
 // Check if course is in cart
 const checkItemInCart = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user?._id || req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
     const { courseId } = req.params;
     
-    const cart = await Cart.findCartByUserId(userId);
+  const cart = await Cart.findCartByUserId(userId);
     const inCart = cart ? cart.isItemInCart(courseId) : false;
     
     res.status(200).json({

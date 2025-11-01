@@ -196,9 +196,9 @@ const CourseSchema = new Schema(
   }
 );
 
-// Virtual for student count
+// Virtual for student count (guard against missing field on older documents)
 CourseSchema.virtual('studentCount').get(function() {
-  return this.students.length;
+  return Array.isArray(this.students) ? this.students.length : 0;
 });
 
 // Virtual for course status

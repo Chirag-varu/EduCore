@@ -129,8 +129,20 @@ app.use(
       if (/^http:\/\/localhost:517[3-9]$/.test(origin)) return callback(null, true);
       return callback(new Error(`CORS not allowed for origin: ${origin}`), false);
     },
-    methods: ["GET", "POST", "DELETE", "PUT"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "DELETE", "PUT", "OPTIONS"],
+    // Allow custom headers used by the client (e.g., X-Correlation-ID)
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Correlation-ID",
+      "x-correlation-id",
+      "X-Requested-With",
+      "Accept",
+      "Origin",
+    ],
+    exposedHeaders: ["X-Correlation-ID"],
+    credentials: true,
+    optionsSuccessStatus: 204,
   })
 );
 

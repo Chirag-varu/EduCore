@@ -62,7 +62,7 @@ function App() {
       <ChatProvider>
         <Routes>
           <Route path="/instructor/:id" element={<InstructorView />} />
-          <Route path="/about" element={<AboutPage />} />
+          {/* About page should use the common layout to include nav/header */}
           <Route path="/instructor/home" element={<Instructor />} />
           <Route path="/instructor/CreateCourse" element={<CreateCourse />} />
           <Route
@@ -241,6 +241,7 @@ function App() {
           <Route path="" element={<StudentHomePage />} />
           <Route path="home" element={<StudentHomePage />} />
           <Route path="courses" element={<StudentViewCoursesPage />} />
+          <Route path="about" element={<AboutPage />} />
           <Route path="cart" element={<CartPage />} />
           <Route path="checkout" element={<CheckoutPage />} />
           <Route

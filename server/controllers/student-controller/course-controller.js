@@ -125,8 +125,10 @@ const checkCoursePurchaseInfo = async (req, res) => {
       userId: studentId,
     });
 
-    const ifStudentAlreadyBoughtCurrentCourse =
-      studentCourses?.courses.find((item) => item.courseId === id) > -1;
+    // Determine if the student already bought the course
+    const ifStudentAlreadyBoughtCurrentCourse = Boolean(
+      studentCourses?.courses?.some((item) => item.courseId === id)
+    );
     res.status(200).json({
       success: true,
       data: ifStudentAlreadyBoughtCurrentCourse,
