@@ -90,11 +90,14 @@ export async function checkAuthService() {
   const { data } = await axiosInstance.get("/auth/check-auth");
 
   if (data.success) {
-    sessionStorage.setItem(
-      "accessToken",
-      JSON.stringify(data.data.accessToken)
-    );
-    localStorage.setItem("token", data.data.accessToken);
+    // Only update tokens if API returned a fresh accessToken
+    if (data.data?.accessToken) {
+      sessionStorage.setItem(
+        "accessToken",
+        JSON.stringify(data.data.accessToken)
+      );
+      localStorage.setItem("token", data.data.accessToken);
+    }
     localStorage.setItem("user", JSON.stringify(data.data.user));
     setAuth({
       authenticate: true,

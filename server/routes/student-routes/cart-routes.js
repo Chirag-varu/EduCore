@@ -1,5 +1,6 @@
 import { Router } from "express";
 import cartController from "../../controllers/student-controller/cart-controller.js";
+import authenticate from "../../middleware/auth-middleware.js";
 
 const router = Router();
 
@@ -11,6 +12,9 @@ const {
   getCartCount,
   checkItemInCart
 } = cartController;
+
+// Protect all cart routes with authentication
+router.use(authenticate);
 
 // GET /api/v1/student/cart - Get user's cart
 router.get("/", getCart);

@@ -29,8 +29,8 @@ const authenticate = (req, res, next) => {
   try {
     const payload = verifyToken(token, process.env.JWT_SECRET);
 
-    // Additional token validation
-    if (!payload.userId || !payload.role) {
+    // Additional token validation: allow either `_id` or `userId` from legacy/new tokens
+    if (!(payload?._id || payload?.userId) || !payload.role) {
       return res.status(401).json({
         success: false,
         message: "Invalid token payload",
@@ -45,7 +45,16 @@ const authenticate = (req, res, next) => {
       });
     }
 
-    req.user = payload;
+    // Normalize user object for backward compatibility across controllers
+    // Many controllers expect `req.user._id`, while newer code uses `userId`.
+    // Provide all common keys without overwriting existing valid values.
+    const normalizedId = payload.userId || payload._id || payload.id;
+    req.user = {
+      ...payload,
+      userId: normalizedId,
+      _id: payload._id || normalizedId,
+      id: payload.id || normalizedId,
+    };
 
     next();
   } catch (e) {
