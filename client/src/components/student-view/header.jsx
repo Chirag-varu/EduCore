@@ -1,10 +1,19 @@
-import { TvMinimalPlay, Menu, X } from "lucide-react";
+import { TvMinimalPlay, Menu, X, User as UserIcon, LogOut, ShoppingCart, LayoutDashboard } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
 import { useContext, useState, useEffect, useRef } from "react";
 import { AuthContext } from "@/context/auth-context";
 import EduCore_Logo from "@/assets/logoImg.png";
 import CartIcon from "@/components/ui/cart-icon";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 function StudentViewCommonHeader() {
   const navigate = useNavigate();
@@ -12,6 +21,7 @@ function StudentViewCommonHeader() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileRef = useRef();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -34,6 +44,14 @@ function StudentViewCommonHeader() {
     sessionStorage.clear();
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+  }
+
+  function getInitials(name) {
+    if (!name) return "U";
+    const parts = String(name).trim().split(/\s+/);
+    const first = parts[0]?.[0] || "U";
+    const second = parts[1]?.[0] || "";
+    return (first + second).toUpperCase();
   }
 
   const isActive = (path) =>
@@ -111,36 +129,84 @@ function StudentViewCommonHeader() {
           </div>
         </div>
 
-        {/* Right section - Cart, User & Logout (only show if authenticated) */}
+        {/* Right section - Cart, User (hover menu) (only show if authenticated) */}
         <div className="flex items-center space-x-4">
           {auth.authenticate ? (
             <>
               {/* Cart Icon */}
               <CartIcon />
-              
-              {/* User Info */}
+              {/* User Avatar + Hover Menu */}
               <div
-                onClick={() => navigate("/student-courses")}
-                role="button"
-                tabIndex={0}
-                aria-label="Open my courses"
-                className="flex cursor-pointer items-center gap-2 hover:opacity-80 transition"
+                onMouseEnter={() => setMenuOpen(true)}
+                onMouseLeave={() => setMenuOpen(false)}
+                className="relative"
               >
-                <span className="font-bold md:text-lg text-sm text-foreground">
-                  {auth.user?.userName || "User"}
-                </span>
-                <TvMinimalPlay className="w-6 h-6 md:w-8 md:h-8 text-primary" />
+                <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      aria-label="User menu"
+                      className="rounded-full ring-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    >
+                      <Avatar className="h-9 w-9">
+                        <AvatarFallback className="text-sm font-semibold">
+                          {getInitials(auth.user?.userName)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-64"
+                    onMouseEnter={() => setMenuOpen(true)}
+                    onMouseLeave={() => setMenuOpen(false)}
+                  >
+                    <DropdownMenuLabel>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-9 w-9">
+                          <AvatarFallback className="text-sm font-semibold">
+                            {getInitials(auth.user?.userName)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold leading-tight truncate">
+                            {auth.user?.userName || "User"}
+                          </p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {auth.user?.userEmail || ""}
+                          </p>
+                        </div>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={() => navigate("/student-courses")}>
+                      <TvMinimalPlay className="mr-2 h-4 w-4" /> My learning
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => navigate("/cart")}>
+                      <ShoppingCart className="mr-2 h-4 w-4" /> My cart
+                    </DropdownMenuItem>
+                    <DropdownMenuItem disabled>
+                      <UserIcon className="mr-2 h-4 w-4" /> Profile
+                    </DropdownMenuItem>
+                    {auth?.user?.role === "instructor" && (
+                      <DropdownMenuItem onSelect={() => navigate("/instructor")}> 
+                        <LayoutDashboard className="mr-2 h-4 w-4" /> Instructor dashboard
+                      </DropdownMenuItem>
+                    )}
+                    {auth?.user?.role === "admin" && (
+                      <DropdownMenuItem onSelect={() => navigate("/admin")}> 
+                        <LayoutDashboard className="mr-2 h-4 w-4" /> Admin dashboard
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive"
+                      onSelect={() => handleLogout()}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" /> Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-
-              {/* Logout */}
-              <Button
-                onClick={handleLogout}
-                variant="outline"
-                aria-label="Sign out"
-                className="font-medium hover:bg-destructive hover:text-white transition"
-              >
-                Sign Out
-              </Button>
             </>
           ) : (
             /* Show Sign In button for non-authenticated users */
