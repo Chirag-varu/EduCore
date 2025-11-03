@@ -117,8 +117,16 @@ export default function CartPage() {
           {/* Cart Items */}
           <div className="lg:col-span-2">
             <div className="space-y-4">
-              {cart.items.map((item) => (
-                <Card key={item.courseId} className="overflow-hidden">
+              {cart.items.map((item) => {
+                // courseId may be populated as an object (due to Mongoose populate)
+                // Normalize to the actual id string for keys and API calls
+                const normalizedCourseId =
+                  typeof item.courseId === "object" && item.courseId !== null
+                    ? item.courseId._id || item.courseId.id || item.courseId.toString?.() || ""
+                    : item.courseId;
+
+                return (
+                <Card key={normalizedCourseId} className="overflow-hidden">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row">
                       {/* Course Image */}
@@ -155,12 +163,12 @@ export default function CartPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleRemoveItem(item.courseId, item.courseTitle)}
-                              disabled={removing[item.courseId]}
+                              onClick={() => handleRemoveItem(normalizedCourseId, item.courseTitle)}
+                              disabled={removing[normalizedCourseId]}
                               className="text-red-600 hover:text-red-700 hover:bg-red-50"
                             >
                               <Trash2 className="h-4 w-4 mr-1" />
-                              {removing[item.courseId] ? "Removing..." : "Remove"}
+                              {removing[normalizedCourseId] ? "Removing..." : "Remove"}
                             </Button>
                           </div>
                         </div>
@@ -168,7 +176,7 @@ export default function CartPage() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              );})}
             </div>
           </div>
 
@@ -207,7 +215,7 @@ export default function CartPage() {
                   className="w-full"
                   onClick={handleContinueShopping}
                 >
-                  Continue Shopping
+                  Continue browsing courses
                 </Button>
               </CardContent>
             </Card>

@@ -162,7 +162,7 @@ const removeFromCart = async (req, res) => {
     if (!userId) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
-    const { courseId } = req.params;
+  const { courseId } = req.params;
     
     if (!courseId) {
       return res.status(400).json({
@@ -170,7 +170,11 @@ const removeFromCart = async (req, res) => {
         message: "Course ID is required"
       });
     }
-    
+    // Validate course id
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+      return res.status(400).json({ success: false, message: "Invalid course id" });
+    }
+
     // Find user's cart
     const cart = await Cart.findCartByUserId(userId);
     if (!cart) {
