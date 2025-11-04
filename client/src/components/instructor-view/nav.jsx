@@ -1,13 +1,5 @@
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import LogoutButton from "@/components/common/logout-button";
 import { BarChart, Book, LogOut, Menu, MessageSquare, X } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -18,7 +10,6 @@ export default function InstructorNav({
   handleLogout,
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [logoutOpen, setLogoutOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -49,10 +40,7 @@ export default function InstructorNav({
   ];
 
   const handleNavigation = (menuItem) => {
-    if (menuItem.value === "logout") {
-      setLogoutOpen(true);
-      return;
-    }
+    if (menuItem.value === "logout") return; // handled by LogoutButton
 
     if (menuItem.href) {
       if (menuItem.href === "/instructor") {
@@ -107,44 +95,37 @@ export default function InstructorNav({
           <nav aria-label="Instructor navigation">
             {menuItems.map((menuItem) => (
               <div key={menuItem.value}>
-                <Button
-                  className={`w-full justify-start mb-2 text-left px-3 py-2 rounded-md 
-                    ${menuItem.value === "logout" ? "text-destructive hover:text-destructive" : ""}
+                {menuItem.value === "logout" ? (
+                  <LogoutButton
+                    trigger={
+                      <Button
+                        className={`w-full justify-start mb-2 text-left px-3 py-2 rounded-md text-destructive hover:text-destructive`}
+                        variant="ghost"
+                        aria-label={menuItem.label}
+                      >
+                        <menuItem.icon className="mr-2 h-4 w-4 text-destructive" aria-hidden="true" />
+                        {menuItem.label}
+                      </Button>
+                    }
+                    onLoggedOut={() => setIsOpen(false)}
+                  />
+                ) : (
+                  <Button
+                    className={`w-full justify-start mb-2 text-left px-3 py-2 rounded-md 
                     ${isCurrentPath(menuItem) ? "bg-gray-100 dark:bg-gray-700 text-foreground" : "hover:bg-muted/20"}
                   `}
-                  variant="ghost"
-                  onClick={() => handleNavigation(menuItem)}
-                  aria-current={isCurrentPath(menuItem) ? "page" : undefined}
-                  aria-label={menuItem.label}
-                >
-                  <menuItem.icon
-                    className={`mr-2 h-4 w-4 ${menuItem.value === "logout" ? "text-destructive" : ""}`}
-                    aria-hidden="true"
-                  />
-                  {menuItem.label}
-                </Button>
+                    variant="ghost"
+                    onClick={() => handleNavigation(menuItem)}
+                    aria-current={isCurrentPath(menuItem) ? "page" : undefined}
+                    aria-label={menuItem.label}
+                  >
+                    <menuItem.icon className="mr-2 h-4 w-4" aria-hidden="true" />
+                    {menuItem.label}
+                  </Button>
+                )}
               </div>
             ))}
           </nav>
-
-          <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Confirm Logout</DialogTitle>
-                <DialogDescription>
-                  Are you sure you want to logout?
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setLogoutOpen(false)}>
-                  Cancel
-                </Button>
-                <Button variant="destructive" onClick={handleLogout}>
-                  Logout
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
         </div>
       </aside>
     </>

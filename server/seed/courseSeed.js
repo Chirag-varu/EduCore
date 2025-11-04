@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { Course } from "../models/Courses.model.js";
 import Lecture from "../models/lecture.model.js";
-// import User from "../models/User.js";
 import StudentCourses from "../models/StudentCourses.js";
 import User from "../models/User.js";
+import bcrypt from "bcryptjs";
 
 dotenv.config();
 
@@ -19,6 +19,44 @@ const seedDB = async () => {
     await Course.deleteMany();
     await Lecture.deleteMany();
     await StudentCourses.deleteMany();
+
+    // Ensure demo users exist (student, instructor, admin)
+    const demoUsers = [
+      {
+        userName: "Demo Student",
+        userEmail: "student@demo.com",
+        role: "student",
+        password: "Password@123",
+      },
+      {
+        userName: "Demo Instructor",
+        userEmail: "instructor@demo.com",
+        role: "instructor",
+        password: "Password@123",
+      },
+      {
+        userName: "Demo Admin",
+        userEmail: "admin@demo.com",
+        role: "admin",
+        password: "Password@123",
+      },
+    ];
+
+    for (const du of demoUsers) {
+      const existing = await User.findOne({ userEmail: du.userEmail });
+      if (!existing) {
+        const hash = await bcrypt.hash(du.password, 10);
+        await User.create({
+          userName: du.userName,
+          userEmail: du.userEmail,
+          role: du.role,
+          password: hash,
+        });
+        console.log(`👤 Created ${du.role} user: ${du.userEmail}`);
+      } else {
+        console.log(`ℹ️  User exists: ${du.userEmail}`);
+      }
+    }
 
     // Seed Lectures
     const lectures = await Lecture.insertMany([
@@ -163,7 +201,7 @@ const seedDB = async () => {
     const courses = await Course.insertMany(courseTemplates);
     console.log("🎉 Courses Seeded Successfully");
 
-    // ✅ Enroll ALL users into ALL created courses (StudentCourses collection)
+  // ✅ Enroll ALL users into ALL created courses (StudentCourses collection)
     const users = await User.find({});
 
     if (users.length === 0) {

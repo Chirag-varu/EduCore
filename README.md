@@ -17,7 +17,27 @@
 
 ---
 
-## 🚀 Project Information
+## � Demo Accounts & Auth Flow
+
+Use these ready-made accounts after seeding to explore role-based dashboards:
+
+- Student: `student@demo.com` / `Password@123`
+- Instructor: `instructor@demo.com` / `Password@123`
+- Admin: `admin@demo.com` / `Password@123`
+
+Notes:
+- Run `npm run seed` to create demo users and sample courses. The seeder will also enroll all users into seeded courses.
+- Login redirects by role: student → `/home`, instructor → `/instructor`, admin → `/admin/newsletters`.
+- Google OAuth is supported on the login and signup pages.
+
+Auth flow highlights:
+- Email+password login issues a JWT stored in `localStorage` and attached via Axios interceptors.
+- Signup uses email OTP verification; after verifying, you’re automatically logged in.
+- Password reset is supported via secure, time-limited tokens.
+
+---
+
+## �🚀 Project Information
 
 | Attribute | Details |
 |-----------|---------|

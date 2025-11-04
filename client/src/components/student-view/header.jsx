@@ -6,6 +6,7 @@ import { AuthContext } from "@/context/auth-context";
 import EduCore_Logo from "@/assets/logoImg.png";
 import CartIcon from "@/components/ui/cart-icon";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import LogoutButton from "@/components/common/logout-button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,13 +39,6 @@ function StudentViewCommonHeader() {
     document.addEventListener("click", onDoc);
     return () => document.removeEventListener("click", onDoc);
   }, []);
-
-  function handleLogout() {
-    resetCredentials();
-    sessionStorage.clear();
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-  }
 
   function getInitials(name) {
     if (!name) return "U";
@@ -198,12 +192,18 @@ function StudentViewCommonHeader() {
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      className="text-destructive focus:text-destructive"
-                      onSelect={() => handleLogout()}
-                    >
-                      <LogOut className="mr-2 h-4 w-4" /> Log out
-                    </DropdownMenuItem>
+                    <LogoutButton
+                      onLoggedOut={() => setMenuOpen(false)}
+                      trigger={
+                        // Prevent default onSelect so the dialog can open without immediate menu action
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive"
+                          onSelect={(e) => e.preventDefault()}
+                        >
+                          <LogOut className="mr-2 h-4 w-4" /> Log out
+                        </DropdownMenuItem>
+                      }
+                    />
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -265,13 +265,17 @@ function StudentViewCommonHeader() {
                 >
                   My Courses
                 </button>
-                <button
-                  onClick={handleLogout}
-                  className="text-left px-3 py-2 rounded hover:bg-muted/20"
-                  aria-label="Sign out"
-                >
-                  Sign Out
-                </button>
+                <LogoutButton
+                  onLoggedOut={() => setMobileOpen(false)}
+                  trigger={
+                    <button
+                      className="text-left px-3 py-2 rounded hover:bg-muted/20"
+                      aria-label="Sign out"
+                    >
+                      Sign Out
+                    </button>
+                  }
+                />
               </>
             ) : (
               <button

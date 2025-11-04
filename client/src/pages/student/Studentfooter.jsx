@@ -1,5 +1,6 @@
 // import { useNavigate } from "react-router-dom";
-import { Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
+import { Facebook, Twitter, Linkedin, Instagram, LogOut } from "lucide-react";
+import LogoutButton from "@/components/common/logout-button";
 
 function Studentfooter() {
   return (
@@ -37,6 +38,16 @@ function Studentfooter() {
               <a href="/faq" className="hover:text-white transition">
                 FAQ
               </a>
+            </li>
+            <li>
+              {/* Logout with confirmation dialog */}
+              <LogoutButton
+                trigger={
+                  <span className="inline-flex items-center gap-2 hover:text-white transition cursor-pointer">
+                    <LogOut size={16} /> Logout
+                  </span>
+                }
+              />
             </li>
           </ul>
         </div>

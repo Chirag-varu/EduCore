@@ -158,6 +158,19 @@ export default function AuthProvider({ children }) {
     });
   }
 
+  // Unified logout helper (clears tokens and auth state)
+  function logout() {
+    try {
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+      sessionStorage.clear();
+    } catch (_) {
+      // noop
+    }
+    resetCredentials();
+  }
+
   useEffect(() => {
     checkAuthUser();
   }, []);
@@ -178,6 +191,7 @@ export default function AuthProvider({ children }) {
         auth,
         setAuth,
         resetCredentials,
+        logout,
       }}
     >
       {loading ? <Skeleton /> : children}

@@ -1,8 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { AuthContext } from "@/context/auth-context";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import EduCore_Logo from "@/assets/logoImg.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,34 +19,35 @@ function AuthPage() {
     handleGoogleLogin,
   } = useContext(AuthContext);
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const roleRedirects = {
+    instructor: "/instructor",
+    student: "/home",
+    admin: "/admin/newsletters",
+  };
 
   const handleSignIn = async (e) => {
-    e.preventDefault(); // prevent page reload
+    e.preventDefault();
     try {
-      // Use ApiConfig for login instead of context method
-      const response = await ApiConfig.auth.login({
-        userEmail: signInFormData.userEmail,
-        password: signInFormData.password
-      });
+      // Use context login to keep auth state consistent
+      const response = await handleLoginUser(e);
 
-      if (ApiConfig.isSuccessResponse(response)) {
-        // Store user data and token (similar to what handleLoginUser does)
-        localStorage.setItem("token", response.data.accessToken);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-        
-        // Update auth context if needed
-        if (handleLoginUser) {
-          await handleLoginUser({ preventDefault: () => {} });
-        }
+      if (response?.success) {
+        const user = response?.data?.user || JSON.parse(localStorage.getItem("user"));
 
         toast({
           title: "✅ Sign In Successful",
           description: "Welcome back!",
         });
+
+        // Navigate based on role
+        const redirectPath = roleRedirects[user?.role] || "/home";
+        navigate(redirectPath, { replace: true });
       } else {
         toast({
-          title: "❌ Sign In Failed", 
-          description: ApiConfig.getErrorMessage(response),
+          title: "❌ Sign In Failed",
+          description: response?.message || "Invalid credentials.",
           variant: "destructive",
         });
       }
@@ -57,10 +58,7 @@ function AuthPage() {
         variant: "destructive",
       });
     } finally {
-      setSignInFormData({
-        userEmail: "",
-        password: "",
-      });
+      setSignInFormData({ userEmail: "", password: "" });
     }
   };
 
@@ -70,7 +68,7 @@ function AuthPage() {
       const response = await ApiConfig.auth.googleLogin(credential);
 
       if (ApiConfig.isSuccessResponse(response)) {
-        // Store user data and token
+        // Persist token and user
         if (response.data?.accessToken) {
           localStorage.setItem("token", response.data.accessToken);
         }
@@ -78,15 +76,19 @@ function AuthPage() {
           localStorage.setItem("user", JSON.stringify(response.data.user));
         }
 
-        // Update auth context if needed
+        // Update auth context
         if (handleGoogleLogin) {
           await handleGoogleLogin(response);
         }
 
-        toast({ 
+        toast({
           title: "✅ Google login successful",
-          description: "Welcome to EduCore!"
+          description: "Welcome to EduCore!",
         });
+
+        const user = response?.data?.user || JSON.parse(localStorage.getItem("user"));
+        const redirectPath = roleRedirects[user?.role] || "/home";
+        navigate(redirectPath, { replace: true });
       } else {
         toast({
           title: "❌ Google login failed",
@@ -183,7 +185,6 @@ function AuthPage() {
                       type="submit"
                       className="w-full"
                       disabled={!checkIfSignInFormIsValid()}
-                      onClick={handleSignIn}
                     >
                       Login
                     </Button>

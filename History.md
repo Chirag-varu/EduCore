@@ -1,5 +1,35 @@
 # HISTORY.md
 
+# 1.15.6 / 2025-11-04
+- Added: Logout confirmation dialog using Radix AlertDialog; unified client-side logout via AuthContext and consistent redirect to `/auth`
+- Changed: Auth login flow on `client/src/pages/auth/index.jsx` now uses AuthContext for state + role-based redirects (student → `/home`, instructor → `/instructor`, admin → `/admin/newsletters`)
+- Added: Google OAuth success now redirects by role
+- Added: Seeder now creates demo accounts (student/instructor/admin) with secure hashed passwords
+- Docs: README updated with Demo Accounts & Auth Flow section (credentials, redirects, token behavior)
+- QA: Server test suites passing (31/31)
+
+Recent commits snapshot:
+- dc3c75f (2025-11-03) feat(header): add hoverable user avatar dropdown with role-based links (My Learning, Cart, Dashboards, Logout)
+- c8813ea (2025-11-03) fix(cart): normalize courseId for remove action and validate ObjectId on server
+- aa5a52f (2025-11-01) cart: use real course price, prevent duplicates, auto-clean dupes on fetch
+- 3799230 (2025-11-01) auth: middleware supports both token formats (_id or userId) for compatibility
+- 9969288 (2025-10-31) dev: allow 5174 port for Vite proxy alignment to prevent blocked requests
+- 4e907a3 (2025-10-31) patch update
+- 46207f8 (2025-10-31) file adjusted
+- 3b3c5bc (2025-10-31) made it dynamic
+- 47dfd1e (2025-10-31) feature: add to cart
+- ac8a8bb (2025-10-31) UX: dashboard polish with loading, errors, skeletons
+- 6d108a9 (2025-10-30) loading updated at frontend
+- 3b4f990 (2025-10-30) final fix for frontend and packages
+
+# 1.15.5 / 2025-10-28
+- Security: JWT security hardening (no fallback secrets; stricter config)
+- Security: Password complexity enforcement with real-time strength indicator
+- Security: Brute-force protection with advanced rate limiting on auth endpoints
+- Security: Comprehensive env var validation on server startup
+- UX: Client-side password feedback (requirements + strength bar)
+- Docs/Testing: Updated README; expanded testing guidance and security notes
+
 # 1.15.4 / 2025-10-25
 - Security: **CRITICAL FIX** - Removed hardcoded JWT secret fallback in authentication middleware
 - Security: Added comprehensive environment variable validation on server startup
