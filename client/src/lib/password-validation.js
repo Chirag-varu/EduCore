@@ -20,9 +20,18 @@ export const validatePasswordStrength = (password) => {
   const passedChecks = Object.values(checks).filter(Boolean).length;
   const isValid = passedChecks === 5;
 
+  // Determine strength with sensible gating rules:
+  // - If too short, always 'weak' regardless of other checks
+  // - 'strong' only when all requirements are met
+  // - 'medium' when 3-4 checks pass (but not all)
   let strength = 'weak';
-  if (passedChecks >= 4) strength = 'strong';
-  else if (passedChecks >= 3) strength = 'medium';
+  if (!checks.minLength) {
+    strength = 'weak';
+  } else if (isValid) {
+    strength = 'strong';
+  } else if (passedChecks >= 3) {
+    strength = 'medium';
+  }
 
   return {
     isValid,

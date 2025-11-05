@@ -17,11 +17,11 @@ describe('validatePasswordStrength', () => {
     expect(res.strength).toBe('weak');
   });
 
-  it('returns strong strength string but isValid false when missing special char', () => {
+  it('returns medium strength but isValid false when missing special char', () => {
     const pwd = 'Abcd1234';
     const res = validatePasswordStrength(pwd);
-    // has upper, lower, numbers, length -> 4 checks -> strength 'strong' by util
-    expect(res.strength).toBe('strong');
+    // has upper, lower, numbers, length -> 4 checks -> strength 'medium' when not all requirements met
+    expect(res.strength).toBe('medium');
     expect(res.isValid).toBe(false);
     expect(res.score).toBe(4);
   });

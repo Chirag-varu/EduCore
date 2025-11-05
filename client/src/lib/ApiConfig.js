@@ -18,9 +18,10 @@ import axiosInstance from "@/api/axiosInstance";
 // BASE CONFIGURATION
 // =============================================================================
 
-const BASE_URL = import.meta.env.MODE === "development" 
-  ? "http://localhost:5000/api/v1" 
-  : "/api/v1";
+// Treat any non-production mode (including 'test') as development for local API base URL
+const BASE_URL = import.meta.env.MODE === "production"
+  ? "/api/v1"
+  : "http://localhost:5000/api/v1";
 
 // =============================================================================
 // UTILITY FUNCTIONS
@@ -746,7 +747,9 @@ const ApiConfig = {
    */
   batch: async (apiCalls) => {
     try {
-      const responses = await Promise.allSettled(apiCalls);
+      // Support both an array of functions (to be invoked) and an array of promises
+      const promises = apiCalls.map((call) => (typeof call === 'function' ? call() : call));
+      const responses = await Promise.allSettled(promises);
       return responses.map((response, index) => {
         if (response.status === 'fulfilled') {
           return { success: true, data: response.value };

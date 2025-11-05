@@ -33,9 +33,9 @@ const PasswordStrengthIndicator = ({ password, showRequirements = true }) => {
             {validation.requirements.map((req) => (
               <li key={req.key} className="flex items-center space-x-2 text-xs">
                 {req.passed ? (
-                  <CheckIcon className="w-3 h-3 text-green-500" />
+                  <CheckIcon role="img" aria-label="requirement-passed" className="w-3 h-3 text-green-500" />
                 ) : (
-                  <XIcon className="w-3 h-3 text-red-500" />
+                  <XIcon role="img" aria-label="requirement-failed" className="w-3 h-3 text-red-500" />
                 )}
                 <span className={req.passed ? 'text-green-600' : 'text-gray-600'}>
                   {req.label}
