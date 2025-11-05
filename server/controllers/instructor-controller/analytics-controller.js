@@ -3,6 +3,7 @@ import Course from "../../models/Course.js";
 import StudentCourses from "../../models/StudentCourses.js";
 import Order from "../../models/Order.js";
 import CourseProgress from "../../models/CourseProgress.js";
+import CourseComment from "../../models/CourseComment.js";
 
 // Get enhanced instructor analytics
 export const getInstructorAnalytics = async (req, res) => {
@@ -155,6 +156,54 @@ export const getInstructorAnalytics = async (req, res) => {
       { $sort: { '_id': 1 } }
     ]);
 
+    // Ratings & Reviews analytics (Udemy-style)
+    // Aggregate ratings distribution and averages across instructor's courses
+    let ratings = { average: 0, total: 0, distribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 } };
+    let recentReviews = [];
+
+    if (courseIds.length > 0) {
+      const ratingsAgg = await CourseComment.aggregate([
+        { $match: { courseId: { $in: courseIds } } },
+        {
+          $facet: {
+            distribution: [
+              { $group: { _id: '$rating', count: { $sum: 1 } } },
+              { $project: { _id: 0, rating: '$_id', count: 1 } },
+              { $sort: { rating: -1 } }
+            ],
+            summary: [
+              { $group: { _id: null, average: { $avg: '$rating' }, total: { $sum: 1 } } },
+              { $project: { _id: 0, average: { $round: ['$average', 1] }, total: 1 } }
+            ]
+          }
+        }
+      ]);
+
+      const dist = ratingsAgg[0]?.distribution || [];
+      const summary = ratingsAgg[0]?.summary?.[0] || { average: 0, total: 0 };
+
+      // Map distribution to 1-5 keys with defaults
+      const distMap = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+      dist.forEach((d) => {
+        const key = String(d.rating);
+        if (distMap[key] !== undefined) distMap[key] = d.count;
+      });
+
+      ratings = {
+        average: summary.average || 0,
+        total: summary.total || 0,
+        distribution: distMap
+      };
+
+      // Fetch recent reviews
+      recentReviews = await CourseComment.find({ courseId: { $in: courseIds } })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .select('userName rating comment createdAt courseId')
+        .populate('courseId', 'title')
+        .lean();
+    }
+
     res.status(200).json({
       success: true,
       data: {
@@ -163,7 +212,9 @@ export const getInstructorAnalytics = async (req, res) => {
         topCourses,
         revenueData,
         enrollmentTrend,
-        studentEngagement
+        studentEngagement,
+        ratings,
+        recentReviews
       }
     });
   } catch (error) {

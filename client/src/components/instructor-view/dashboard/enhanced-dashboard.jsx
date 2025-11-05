@@ -211,6 +211,23 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
     value: item.enrollments || 0
   })) || [];
 
+  const ratings = analytics?.ratings || { average: 0, total: 0, distribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 } };
+  const recentReviews = analytics?.recentReviews || [];
+
+  const totalReviewsForBar = Object.values(ratings.distribution || {}).reduce((a, b) => a + b, 0) || 1;
+
+  const renderStars = (value = 0) => {
+    const full = Math.floor(value);
+    const remainder = value - full;
+    return (
+      <div className="flex items-center gap-0.5">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Star key={i} className={`h-4 w-4 ${i < full ? 'fill-yellow-400 text-yellow-400' : remainder > 0 && i === full ? 'text-yellow-400' : 'text-muted-foreground'} `} />
+        ))}
+      </div>
+    );
+  };
+
   const config = [
     {
       icon: Users,
@@ -480,6 +497,94 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Ratings & Reviews (Udemy-style) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Star className="h-5 w-5" />
+            Ratings & Reviews
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loadingStates.analytics ? (
+            <div className="space-y-4">
+              <div className="h-6 w-40 bg-muted rounded animate-pulse"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="h-4 w-full bg-muted rounded animate-pulse"></div>
+                  ))}
+                </div>
+                <div className="space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="h-16 w-full bg-muted rounded animate-pulse"></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Summary & distribution */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="text-4xl font-bold">{ratings.average?.toFixed ? ratings.average.toFixed(1) : ratings.average}</div>
+                  <div>
+                    {renderStars(ratings.average)}
+                    <div className="text-sm text-muted-foreground">{ratings.total} reviews</div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  {[5,4,3,2,1].map((star) => {
+                    const count = ratings.distribution?.[star] || 0;
+                    const pct = Math.round((count / totalReviewsForBar) * 100);
+                    return (
+                      <div key={star} className="flex items-center gap-3">
+                        <div className="w-10 text-sm text-muted-foreground flex items-center gap-1">
+                          <span>{star}</span>
+                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                        </div>
+                        <div className="flex-1 h-2 bg-muted rounded">
+                          <div className="h-2 bg-yellow-400 rounded" style={{ width: `${pct}%` }} />
+                        </div>
+                        <div className="w-12 text-right text-sm text-muted-foreground">{pct}%</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Recent reviews */}
+              <div className="space-y-4">
+                {recentReviews && recentReviews.length > 0 ? (
+                  recentReviews.map((rev, idx) => (
+                    <div key={idx} className="p-4 border rounded-lg">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <div className="font-medium">{rev.userName}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {rev.courseId?.title ? rev.courseId.title : 'Course'} • {new Date(rev.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {renderStars(rev.rating)}
+                          <span className="text-sm text-muted-foreground">{rev.rating.toFixed ? rev.rating.toFixed(1) : rev.rating}</span>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-sm">
+                        {rev.comment}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm text-muted-foreground">No recent reviews yet</div>
+                )}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Course Performance */}
       <Card>
