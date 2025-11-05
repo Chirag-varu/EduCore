@@ -18,6 +18,7 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import InstructorNav from "@/components/instructor-view/nav";
+import useDocumentTitle from "@/hooks/use-document-title";
 
 function AddNewCoursePage() {
   const {
@@ -135,6 +136,16 @@ function AddNewCoursePage() {
   }, [params?.courseId]);
 
   console.log(params, currentEditedCourseId, "params");
+
+  // Dynamic title: Edit vs Create with course title when available
+  const isEditing = Boolean(currentEditedCourseId);
+  useDocumentTitle(
+    isEditing
+      ? courseLandingFormData?.title
+        ? `Edit Course: ${courseLandingFormData.title}`
+        : "Edit Course"
+      : "Create Course"
+  );
 
   return (
     <div className="flex h-full min-h-screen bg-gray-100">
