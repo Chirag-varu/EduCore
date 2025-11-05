@@ -48,7 +48,12 @@ function App() {
     const user = localStorage.getItem("user");
 
     if (token && user) {
-      setAuth({ token, user: JSON.parse(user), authenticate: true });
+      const parsed = JSON.parse(user);
+      const normalizedUser = {
+        ...parsed,
+        userId: parsed?.userId || parsed?._id || parsed?.id,
+      };
+      setAuth({ authenticate: true, user: normalizedUser });
     }
     setLoading(false);
   }, []);

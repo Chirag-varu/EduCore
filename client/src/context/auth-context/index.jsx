@@ -54,11 +54,16 @@ export default function AuthProvider({ children }) {
           "accessToken",
           JSON.stringify(loginData.data.accessToken)
         );
+        // Normalize user shape to always include userId
+        const normalizedUser = {
+          ...loginData.data.user,
+          userId: loginData?.data?.user?.userId || loginData?.data?.user?._id || loginData?.data?.user?.id,
+        };
         localStorage.setItem("token", loginData.data.accessToken);
-        localStorage.setItem("user", JSON.stringify(loginData.data.user));
+        localStorage.setItem("user", JSON.stringify(normalizedUser));
         setAuth({
           authenticate: true,
-          user: loginData.data.user,
+          user: normalizedUser,
         });
       }
     }
@@ -76,11 +81,15 @@ export default function AuthProvider({ children }) {
         "accessToken",
         JSON.stringify(data.data.accessToken)
       );
+      const normalizedUser = {
+        ...data.data.user,
+        userId: data?.data?.user?.userId || data?.data?.user?._id || data?.data?.user?.id,
+      };
       localStorage.setItem("token", data.data.accessToken);
-      localStorage.setItem("user", JSON.stringify(data.data.user));
+      localStorage.setItem("user", JSON.stringify(normalizedUser));
       setAuth({
         authenticate: true,
-        user: data.data.user,
+        user: normalizedUser,
       });
     } else {
       setAuth({
@@ -99,11 +108,15 @@ export default function AuthProvider({ children }) {
           "accessToken",
           JSON.stringify(data.data.accessToken)
         );
+        const normalizedUser = {
+          ...data.data.user,
+          userId: data?.data?.user?.userId || data?.data?.user?._id || data?.data?.user?.id,
+        };
         localStorage.setItem("token", data.data.accessToken);
-        localStorage.setItem("user", JSON.stringify(data.data.user));
+        localStorage.setItem("user", JSON.stringify(normalizedUser));
         setAuth({
           authenticate: true,
-          user: data.data.user,
+          user: normalizedUser,
         });
       } else {
         setAuth({
@@ -130,9 +143,13 @@ export default function AuthProvider({ children }) {
       console.log(data);
       console.log("====================================");
       if (data.success) {
+        const normalizedUser = {
+          ...data.data.user,
+          userId: data?.data?.user?.userId || data?.data?.user?._id || data?.data?.user?.id,
+        };
         setAuth({
           authenticate: true,
-          user: data.data.user,
+          user: normalizedUser,
         });
       } else {
         setAuth({

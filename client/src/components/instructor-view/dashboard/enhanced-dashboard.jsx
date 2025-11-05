@@ -89,7 +89,10 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
       setLoadingStates(prev => ({ ...prev, initial: true, analytics: true, stats: true }));
       setError(null);
       
-      if (auth?.user?.userId) {
+      // Prefer a normalized id regardless of where it comes from
+      const instructorId = auth?.user?.userId || auth?.user?._id || auth?.user?.id;
+
+      if (instructorId) {
         console.log('Auth user found, fetching analytics:', auth.user);
         await Promise.all([
           fetchAnalytics(),
@@ -105,15 +108,17 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
     };
 
     initializeDashboard();
-  }, [auth?.user?.userId, selectedTimeframe, listOfCourses]);
+  }, [auth?.user?.userId, auth?.user?._id, selectedTimeframe, listOfCourses]);
 
   const fetchAnalytics = async () => {
     try {
       setLoadingStates(prev => ({ ...prev, analytics: true }));
       setError(null);
-      console.log('Fetching analytics for user:', auth.user.userId);
+      const instructorId = auth?.user?.userId || auth?.user?._id || auth?.user?.id;
+      console.log('Fetching analytics for user:', instructorId);
+      // axiosInstance already has baseURL /api/v1; avoid duplicating it in the path
       const response = await axiosInstance.get(
-        `/api/v1/instructor/course/analytics/${auth.user.userId}?timeframe=${selectedTimeframe}`
+        `/instructor/course/analytics/${instructorId}?timeframe=${selectedTimeframe}`
       );
       
       console.log('Analytics response:', response.data);
@@ -265,7 +270,7 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
   }
 
   // Show fallback if no analytics data but not loading
-  if (!loadingStates.analytics && !analytics && auth?.user?.userId) {
+  if (!loadingStates.analytics && !analytics && (auth?.user?.userId || auth?.user?._id || auth?.user?.id)) {
     return (
       <div className="space-y-6">
         {/* Header with timeframe selector */}
@@ -369,7 +374,7 @@ function EnhancedInstructorDashboard({ listOfCourses = [] }) {
   }
 
   // Show fallback if no user authenticated
-  if (!loadingStates.initial && !auth?.user?.userId) {
+  if (!loadingStates.initial && !(auth?.user?.userId || auth?.user?._id || auth?.user?.id)) {
     return (
       <div className="flex items-center justify-center py-8">
         <div className="text-center">
