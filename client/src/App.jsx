@@ -38,6 +38,7 @@ import QuizCreator from "./pages/instructor/QuizCreator";
 import AssignmentCreator from "./pages/instructor/AssignmentCreator";
 import QuizTaking from "./pages/student/QuizTaking";
 import AssignmentSubmission from "./pages/student/AssignmentSubmission";
+import RouteTitleManager from "./components/common/RouteTitleManager";
 
 function App() {
   const { auth, setAuth } = useContext(AuthContext);
@@ -65,6 +66,8 @@ function App() {
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <ChatProvider>
+        {/* Global page title defaults (pages can still override locally) */}
+        <RouteTitleManager />
         <Routes>
           <Route path="/instructor/:id" element={<InstructorView />} />
           {/* About page should use the common layout to include nav/header */}

@@ -24,6 +24,7 @@ import { CheckCircle, Globe, Lock, PlayCircle } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import CommentsSection from "@/components/comments/CommentsSection";
+import useDocumentTitle from "@/hooks/use-document-title";
 
 function StudentViewCourseDetailsPage() {
   const {
@@ -132,6 +133,13 @@ function StudentViewCourseDetailsPage() {
         setLectures(null),
         setCurrentCourseDetailsId(null);
   }, [location.pathname]);
+
+  // Dynamic page title once course data is available
+  useDocumentTitle(
+    studentViewCourseDetails?.title
+      ? `Course: ${studentViewCourseDetails.title}`
+      : undefined
+  );
   
   // Check if user is already enrolled in this course
   async function checkEnrollmentStatus() {

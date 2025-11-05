@@ -24,6 +24,7 @@ import { Check, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import Confetti from "react-confetti";
 import { useNavigate, useParams } from "react-router-dom";
+import useDocumentTitle from "@/hooks/use-document-title";
 
 function StudentViewCourseProgressPage() {
   const navigate = useNavigate();
@@ -123,6 +124,14 @@ function StudentViewCourseProgressPage() {
   }, [showConfetti]);
 
   console.log(currentLecture, "currentLecture");
+
+  // Dynamic page title when course name is known
+  useDocumentTitle(
+    studentCurrentCourseProgress?.courseDetails?.title
+      ? `${studentCurrentCourseProgress.courseDetails.title} — Progress`
+      : undefined,
+    { suffix: " — EduCore" }
+  );
 
   return (
     <div className="flex flex-col h-screen bg-[#1c1d1f] text-white">
