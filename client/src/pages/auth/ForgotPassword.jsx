@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { requestPasswordResetService } from "@/services"; 
 import AuthNavbar from "@/components/auth/AuthNavbar";
@@ -14,6 +14,10 @@ function ForgotPasswordPage() {
   const [isEmailSent, setIsEmailSent] = useState(false);
 
   const { toast } = useToast();
+
+  useEffect(() => {
+    document.title = "Forgot Password — EduCore";
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

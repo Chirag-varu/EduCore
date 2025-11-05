@@ -3,6 +3,7 @@ import { AuthContext } from "@/context/auth-context";
 import { useContext } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import EduCore_Logo from "@/assets/logoImg.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,10 @@ import { GoogleLogin } from "@react-oauth/google";
 import ApiConfig from "@/lib/ApiConfig";
 
 function AuthPage() {
+  // Page title
+  useEffect(() => {
+    document.title = "Login — EduCore";
+  }, []);
   const {
     signInFormData,
     setSignInFormData,

@@ -25,6 +25,9 @@ function ResetPasswordPage() {
   const [resetSuccess, setResetSuccess] = useState(false);
   
   useEffect(() => {
+    // Set page title
+    document.title = "Reset Password — EduCore";
+
     // Skip verification since we don't have a dedicated verify endpoint
     // The token will be verified when they submit the new password
     setIsVerifying(false);

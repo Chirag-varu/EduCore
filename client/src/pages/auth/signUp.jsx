@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { AuthContext } from "@/context/auth-context";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import EduCore_Logo from "@/assets/logoImg.png";
@@ -12,6 +12,9 @@ import { GoogleLogin } from "@react-oauth/google";
 import PasswordStrengthIndicator from "@/components/ui/password-strength-indicator";
 
 function Sign_up() {
+  useEffect(() => {
+    document.title = "Sign Up — EduCore";
+  }, []);
   const {
     signUpFormData, 
     setSignUpFormData,
