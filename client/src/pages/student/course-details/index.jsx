@@ -48,6 +48,10 @@ function StudentViewCourseDetailsPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
+  const [buying, setBuying] = useState(false);
+  const [orderKey, setOrderKey] = useState("");
+
+  const genKey = () => `order:${auth?.user?._id || 'anon'}:${id}:${Date.now()}`;
 
   async function fetchStudentViewCourseDetails() {
     // const checkCoursePurchaseInfoResponse =
@@ -85,6 +89,10 @@ function StudentViewCourseDetailsPage() {
   }
 
   async function handleCreatePayment() {
+    if (buying) return; // guard double submit
+    setBuying(true);
+    const key = orderKey || genKey();
+    setOrderKey(key);
     const paymentPayload = {
       userId: auth?.user?._id,
       userName: auth?.user?.userName,
@@ -104,7 +112,7 @@ function StudentViewCourseDetailsPage() {
     };
 
     console.log(paymentPayload, "paymentPayload");
-    const response = await createPaymentService(paymentPayload);
+  const response = await createPaymentService(paymentPayload, key);
 
     if (response.success) {
       sessionStorage.setItem(
@@ -113,6 +121,7 @@ function StudentViewCourseDetailsPage() {
       );
       setApprovalUrl(response?.data?.approveUrl);
     }
+    setBuying(false);
   }
 
   useEffect(() => {
@@ -284,8 +293,8 @@ function StudentViewCourseDetailsPage() {
                 </Button>
               ) : (
                 <div className="space-y-3">
-                  <Button onClick={handleCourseAction} className="w-full">
-                    Buy Now
+                  <Button onClick={handleCourseAction} className="w-full" disabled={buying}>
+                    {buying ? 'Processing…' : 'Buy Now'}
                   </Button>
                   <AddToCartButton 
                     course={studentViewCourseDetails} 

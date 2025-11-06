@@ -1,4 +1,7 @@
 import { sanitizeInput, validateRequestSize, validateFields } from '../middleware/input-validation.js';
+import { apiSecurityHeaders, apiRateLimit } from '../middleware/security.js';
+import express from 'express';
+import request from 'supertest';
 
 // Mock Express req, res, next
 const mockRequest = (body = {}, query = {}, params = {}) => ({
@@ -199,6 +202,29 @@ describe('Security Middleware Tests', () => {
 
       expect(mockNext).toHaveBeenCalled();
       expect(res.status).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('API Security Headers', () => {
+    test('should set security headers on responses', async () => {
+      const app = express();
+      app.get('/test', apiSecurityHeaders, (req, res) => res.json({ ok: true }));
+      const res = await request(app).get('/test');
+      expect(res.headers['x-content-type-options']).toBe('nosniff');
+      expect(res.headers['x-frame-options']).toBe('DENY');
+      expect(res.headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
+    });
+  });
+
+  describe('API Rate Limit', () => {
+    test('should not count successful requests', async () => {
+      const app = express();
+      app.get('/ok', apiRateLimit, (req, res) => res.json({ ok: true }));
+      // Run a few successful requests; should not be blocked
+      for (let i = 0; i < 120; i++) {
+        const res = await request(app).get('/ok');
+        expect(res.status).toBe(200);
+      }
     });
   });
 });

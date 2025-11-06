@@ -38,6 +38,16 @@ const UserSchema = new Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  // Optional profile links
+  links: {
+    website: { type: String, default: "" },
+    facebookUsername: { type: String, default: "" },
+    instagramUsername: { type: String, default: "" },
+    linkedinUrl: { type: String, default: "" },
+    tiktokUsername: { type: String, default: "" },
+    xUsername: { type: String, default: "" },
+    youtubeUsername: { type: String, default: "" },
   }
 }, {
   timestamps: true

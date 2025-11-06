@@ -33,8 +33,8 @@ export const apiRateLimit = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  // Skip successful responses
-  skip: (req, res) => res.statusCode < 400,
+  // Do not count successful requests towards the rate limit
+  skipSuccessfulRequests: true,
 });
 
 /**

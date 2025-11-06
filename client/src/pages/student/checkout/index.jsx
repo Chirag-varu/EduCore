@@ -38,6 +38,7 @@ export default function CheckoutPage() {
 
     try {
       setProcessing(true);
+      const idKey = `checkout:${auth.user._id}:${cart.items.map(i=>i.courseId).join('-')}:${Date.now()}`;
 
       // Create a combined order for all cart items
       const paymentPayload = {
@@ -62,7 +63,7 @@ export default function CheckoutPage() {
         isCartCheckout: true // Flag to indicate this is a cart checkout
       };
 
-      const response = await createPaymentService(paymentPayload);
+  const response = await createPaymentService(paymentPayload, idKey);
 
       if (response.success) {
         sessionStorage.setItem(

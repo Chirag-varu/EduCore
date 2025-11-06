@@ -204,8 +204,10 @@ export async function checkCoursePurchaseInfoService(courseId, studentId) {
   return data;
 }
 
-export async function createPaymentService(formData) {
-  const { data } = await axiosInstance.post(`/student/order/create`, formData);
+export async function createPaymentService(formData, idempotencyKey) {
+  const headers = {};
+  if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
+  const { data } = await axiosInstance.post(`/student/order/create`, formData, { headers });
 
   return data;
 }
@@ -302,6 +304,20 @@ export async function resetPasswordService(token, newPassword) {
       throw new Error(error.response.data.message);
     } else {
       throw new Error("Password reset failed. Please try again.");
+    }
+  }
+}
+
+// Profile Services
+export async function updateStudentProfileLinksService(links) {
+  try {
+    const { data } = await axiosInstance.put(`/student/update-profile`, { links });
+    return data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data.message);
+    } else {
+      throw new Error("Failed to update profile links. Please try again.");
     }
   }
 }

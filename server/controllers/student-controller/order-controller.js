@@ -1,10 +1,26 @@
 import payment from "../../helpers/paypal.js";
 import Order from "../../models/Order.js";
-import findByIdAndUpdate from "../../models/Course.js";
+import Course from "../../models/Course.js";
 import StudentCourses from "../../models/StudentCourses.js";
 
 const createOrder = async (req, res) => {
   try {
+    // Support Idempotency-Key via header or body
+    const idempotencyKey = req.headers["idempotency-key"] || req.body?.idempotencyKey;
+
+    if (idempotencyKey) {
+      const existing = await Order.findOne({ idempotencyKey }).lean();
+      if (existing) {
+        return res.status(200).json({
+          success: true,
+          message: "Order already created",
+          data: {
+            approveUrl: existing.approvalUrl,
+            orderId: existing._id,
+          },
+        });
+      }
+    }
     const {
       userId,
       userName,
@@ -62,6 +78,10 @@ const createOrder = async (req, res) => {
           message: "Error while creating paypal payment!",
         });
       } else {
+        const approveUrl = paymentInfo.links.find(
+          (link) => link.rel == "approval_url"
+        ).href;
+
         const newlyCreatedCourseOrder = new Order({
           userId,
           userName,
@@ -78,13 +98,11 @@ const createOrder = async (req, res) => {
           courseTitle,
           courseId,
           coursePricing,
+          idempotencyKey: idempotencyKey || undefined,
+          approvalUrl: approveUrl,
         });
 
         await newlyCreatedCourseOrder.save();
-
-        const approveUrl = paymentInfo.links.find(
-          (link) => link.rel == "approval_url"
-        ).href;
 
         res.status(201).json({
           success: true,
@@ -108,7 +126,7 @@ const capturePaymentAndFinalizeOrder = async (req, res) => {
   try {
     const { paymentId, payerId, orderId } = req.body;
 
-    let order = await Order(orderId);
+    let order = await Order.findById(orderId);
 
     if (!order) {
       return res.status(404).json({
@@ -125,7 +143,7 @@ const capturePaymentAndFinalizeOrder = async (req, res) => {
     await order.save();
 
     //update out student course model
-    const studentCourses = await StudentCourses({
+    const studentCourses = await StudentCourses.findOne({
       userId: order.userId,
     });
 
@@ -159,7 +177,7 @@ const capturePaymentAndFinalizeOrder = async (req, res) => {
     }
 
     //update the course schema students
-    await findByIdAndUpdate(order.courseId, {
+    await Course.findByIdAndUpdate(order.courseId, {
       $addToSet: {
         students: {
           studentId: order.userId,
