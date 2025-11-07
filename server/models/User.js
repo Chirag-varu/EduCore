@@ -8,6 +8,11 @@ const UserSchema = new Schema({
     minlength: [2, 'Username must be at least 2 characters long'],
     maxlength: [50, 'Username cannot exceed 50 characters']
   },
+  // Optional avatar image
+  avatarUrl: {
+    type: String,
+    default: "",
+  },
   userEmail: {
     type: String,
     required: [true, 'Email is required'],

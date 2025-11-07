@@ -322,6 +322,25 @@ export async function updateStudentProfileLinksService(links) {
   }
 }
 
+// Basic profile (name + avatar) update
+export async function updateStudentBasicProfileService({ userName, avatarFile }) {
+  try {
+    const formData = new FormData();
+    formData.append('userName', userName);
+    if (avatarFile) formData.append('avatar', avatarFile);
+    const { data } = await axiosInstance.put(`/student/update-basic-profile`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data.message);
+    } else {
+      throw new Error("Failed to update profile. Please try again.");
+    }
+  }
+}
+
 // Cart Services
 export async function getCartService() {
   const { data } = await axiosInstance.get(`/student/cart`);
