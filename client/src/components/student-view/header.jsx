@@ -178,7 +178,7 @@ function StudentViewCommonHeader() {
                     <DropdownMenuItem onSelect={() => navigate("/cart")}>
                       <ShoppingCart className="mr-2 h-4 w-4" /> My cart
                     </DropdownMenuItem>
-                    <DropdownMenuItem disabled>
+                    <DropdownMenuItem onSelect={() => navigate("/profile")}>
                       <UserIcon className="mr-2 h-4 w-4" /> Profile
                     </DropdownMenuItem>
                     {auth?.user?.role === "instructor" && (

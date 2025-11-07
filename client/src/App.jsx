@@ -40,6 +40,7 @@ import QuizTaking from "./pages/student/QuizTaking";
 import AssignmentSubmission from "./pages/student/AssignmentSubmission";
 import RouteTitleManager from "./components/common/RouteTitleManager";
 import AccountSettings from "./pages/student/AccountSettings";
+import ProfilePage from "./pages/student/profile";
 
 function App() {
   const { auth, setAuth } = useContext(AuthContext);
@@ -254,6 +255,7 @@ function App() {
           <Route path="cart" element={<CartPage />} />
           <Route path="checkout" element={<CheckoutPage />} />
           <Route path="account" element={<AccountSettings />} />
+          <Route path="profile" element={<ProfilePage />} />
           <Route
             path="course/details/:id"
             element={<StudentViewCourseDetailsPage />}
