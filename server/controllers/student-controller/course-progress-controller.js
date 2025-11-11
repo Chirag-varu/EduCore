@@ -165,4 +165,197 @@ export default {
   markCurrentLectureAsViewed,
   getCurrentCourseProgress,
   resetCurrentCourseProgress,
+  // New API v2 (auth-derived)
+  getCourseProgressSummary: async (req, res) => {
+    try {
+      const userId = req?.user?._id || req?.user?.userId;
+      const { courseId } = req.params;
+
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "Unauthorized" });
+      }
+
+      const course = await Course.findById(courseId);
+      if (!course) {
+        return res.status(404).json({ success: false, message: "Course not found" });
+      }
+
+      // Validate purchase
+      const studentPurchasedCourses = await StudentCourses.findOne({ userId: String(userId) });
+      const isPurchased = studentPurchasedCourses?.courses?.some(
+        (item) => String(item.courseId) === String(courseId)
+      );
+      if (!isPurchased) {
+        return res.status(403).json({ success: false, message: "Access denied. Course not purchased." });
+      }
+
+      const totalLectures = Array.isArray(course.curriculum) ? course.curriculum.length : 0;
+      const progressDoc = await CourseProgress.findOne({ userId: String(userId), courseId: String(courseId) });
+
+      const lecturesProgress = progressDoc?.lecturesProgress || [];
+      const viewedSet = new Set(
+        lecturesProgress
+          .filter((lp) => lp.viewed)
+          .map((lp) => String(lp.lectureId))
+      );
+
+      const viewedLectures = Array.isArray(course.curriculum)
+        ? course.curriculum.filter((id) => viewedSet.has(String(id))).length
+        : 0;
+
+      const percentage = totalLectures > 0 ? Number(((viewedLectures / totalLectures) * 100).toFixed(1)) : 0;
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          userId: String(userId),
+          courseId: String(courseId),
+          totalLectures,
+          viewedLectures,
+          percentage,
+          completed: !!progressDoc?.completed,
+          completionDate: progressDoc?.completionDate || null,
+          lecturesProgress,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: "Some error occurred!" });
+    }
+  },
+  updateLectureProgress: async (req, res) => {
+    try {
+      const userId = req?.user?._id || req?.user?.userId;
+      const { courseId, lectureId } = req.params;
+      const { viewed } = req.body || {};
+
+      if (!userId) return res.status(401).json({ success: false, message: "Unauthorized" });
+      if (typeof viewed !== "boolean") {
+        return res.status(400).json({ success: false, message: "`viewed` boolean is required" });
+      }
+
+      const course = await Course.findById(courseId);
+      if (!course) return res.status(404).json({ success: false, message: "Course not found" });
+
+      // Validate lecture belongs to course
+      const inCurriculum = (course.curriculum || []).some((id) => String(id) === String(lectureId));
+      if (!inCurriculum) {
+        return res.status(409).json({ success: false, message: "Lecture does not belong to the course" });
+      }
+
+      // Validate purchase
+      const studentPurchasedCourses = await StudentCourses.findOne({ userId: String(userId) });
+      const isPurchased = studentPurchasedCourses?.courses?.some(
+        (item) => String(item.courseId) === String(courseId)
+      );
+      if (!isPurchased) {
+        return res.status(403).json({ success: false, message: "Access denied. Course not purchased." });
+      }
+
+      let progress = await CourseProgress.findOne({ userId: String(userId), courseId: String(courseId) });
+      if (!progress) {
+        progress = new CourseProgress({
+          userId: String(userId),
+          courseId: String(courseId),
+          lecturesProgress: [],
+          completed: false,
+        });
+      }
+
+      const existing = progress.lecturesProgress.find((lp) => String(lp.lectureId) === String(lectureId));
+      if (existing) {
+        existing.viewed = viewed;
+        existing.dateViewed = viewed ? new Date() : null;
+      } else {
+        progress.lecturesProgress.push({ lectureId: String(lectureId), viewed, dateViewed: viewed ? new Date() : null });
+      }
+
+      // Recompute completion
+      const totalLectures = Array.isArray(course.curriculum) ? course.curriculum.length : 0;
+      const viewedCount = progress.lecturesProgress.filter((lp) => lp.viewed && (course.curriculum || []).some((id) => String(id) === String(lp.lectureId))).length;
+      const allViewed = totalLectures > 0 && viewedCount === totalLectures;
+      progress.completed = allViewed;
+      progress.completionDate = allViewed ? (progress.completionDate || new Date()) : null;
+
+      await progress.save();
+
+      const percentage = totalLectures > 0 ? Number(((viewedCount / totalLectures) * 100).toFixed(1)) : 0;
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          userId: String(userId),
+          courseId: String(courseId),
+          totalLectures,
+          viewedLectures: viewedCount,
+          percentage,
+          completed: progress.completed,
+          completionDate: progress.completionDate,
+          lecturesProgress: progress.lecturesProgress,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: "Some error occurred!" });
+    }
+  },
+  resetCourseProgressV2: async (req, res) => {
+    try {
+      const userId = req?.user?._id || req?.user?.userId;
+      const { courseId } = req.params;
+      if (!userId) return res.status(401).json({ success: false, message: "Unauthorized" });
+
+      const course = await Course.findById(courseId);
+      if (!course) return res.status(404).json({ success: false, message: "Course not found" });
+
+      // Validate purchase
+      const studentPurchasedCourses = await StudentCourses.findOne({ userId: String(userId) });
+      const isPurchased = studentPurchasedCourses?.courses?.some(
+        (item) => String(item.courseId) === String(courseId)
+      );
+      if (!isPurchased) {
+        return res.status(403).json({ success: false, message: "Access denied. Course not purchased." });
+      }
+
+      const progress = await CourseProgress.findOne({ userId: String(userId), courseId: String(courseId) });
+      if (!progress) {
+        // Nothing to reset; return empty summary
+        return res.status(200).json({
+          success: true,
+          data: {
+            userId: String(userId),
+            courseId: String(courseId),
+            totalLectures: Array.isArray(course.curriculum) ? course.curriculum.length : 0,
+            viewedLectures: 0,
+            percentage: 0,
+            completed: false,
+            completionDate: null,
+            lecturesProgress: [],
+          },
+        });
+      }
+
+      progress.lecturesProgress = [];
+      progress.completed = false;
+      progress.completionDate = null;
+      await progress.save();
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          userId: String(userId),
+          courseId: String(courseId),
+          totalLectures: Array.isArray(course.curriculum) ? course.curriculum.length : 0,
+          viewedLectures: 0,
+          percentage: 0,
+          completed: false,
+          completionDate: null,
+          lecturesProgress: [],
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: "Some error occurred!" });
+    }
+  },
 };
