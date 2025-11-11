@@ -13,6 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VideoPlayer from "@/components/video-player";
 import StudentChatDrawer from "@/components/chat/StudentChatDrawer";
+import CourseProgressBar from "@/components/student-view/CourseProgressBar";
 import { AuthContext } from "@/context/auth-context";
 import { StudentContext } from "@/context/student-context";
 import {
@@ -154,6 +155,18 @@ function StudentViewCourseProgressPage() {
             <p className="text-sm font-semibold hidden md:block">
               {studentCurrentCourseProgress?.courseDetails?.subtitle}
             </p>
+            {/* Overall course progress bar */}
+            {Array.isArray(studentCurrentCourseProgress?.lectures) && (
+              <div className="mt-2 w-80 hidden md:block">
+                <CourseProgressBar
+                  percentage={(function(){
+                    const total = studentCurrentCourseProgress?.lectures?.length || 0;
+                    const viewed = (studentCurrentCourseProgress?.progress || []).filter(p => p.viewed).length;
+                    return total > 0 ? Math.round((viewed / total) * 100) : 0;
+                  })()}
+                />
+              </div>
+            )}
           </div>
           
           {auth?.authenticate && studentCurrentCourseProgress?.courseDetails?.instructorId && (
