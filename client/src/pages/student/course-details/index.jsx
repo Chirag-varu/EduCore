@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import VideoPlayer from "@/components/video-player";
 import { AuthContext } from "@/context/auth-context";
 import { StudentContext } from "@/context/student-context";
+import CourseProgressBar from "@/components/student-view/CourseProgressBar";
 import StudentChatDrawer from "@/components/chat/StudentChatDrawer";
 import AddToCartButton from "@/components/ui/add-to-cart-button";
 import { useCart } from "@/context/cart-context";
@@ -36,6 +37,8 @@ function StudentViewCourseDetailsPage() {
     setLoadingState,
     lectures,
     setLectures,
+    courseProgressCache,
+    loadProgressSummary,
   } = useContext(StudentContext);
 
   const { auth } = useContext(AuthContext);
@@ -182,6 +185,13 @@ function StudentViewCourseDetailsPage() {
     }
   }, [studentViewCourseDetails, auth?.user]);
 
+  // Load progress summary if enrolled
+  useEffect(() => {
+    if (isEnrolled && studentViewCourseDetails?._id) {
+      loadProgressSummary(studentViewCourseDetails._id);
+    }
+  }, [isEnrolled, studentViewCourseDetails?._id, loadProgressSummary]);
+
   if (loadingState) return <Skeleton />;
 
   if (approvalUrl !== "") {
@@ -285,6 +295,14 @@ function StudentViewCourseDetailsPage() {
                   ${studentViewCourseDetails?.price}
                 </span>
               </div>
+
+              {isEnrolled && (
+                <div className="mb-4">
+                  <CourseProgressBar
+                    percentage={courseProgressCache?.[studentViewCourseDetails?._id]?.percentage ?? 0}
+                  />
+                </div>
+              )}
               
               {/* Show different buttons based on enrollment status */}
               {isEnrolled ? (

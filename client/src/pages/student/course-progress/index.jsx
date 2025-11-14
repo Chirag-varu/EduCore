@@ -21,6 +21,7 @@ import {
   markLectureAsViewedService,
   resetCourseProgressService,
 } from "@/services";
+import { updateLectureViewed as updateLectureViewedV2, resetCourseProgress as resetCourseProgressV2 } from "@/services/courseProgress";
 import { Check, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import Confetti from "react-confetti";
@@ -99,19 +100,31 @@ function StudentViewCourseProgressPage() {
   }
 
   async function handleRewatchCourse() {
-    const response = await resetCourseProgressService(
-      auth?.user?._id,
-      studentCurrentCourseProgress?.courseDetails?._id
-    );
+    // Prefer new authenticated reset; fall back to legacy if needed
+    let ok = false;
+    try {
+      const resV2 = await resetCourseProgressV2(
+        studentCurrentCourseProgress?.courseDetails?._id
+      );
+      ok = !!resV2?.success;
+    } catch (e) {
+      ok = false;
+    }
+    if (!ok) {
+      const response = await resetCourseProgressService(
+        auth?.user?._id,
+        studentCurrentCourseProgress?.courseDetails?._id
+      );
+      ok = !!response?.success;
+    }
 
-    if (response?.success) {
-      setCurrentLecture(null);
-      setShowConfetti(false);
-      setShowCourseCompleteDialog(false);
-      fetchCurrentCourseProgress();
+      if (ok) {
+        setCurrentLecture(null);
+        setShowConfetti(false);
+        setShowCourseCompleteDialog(false);
+        fetchCurrentCourseProgress();
     }
   }
-
   useEffect(() => {
     fetchCurrentCourseProgress();
   }, [id]);
@@ -229,21 +242,60 @@ function StudentViewCourseProgressPage() {
               <ScrollArea className="h-full">
                 <div className="p-4 space-y-4">
                   <h2 className="text-xl font-bold">Leactues</h2>
-                  {studentCurrentCourseProgress?.lectures?.map((item) => (
-                    <div
-                      className="flex items-center space-x-2 text-sm text-white font-bold cursor-pointer"
-                      key={item._id}
-                    >
-                      {studentCurrentCourseProgress?.progress?.find(
-                        (progressItem) => progressItem.lectureId === item._id
-                      )?.viewed ? (
-                        <Check className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <Play className="h-4 w-4 " />
-                      )}
-                      <span>{item?.lectureTitle}</span>
-                    </div>
-                  ))}
+                  {studentCurrentCourseProgress?.lectures?.map((item) => {
+                      const viewed = !!studentCurrentCourseProgress?.progress?.find(
+                        (progressItem) => progressItem.lectureId === item._id && progressItem.viewed
+                      );
+                      return (
+                        <div
+                          className="flex items-center justify-between text-sm text-white font-bold gap-3 cursor-pointer hover:bg-gray-800/40 rounded px-2 py-1"
+                          key={item._id}
+                        >
+                          <button
+                            className="flex items-center gap-2 flex-1 text-left"
+                            onClick={() => setCurrentLecture(item)}
+                            aria-label={`Play ${item?.lectureTitle}`}
+                          >
+                            {viewed ? (
+                              <Check className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <Play className="h-4 w-4 " />
+                            )}
+                            <span className="truncate">{item?.lectureTitle}</span>
+                          </button>
+                          <button
+                            className={`text-xs px-2 py-1 rounded border ${viewed ? "border-green-500 text-green-400" : "border-gray-500 text-gray-300"}`}
+                            onClick={async () => {
+                              const nextViewed = !viewed;
+                              try {
+                                const res = await updateLectureViewedV2(
+                                  studentCurrentCourseProgress?.courseDetails?._id,
+                                  item._id,
+                                  nextViewed
+                                );
+                                if (res?.success) {
+                                  // sync local progress from server response
+                                  setStudentCurrentCourseProgress((prev) => ({
+                                    ...prev,
+                                    progress: res.data.lecturesProgress || [],
+                                  }));
+
+                                  // If completed, celebrate
+                                  if (res.data?.completed) {
+                                    setShowCourseCompleteDialog(true);
+                                    setShowConfetti(true);
+                                  }
+                                }
+                              } catch (e) {
+                                console.error("Failed to toggle viewed state", e);
+                              }
+                            }}
+                          >
+                            {viewed ? "Viewed" : "Mark as Viewed"}
+                          </button>
+                        </div>
+                      );
+                  })}
                 </div>
               </ScrollArea>
             </TabsContent>

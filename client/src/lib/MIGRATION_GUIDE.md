@@ -610,3 +610,68 @@ If you encounter issues during migration:
 4. Check the console for detailed error messages
 
 The new ApiConfig system is designed to be a drop-in replacement with enhanced features. Most migrations should be straightforward with just import and method name changes!
+
+---
+
+## 📈 Course Progress v2 (Authenticated endpoints)
+
+EduCore now includes authenticated course progress endpoints that compute percentage completion per course and track per-lecture viewed state. These coexist with legacy progress APIs during migration.
+
+### Endpoints
+
+- GET `/api/v1/student/course-progress/summary/:courseId`
+  - Returns overall progress summary for the current authenticated user.
+  - Example response:
+    ```json
+    {
+      "success": true,
+      "data": {
+        "courseId": "<id>",
+        "percentage": 40,
+        "totalLectures": 25,
+        "completedLectures": 10,
+        "lecturesProgress": [
+          { "lectureId": "<lecId>", "viewed": true, "dateViewed": "2025-01-01T00:00:00.000Z" }
+        ]
+      }
+    }
+    ```
+
+- PATCH `/api/v1/student/course-progress/:courseId/lecture/:lectureId` with body `{ viewed: boolean }`
+  - Toggles a lecture's viewed state and returns the updated summary.
+
+- DELETE `/api/v1/student/course-progress/:courseId`
+  - Resets all viewed states for the course for the current user and returns the updated summary (percentage 0).
+
+All endpoints are authenticated via JWT and validate that the user has purchased the course and that the lecture belongs to the course.
+
+### Client usage (services)
+
+```js
+import { getCourseProgressSummary, updateLectureViewed, resetCourseProgress } from '@/services/courseProgress';
+
+const summary = await getCourseProgressSummary(courseId);
+await updateLectureViewed(courseId, lectureId, true); // mark viewed
+await resetCourseProgress(courseId); // reset all
+```
+
+### Client usage (context helper)
+
+The `StudentContext` exposes helpers with optimistic UX:
+
+```jsx
+import { useContext } from 'react';
+import { StudentContext } from '@/context/student-context';
+
+const { loadProgressSummary, toggleLectureViewed, resetProgress, courseProgressCache } = useContext(StudentContext);
+
+await loadProgressSummary(courseId); // caches summary at courseProgressCache[courseId]
+await toggleLectureViewed(courseId, lectureId, true); // optimistic toggle + server reconciliation
+await resetProgress(courseId); // sets percentage to 0
+```
+
+### Migration notes
+
+- Keep legacy endpoints during rollout; migrate UI to use the new services/context helpers.
+- UI components can reuse the shared `CourseProgressBar` at `src/components/student-view/CourseProgressBar.jsx`.
+- Consider adding an index on `CourseProgress (userId, courseId)` in MongoDB for large datasets.
