@@ -20,7 +20,20 @@ redisClient.sendCommand = function(...args) {
   }
   return originalSendCommand.apply(this, args);
 };
-
-await redisClient.connect();
+// Lazy connection to avoid top-level await issues in Jest and during import
+// Consumers should call ensureRedisConnected() before performing operations when Redis is required.
+let isConnected = false;
+export async function ensureRedisConnected() {
+  if (!isConnected) {
+    try {
+      await redisClient.connect();
+      isConnected = true;
+    } catch (err) {
+      // Log and rethrow to allow callers to decide whether to proceed without Redis
+      console.warn("⚠️  Failed to connect to Redis:", err?.message || err);
+      throw err;
+    }
+  }
+}
 
 export default redisClient;

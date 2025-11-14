@@ -9,10 +9,11 @@ import bcrypt from "bcryptjs";
 dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI || "";
+const DB_NAME = process.env.DB_NAME || undefined; // Optional explicit DB name to avoid case conflicts
 
 const seedDB = async () => {
   try {
-    await mongoose.connect(MONGO_URI);
+  await mongoose.connect(MONGO_URI, DB_NAME ? { dbName: DB_NAME } : undefined);
     console.log("✅ MongoDB Connected");
 
     // Clear old data
