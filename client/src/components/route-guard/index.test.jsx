@@ -7,58 +7,91 @@ function Page({ label }) {
   return <div>{label}</div>;
 }
 
-function renderWithRouter({ initialPath, authenticated, user, allowedRoles, elementLabel = "Protected" }) {
+// Test harness updated to mount RouteGuard on the specific protected routes instead of a greedy catch-all.
+function renderScenario({ initialPath, authenticated, user }) {
   return render(
     <MemoryRouter initialEntries={[initialPath]}>
       <Routes>
+        {/* Auth route guarded to allow redirect when already authenticated */}
         <Route
-          path="/*"
+          path="/auth"
           element={
             <RouteGuard
               authenticated={authenticated}
               user={user}
-              allowedRoles={allowedRoles}
-              element={<Page label={elementLabel} />}
+              element={<Page label="AUTH" />}
             />
           }
         />
-        <Route path="/auth" element={<Page label="AUTH" />} />
+        {/* Home destination */}
         <Route path="/home" element={<Page label="HOME" />} />
-        <Route path="/instructor" element={<Page label="INSTRUCTOR" />} />
-        <Route path="/admin/newsletters" element={<Page label="ADMIN_NEWS" />} />
+        {/* Protected instructor route */}
+        <Route
+          path="/instructor"
+          element={
+            <RouteGuard
+              authenticated={authenticated}
+              user={user}
+              element={<Page label="INSTRUCTOR_PAGE" />}
+            />
+          }
+        />
+        {/* Protected admin newsletters route */}
+        <Route
+          path="/admin/newsletters"
+          element={
+            <RouteGuard
+              authenticated={authenticated}
+              user={user}
+              allowedRoles={["admin"]}
+              element={<Page label="ADMIN_NEWS_PAGE" />}
+            />
+          }
+        />
+        {/* Fallback for other paths (treated as protected generic) */}
+        <Route
+          path="*"
+          element={
+            <RouteGuard
+              authenticated={authenticated}
+              user={user}
+              element={<Page label="GENERIC_PROTECTED" />}
+            />
+          }
+        />
       </Routes>
     </MemoryRouter>
   );
 }
 
 describe("RouteGuard", () => {
-  it("allows unauthenticated access to /auth", () => {
-    renderWithRouter({ initialPath: "/auth", authenticated: false, user: null });
-    expect(screen.getByText("Protected")).toBeInTheDocument();
-  });
-
-  it("redirects unauthenticated users to /auth when accessing protected route", () => {
-    renderWithRouter({ initialPath: "/instructor", authenticated: false, user: null });
+  it("renders AUTH page for unauthenticated /auth access", () => {
+    renderScenario({ initialPath: "/auth", authenticated: false, user: null });
     expect(screen.getByText("AUTH")).toBeInTheDocument();
   });
 
-  it("redirects authenticated student away from /auth to /home", () => {
-    renderWithRouter({ initialPath: "/auth", authenticated: true, user: { role: "student" } });
+  it("redirects unauthenticated user from /instructor to /auth", () => {
+    renderScenario({ initialPath: "/instructor", authenticated: false, user: null });
+    expect(screen.getByText("AUTH")).toBeInTheDocument();
+  });
+
+  it("redirects authenticated student from /auth to /home", async () => {
+    renderScenario({ initialPath: "/auth", authenticated: true, user: { role: "student" } });
+    expect(await screen.findByText("HOME")).toBeInTheDocument();
+  });
+
+  it("allows instructor access to /instructor", () => {
+    renderScenario({ initialPath: "/instructor", authenticated: true, user: { role: "instructor" } });
+    expect(screen.getByText("INSTRUCTOR_PAGE")).toBeInTheDocument();
+  });
+
+  it("redirects student from /admin/newsletters to /home", () => {
+    renderScenario({ initialPath: "/admin/newsletters", authenticated: true, user: { role: "student" } });
     expect(screen.getByText("HOME")).toBeInTheDocument();
   });
 
-  it("allows instructor to access /instructor", () => {
-    renderWithRouter({ initialPath: "/instructor", authenticated: true, user: { role: "instructor" } });
-    expect(screen.getByText("Protected")).toBeInTheDocument();
-  });
-
-  it("blocks student from accessing /admin and redirects to /home", () => {
-    renderWithRouter({ initialPath: "/admin", authenticated: true, user: { role: "student" } });
-    expect(screen.getByText("HOME")).toBeInTheDocument();
-  });
-
-  it("allows admin to access /admin/newsletters", () => {
-    renderWithRouter({ initialPath: "/admin/newsletters", authenticated: true, user: { role: "admin" } });
-    expect(screen.getByText("Protected")).toBeInTheDocument();
+  it("allows admin access to /admin/newsletters", () => {
+    renderScenario({ initialPath: "/admin/newsletters", authenticated: true, user: { role: "admin" } });
+    expect(screen.getByText("ADMIN_NEWS_PAGE")).toBeInTheDocument();
   });
 });

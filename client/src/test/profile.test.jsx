@@ -28,7 +28,10 @@ describe('ProfilePage', () => {
         </MemoryRouter>
       </Wrapper>
     );
-    expect(screen.getByText('Test User')).toBeInTheDocument();
+    // Name is rendered as an editable input; assert by accessible label and value
+    const nameInput = screen.getByLabelText('Your name');
+    expect(nameInput).toHaveValue('Test User');
+    // Email is rendered as text
     expect(screen.getByText('test@example.com')).toBeInTheDocument();
   });
 });
