@@ -41,6 +41,7 @@ import AssignmentSubmission from "./pages/student/AssignmentSubmission";
 import RouteTitleManager from "./components/common/RouteTitleManager";
 import AccountSettings from "./pages/student/AccountSettings";
 import ProfilePage from "./pages/student/profile";
+import Loader from "@/components/common/Loader";
 
 function App() {
   const { auth, setAuth } = useContext(AuthContext);
@@ -62,7 +63,7 @@ function App() {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>; // or spinner
+    return <Loader message="Signing you in..." />;
   }
 
   return (

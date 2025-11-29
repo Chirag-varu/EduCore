@@ -1,4 +1,9 @@
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -39,49 +44,57 @@ function StudentViewCourseProgressPage() {
     useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isSideBarOpen, setIsSideBarOpen] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [lectureQuery, setLectureQuery] = useState("");
+  const [showOnlyUnviewed, setShowOnlyUnviewed] = useState(false);
   const { id } = useParams();
 
   async function fetchCurrentCourseProgress() {
-    const response = await getCurrentCourseProgressService(auth?.user?._id, id);
-    if (response?.success) {
-      if (!response?.data?.isPurchased) {
-        setLockCourse(true);
-      } else {
-        setStudentCurrentCourseProgress({
-          courseDetails: response?.data?.courseDetails,
-          lectures:
-            response?.data?.lectures ||
-            response?.data?.courseDetails?.curriculum ||
-            [],
-          progress: response?.data?.progress,
-        });
-
-        if (response?.data?.completed) {
-          setCurrentLecture(response?.data?.lectures[0]);
-          setShowCourseCompleteDialog(true);
-          setShowConfetti(true);
-
-          return;
-        }
-
-        if (response?.data?.progress?.length === 0) {
-          setCurrentLecture(response?.data?.lectures[0]);
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await getCurrentCourseProgressService(auth?.user?._id, id);
+      if (response?.success) {
+        if (!response?.data?.isPurchased) {
+          setLockCourse(true);
         } else {
-          // console.log("logging here");
-          const lastIndexOfViewedAsTrue = response?.data?.progress.reduceRight(
-            (acc, obj, index) => {
-              return acc === -1 && obj.viewed ? index : acc;
-            },
-            -1
-          );
+          setStudentCurrentCourseProgress({
+            courseDetails: response?.data?.courseDetails,
+            lectures:
+              response?.data?.lectures ||
+              response?.data?.courseDetails?.curriculum ||
+              [],
+            progress: response?.data?.progress,
+          });
 
-          setCurrentLecture(
-            response?.data?.courseDetails?.curriculum[
-              lastIndexOfViewedAsTrue + 1
-            ]
-          );
+          if (response?.data?.completed) {
+            setCurrentLecture(response?.data?.lectures?.[0] ?? null);
+            setShowCourseCompleteDialog(true);
+            setShowConfetti(true);
+          } else if ((response?.data?.progress?.length ?? 0) === 0) {
+            setCurrentLecture(response?.data?.lectures?.[0] ?? null);
+          } else {
+            const lastIndexOfViewedAsTrue = response?.data?.progress.reduceRight(
+              (acc, obj, index) => {
+                return acc === -1 && obj.viewed ? index : acc;
+              },
+              -1
+            );
+
+            const fallbackLectures = response?.data?.lectures || response?.data?.courseDetails?.curriculum || [];
+            setCurrentLecture(
+              fallbackLectures[lastIndexOfViewedAsTrue + 1] ?? fallbackLectures[0] ?? null
+            );
+          }
         }
+      } else {
+        setError(response?.message || "Failed to load course progress.");
       }
+    } catch (e) {
+      setError("Something went wrong while loading course progress.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -137,7 +150,18 @@ function StudentViewCourseProgressPage() {
     if (showConfetti) setTimeout(() => setShowConfetti(false), 15000);
   }, [showConfetti]);
 
-  console.log(currentLecture, "currentLecture");
+  // Derived stats for header summary
+  const totalLectures = studentCurrentCourseProgress?.lectures?.length || 0;
+  const viewedCount = (studentCurrentCourseProgress?.progress || []).filter(p => p.viewed).length;
+  const completionPct = totalLectures > 0 ? Math.round((viewedCount / totalLectures) * 100) : 0;
+
+  // Filtered lectures by query / viewed state
+  const filteredLectures = (studentCurrentCourseProgress?.lectures || []).filter((lec) => {
+    const viewed = !!(studentCurrentCourseProgress?.progress || []).find((p) => p.lectureId === lec._id && p.viewed);
+    const matchesQuery = lectureQuery.trim().length === 0 || (lec?.lectureTitle || "").toLowerCase().includes(lectureQuery.trim().toLowerCase());
+    const matchesViewed = showOnlyUnviewed ? !viewed : true;
+    return matchesQuery && matchesViewed;
+  });
 
   // Dynamic page title when course name is known
   useDocumentTitle(
@@ -162,23 +186,27 @@ function StudentViewCourseProgressPage() {
             Courses Page
           </Button>
           <div className="flex flex-col">
-            <h1 className="text-lg font-bold hidden md:block">
-              {studentCurrentCourseProgress?.courseDetails?.title}
-            </h1>
-            <p className="text-sm font-semibold hidden md:block">
-              {studentCurrentCourseProgress?.courseDetails?.subtitle}
-            </p>
-            {/* Overall course progress bar */}
-            {Array.isArray(studentCurrentCourseProgress?.lectures) && (
-              <div className="mt-2 w-80 hidden md:block">
-                <CourseProgressBar
-                  percentage={(function(){
-                    const total = studentCurrentCourseProgress?.lectures?.length || 0;
-                    const viewed = (studentCurrentCourseProgress?.progress || []).filter(p => p.viewed).length;
-                    return total > 0 ? Math.round((viewed / total) * 100) : 0;
-                  })()}
-                />
-              </div>
+            {loading ? (
+              <>
+                <Skeleton className="h-5 w-64 mb-2 hidden md:block" />
+                <Skeleton className="h-4 w-80 hidden md:block" />
+                <Skeleton className="h-6 w-80 mt-2 hidden md:block" />
+              </>
+            ) : (
+              <>
+                <h1 className="text-lg font-bold hidden md:block">
+                  {studentCurrentCourseProgress?.courseDetails?.title}
+                </h1>
+                <p className="text-sm font-semibold hidden md:block">
+                  {studentCurrentCourseProgress?.courseDetails?.subtitle}
+                </p>
+                {/* Overall course progress bar */}
+                {Array.isArray(studentCurrentCourseProgress?.lectures) && (
+                  <div className="mt-2 w-80 hidden md:block">
+                    <CourseProgressBar percentage={completionPct} />
+                  </div>
+                )}
+              </>
             )}
           </div>
           
@@ -189,33 +217,121 @@ function StudentViewCourseProgressPage() {
             />
           )}
         </div>
-        <Button onClick={() => setIsSideBarOpen(!isSideBarOpen)}>
-          {isSideBarOpen ? (
-            <ChevronRight className="h-5 w-5" />
-          ) : (
-            <ChevronLeft className="h-5 w-5" />
+        <div className="flex items-center gap-3">
+          {!loading && totalLectures > 0 && (
+            <div className="hidden md:flex items-center gap-2">
+              <Badge variant="secondary" className="bg-gray-800 text-gray-100">{completionPct}%</Badge>
+              <span className="text-sm text-gray-300">{viewedCount}/{totalLectures} lectures completed</span>
+              <Separator orientation="vertical" className="h-5 bg-gray-700" />
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-black"
+                onClick={handleRewatchCourse}
+                disabled={loading || totalLectures === 0}
+                aria-label="Reset course progress"
+              >
+                Reset progress
+              </Button>
+            </div>
           )}
-        </Button>
+          <Button onClick={() => setIsSideBarOpen(!isSideBarOpen)} aria-label={isSideBarOpen ? "Hide sidebar" : "Show sidebar"}>
+            {isSideBarOpen ? (
+              <ChevronRight className="h-5 w-5" />
+            ) : (
+              <ChevronLeft className="h-5 w-5" />
+            )}
+          </Button>
+        </div>
       </div>
+      {error && (
+        <div className="px-4 py-2 bg-red-900/40 text-red-300 border-b border-red-800">
+          {error}
+        </div>
+      )}
       <div className="flex flex-1 overflow-hidden">
         <div
           className={`flex-1 ${
             isSideBarOpen ? "mr-[400px]" : ""
           } transition-all duration-300`}
         >
-          <VideoPlayer
-            width="100%"
-            height="500px"
-            url={currentLecture?.videoUrl}
-            onProgressUpdate={setCurrentLecture}
-            progressData={currentLecture}
-            courseId={studentCurrentCourseProgress?.courseDetails?._id}
-            allowDownload={studentCurrentCourseProgress?.courseDetails?.isPurchased}
-          />
+          {loading ? (
+            <div className="p-6">
+              <Skeleton className="w-full h-[500px]" />
+            </div>
+          ) : currentLecture ? (
+            <VideoPlayer
+              width="100%"
+              height="500px"
+              url={currentLecture?.videoUrl}
+              onProgressUpdate={setCurrentLecture}
+              progressData={currentLecture}
+              courseId={studentCurrentCourseProgress?.courseDetails?._id}
+              allowDownload={studentCurrentCourseProgress?.courseDetails?.isPurchased}
+            />
+          ) : (
+            <div className="h-[500px] flex items-center justify-center text-gray-300">
+              No lecture selected.
+            </div>
+          )}
           <div className="p-6 bg-[#1c1d1f]">
-            <h2 className="text-2xl font-bold mb-2">
-              {currentLecture?.lectureTitle}
-            </h2>
+            {loading ? (
+              <Skeleton className="h-7 w-96" />
+            ) : (
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2 truncate">
+                    {currentLecture?.lectureTitle || "Untitled lecture"}
+                  </h2>
+                  {currentLecture?.duration ? (
+                    <p className="text-xs text-gray-400">Duration: {Math.round(currentLecture.duration)} min</p>
+                  ) : null}
+                </div>
+                {totalLectures > 0 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-black"
+                      onClick={() => {
+                        const all = studentCurrentCourseProgress?.lectures || [];
+                        const idx = all.findIndex(l => l._id === currentLecture?._id);
+                        if (idx > 0) setCurrentLecture(all[idx - 1]);
+                      }}
+                      aria-label="Previous lecture"
+                    >
+                      <ChevronLeft className="h-4 w-4 mr-1" /> Prev
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-black"
+                      onClick={() => {
+                        const all = studentCurrentCourseProgress?.lectures || [];
+                        const idx = all.findIndex(l => l._id === currentLecture?._id);
+                        if (idx < all.length - 1) setCurrentLecture(all[idx + 1]);
+                      }}
+                      aria-label="Next lecture"
+                    >
+                      Next <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        // jump to next unviewed
+                        const all = studentCurrentCourseProgress?.lectures || [];
+                        const progress = studentCurrentCourseProgress?.progress || [];
+                        const next = all.find(l => !progress.find(p => p.lectureId === l._id && p.viewed));
+                        if (next) setCurrentLecture(next);
+                      }}
+                      aria-label="Jump to next unviewed lecture"
+                    >
+                      Next Unviewed
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
         <div
@@ -241,8 +357,41 @@ function StudentViewCourseProgressPage() {
             <TabsContent value="content">
               <ScrollArea className="h-full">
                 <div className="p-4 space-y-4">
-                  <h2 className="text-xl font-bold">Leactues</h2>
-                  {studentCurrentCourseProgress?.lectures?.map((item) => {
+                  <h2 className="text-xl font-bold">Lectures</h2>
+                  {/* Filters */}
+                  <div className="flex items-center gap-3">
+                    <Input
+                      placeholder="Search lectures"
+                      value={lectureQuery}
+                      onChange={(e) => setLectureQuery(e.target.value)}
+                      className="bg-[#111214] border-gray-700 text-white placeholder:text-gray-500"
+                      aria-label="Search lectures"
+                    />
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="unviewed-switch"
+                        checked={showOnlyUnviewed}
+                        onCheckedChange={setShowOnlyUnviewed}
+                        aria-label="Show only unviewed"
+                      />
+                      <Label htmlFor="unviewed-switch">Only unviewed</Label>
+                    </div>
+                  </div>
+
+                  {loading ? (
+                    <div className="space-y-2">
+                      {Array.from({ length: 6 }).map((_, i) => (
+                        <Skeleton key={i} className="h-10 w-full" />
+                      ))}
+                    </div>
+                  ) : filteredLectures.length === 0 ? (
+                    <div className="text-sm text-gray-400 py-6">
+                      {lectureQuery || showOnlyUnviewed
+                        ? "No lectures match your filters."
+                        : "No lectures available for this course yet."}
+                    </div>
+                  ) : (
+                  filteredLectures.map((item) => {
                       const viewed = !!studentCurrentCourseProgress?.progress?.find(
                         (progressItem) => progressItem.lectureId === item._id && progressItem.viewed
                       );
@@ -262,6 +411,11 @@ function StudentViewCourseProgressPage() {
                               <Play className="h-4 w-4 " />
                             )}
                             <span className="truncate">{item?.lectureTitle}</span>
+                            {typeof item?.duration === "number" && (
+                              <span className="ml-auto text-xs font-normal text-gray-400">
+                                {Math.round(item.duration)}m
+                              </span>
+                            )}
                           </button>
                           <button
                             className={`text-xs px-2 py-1 rounded border ${viewed ? "border-green-500 text-green-400" : "border-gray-500 text-gray-300"}`}
@@ -295,7 +449,7 @@ function StudentViewCourseProgressPage() {
                           </button>
                         </div>
                       );
-                  })}
+                  }))}
                 </div>
               </ScrollArea>
             </TabsContent>

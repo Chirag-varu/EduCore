@@ -24,6 +24,7 @@ import { startNewsletterScheduler } from "./helpers/newsletterScheduler.js";
 import { generalLimiter, authLimiter, apiLimiter, uploadLimiter } from "./middleware/rate-limit.js";
 import { sanitizeInput, validateRequestSize } from "./middleware/input-validation.js";
 import { apiSecurityHeaders } from "./middleware/security.js";
+import { ensureRedisConnected } from "./helpers/redisClient.js";
 
 // Environment variable validation
 const coreRequiredEnvVars = [
@@ -165,6 +166,10 @@ connect(MONGO_URI)
     console.log("MongoDB is connected");
     // Start the newsletter scheduler after database connection is established
     startNewsletterScheduler();
+    // Establish Redis connection in background (non-blocking)
+    ensureRedisConnected().catch((err) => {
+      console.warn("⚠️  Redis not connected (continuing without cache):", err?.message || err);
+    });
   })
   .catch((e) => console.log(e));
 
