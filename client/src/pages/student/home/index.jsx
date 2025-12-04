@@ -59,7 +59,7 @@ function StudentHomePage() {
         {/* Hero Section */}
         <section className="flex flex-col lg:flex-row items-center justify-between py-16 px-6 lg:px-16">
           <div className="lg:w-1/2 space-y-6">
-            <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight bg-gradient-to-r  bg-clip-text text-blue-600">
+            <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight bg-gradient-to-r  bg-clip-text text-slate-900">
               Learning that gets you ahead 🚀
             </h1>
             <p className="text-lg text-gray-700">
