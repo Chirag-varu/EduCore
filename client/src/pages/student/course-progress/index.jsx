@@ -174,7 +174,7 @@ function StudentViewCourseProgressPage() {
   return (
     <div className="flex flex-col h-screen bg-[#1c1d1f] text-white">
       {showConfetti && <Confetti />}
-      <div className="flex items-center justify-between p-4 bg-[#1c1d1f] border-b border-gray-700">
+      <div className="flex items-center justify-between p-2 bg-[#1c1d1f] border-b border-gray-700 m-1">
         <div className="flex items-center space-x-4">
           <Button
             onClick={() => navigate("/student-courses")}
@@ -335,7 +335,7 @@ function StudentViewCourseProgressPage() {
           </div>
         </div>
         <div
-          className={`fixed top-[64px] right-0 bottom-0 w-[400px] bg-[#1c1d1f] border-l border-gray-700 transition-all duration-300 ${
+          className={`fixed top-[64px] mt-12 right-0 bottom-0 w-[400px] bg-[#1c1d1f] border-l border-gray-700 transition-all duration-300 ${
             isSideBarOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
@@ -397,11 +397,11 @@ function StudentViewCourseProgressPage() {
                       );
                       return (
                         <div
-                          className="flex items-center justify-between text-sm text-white font-bold gap-3 cursor-pointer hover:bg-gray-800/40 rounded px-2 py-1"
+                          className="flex items-center justify-between bg-gray-800/40 text-sm text-white font-bold gap-3 cursor-pointer hover:bg-gray-800/40 rounded p-2"
                           key={item._id}
                         >
                           <button
-                            className="flex items-center gap-2 flex-1 text-left"
+                            className="flex items-center bg-gray-800/40 gap-2 flex-1 text-left"
                             onClick={() => setCurrentLecture(item)}
                             aria-label={`Play ${item?.lectureTitle}`}
                           >
@@ -412,13 +412,13 @@ function StudentViewCourseProgressPage() {
                             )}
                             <span className="truncate">{item?.lectureTitle}</span>
                             {typeof item?.duration === "number" && (
-                              <span className="ml-auto text-xs font-normal text-gray-400">
+                              <span className="ml-auto text-xs font-normal text-black">
                                 {Math.round(item.duration)}m
                               </span>
                             )}
                           </button>
                           <button
-                            className={`text-xs px-2 py-1 rounded border ${viewed ? "border-green-500 text-green-400" : "border-gray-500 text-gray-300"}`}
+                            className={`text-xs px-2 py-1 bg-gray-800/40 rounded border ${viewed ? "border-green-500 text-green-400" : "border-gray-500 text-gray-300"}`}
                             onClick={async () => {
                               const nextViewed = !viewed;
                               try {
