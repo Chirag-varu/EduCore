@@ -25,6 +25,7 @@ import {
   getCurrentCourseProgressService,
   markLectureAsViewedService,
   resetCourseProgressService,
+  generateCertificateService,
 } from "@/services";
 import { updateLectureViewed as updateLectureViewedV2, resetCourseProgress as resetCourseProgressV2 } from "@/services/courseProgress";
 import { Check, ChevronLeft, ChevronRight, Play, Award } from "lucide-react";
@@ -47,6 +48,8 @@ function StudentViewCourseProgressPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lectureQuery, setLectureQuery] = useState("");
+  const [certificateId, setCertificateId] = useState(null);
+  const [generatingCertificate, setGeneratingCertificate] = useState(false);
   const [showOnlyUnviewed, setShowOnlyUnviewed] = useState(false);
   const { id } = useParams();
 
@@ -72,6 +75,8 @@ function StudentViewCourseProgressPage() {
             setCurrentLecture(response?.data?.lectures?.[0] ?? null);
             setShowCourseCompleteDialog(true);
             setShowConfetti(true);
+            // Auto-generate certificate when course is completed
+            handleGenerateCertificate(response?.data?.courseDetails?._id);
           } else if ((response?.data?.progress?.length ?? 0) === 0) {
             setCurrentLecture(response?.data?.lectures?.[0] ?? null);
           } else {
@@ -109,6 +114,34 @@ function StudentViewCourseProgressPage() {
       if (response?.success) {
         fetchCurrentCourseProgress();
       }
+    }
+  }
+
+  // Generate certificate when course is completed
+  async function handleGenerateCertificate(courseId) {
+    const targetCourseId = courseId || studentCurrentCourseProgress?.courseDetails?._id;
+    if (!targetCourseId) return;
+    
+    setGeneratingCertificate(true);
+    try {
+      const response = await generateCertificateService(targetCourseId);
+      if (response?.success && response?.data?.certificateId) {
+        setCertificateId(response.data.certificateId);
+      }
+    } catch (err) {
+      console.error("Failed to generate certificate:", err);
+    } finally {
+      setGeneratingCertificate(false);
+    }
+  }
+
+  // Navigate to view the certificate
+  function handleViewCertificate() {
+    if (certificateId) {
+      navigate(`/certificate/${certificateId}`);
+    } else {
+      // Fallback: go to certificates list page
+      navigate("/certificates");
     }
   }
 
@@ -548,20 +581,28 @@ function StudentViewCourseProgressPage() {
         <DialogContent showOverlay={false} className="sm:w-[425px]">
           <DialogHeader>
             <DialogTitle>🎉 Congratulations!</DialogTitle>
-            <DialogDescription className="flex flex-col gap-3">
-              <Label>You have completed the course! Your certificate is ready.</Label>
+            <DialogDescription className="flex flex-col gap-4">
+              <Label className="text-base">You have completed the course!</Label>
+              <p className="text-sm text-muted-foreground">
+                {generatingCertificate 
+                  ? "Generating your certificate..." 
+                  : "Your certificate is ready to view and download."}
+              </p>
               <div className="flex flex-row gap-3 flex-wrap">
                 <Button 
-                  onClick={() => navigate(`/certificates`)}
+                  onClick={handleViewCertificate}
                   className="bg-amber-600 hover:bg-amber-700"
+                  disabled={generatingCertificate}
                 >
                   <Award className="h-4 w-4 mr-2" />
-                  View Certificate
+                  {generatingCertificate ? "Generating..." : "View Certificate"}
                 </Button>
                 <Button variant="outline" onClick={() => navigate("/student-courses")}>
-                  My Courses Page
+                  My Courses
                 </Button>
-                <Button variant="outline" onClick={handleRewatchCourse}>Rewatch Course</Button>
+                <Button variant="outline" onClick={handleRewatchCourse}>
+                  Rewatch
+                </Button>
               </div>
             </DialogDescription>
           </DialogHeader>
