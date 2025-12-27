@@ -27,7 +27,7 @@ import {
   resetCourseProgressService,
 } from "@/services";
 import { updateLectureViewed as updateLectureViewedV2, resetCourseProgress as resetCourseProgressV2 } from "@/services/courseProgress";
-import { Check, ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Play, Award } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import Confetti from "react-confetti";
 import { useNavigate, useParams } from "react-router-dom";
@@ -547,14 +547,21 @@ function StudentViewCourseProgressPage() {
       <Dialog open={showCourseCompleteDialog}>
         <DialogContent showOverlay={false} className="sm:w-[425px]">
           <DialogHeader>
-            <DialogTitle>Congratulations!</DialogTitle>
+            <DialogTitle>🎉 Congratulations!</DialogTitle>
             <DialogDescription className="flex flex-col gap-3">
-              <Label>You have completed the course</Label>
-              <div className="flex flex-row gap-3">
-                <Button onClick={() => navigate("/student-courses")}>
+              <Label>You have completed the course! Your certificate is ready.</Label>
+              <div className="flex flex-row gap-3 flex-wrap">
+                <Button 
+                  onClick={() => navigate(`/certificates`)}
+                  className="bg-amber-600 hover:bg-amber-700"
+                >
+                  <Award className="h-4 w-4 mr-2" />
+                  View Certificate
+                </Button>
+                <Button variant="outline" onClick={() => navigate("/student-courses")}>
                   My Courses Page
                 </Button>
-                <Button onClick={handleRewatchCourse}>Rewatch Course</Button>
+                <Button variant="outline" onClick={handleRewatchCourse}>Rewatch Course</Button>
               </div>
             </DialogDescription>
           </DialogHeader>

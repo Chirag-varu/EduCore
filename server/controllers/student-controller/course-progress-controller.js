@@ -2,6 +2,53 @@ import CourseProgress from "../../models/CourseProgress.js";
 import Course from "../../models/Course.js";
 import Lecture from "../../models/lecture.model.js";
 import StudentCourses from "../../models/StudentCourses.js";
+import Certificate from "../../models/Certificate.js";
+import User from "../../models/User.js";
+
+// Helper to auto-generate certificate on course completion
+async function generateCertificateOnCompletion(userId, courseId) {
+  try {
+    // Check if certificate already exists
+    const existingCertificate = await Certificate.findOne({ userId, courseId });
+    if (existingCertificate) return existingCertificate;
+
+    // Get course, user and instructor details
+    const course = await Course.findById(courseId).lean();
+    const user = await User.findById(userId).lean();
+    if (!course || !user) return null;
+
+    const instructor = await User.findById(course.instructorId).lean();
+
+    // Calculate course duration
+    let totalDuration = 0;
+    if (course.curriculum && course.curriculum.length > 0) {
+      totalDuration = course.curriculum.reduce((acc, lecture) => {
+        return acc + (lecture.duration || 0);
+      }, 0);
+    }
+    const durationText = totalDuration > 0 
+      ? `${Math.round(totalDuration / 60)} hours` 
+      : "";
+
+    // Create certificate
+    const certificate = new Certificate({
+      userId,
+      courseId,
+      studentName: user.userName,
+      courseName: course.title,
+      instructorName: instructor?.userName || "EduCore Instructor",
+      completionDate: new Date(),
+      issueDate: new Date(),
+      courseDuration: durationText,
+    });
+
+    await certificate.save();
+    return certificate;
+  } catch (error) {
+    console.error("Error generating certificate:", error);
+    return null;
+  }
+}
 
 // mark current lecture as viewed
 const markCurrentLectureAsViewed = async (req, res) => {
@@ -47,16 +94,23 @@ const markCurrentLectureAsViewed = async (req, res) => {
       progress.lecturesProgress.length === course.curriculum.length &&
       progress.lecturesProgress.every((item) => item.viewed);
 
+    let certificate = null;
     if (allLecturesViewed) {
       progress.completed = true;
       progress.completionDate = new Date();
       await progress.save();
+      
+      // Auto-generate certificate on completion
+      certificate = await generateCertificateOnCompletion(userId, courseId);
     }
 
     res.status(200).json({
       success: true,
-      message: "Lecture marked as viewed",
+      message: allLecturesViewed 
+        ? "Congratulations! Course completed. Certificate generated." 
+        : "Lecture marked as viewed",
       data: progress,
+      certificate: certificate ? certificate.certificateId : null,
     });
   } catch (error) {
     console.error(error);

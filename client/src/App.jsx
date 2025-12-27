@@ -41,6 +41,9 @@ import AssignmentSubmission from "./pages/student/AssignmentSubmission";
 import RouteTitleManager from "./components/common/RouteTitleManager";
 import AccountSettings from "./pages/student/AccountSettings";
 import ProfilePage from "./pages/student/profile";
+import CertificatesPage from "./pages/student/certificates";
+import CertificateViewPage from "./pages/student/certificates/CertificateView";
+import CertificateVerifyPage from "./pages/student/certificates/CertificateVerify";
 import Loader from "@/components/common/Loader";
 
 function App() {
@@ -100,6 +103,9 @@ function App() {
         {/* Newsletter public routes */}
         <Route path="/newsletter/confirm/:token" element={<ConfirmSubscription />} />
         <Route path="/newsletter/unsubscribe" element={<Unsubscribe />} />
+        
+        {/* Public certificate verification */}
+        <Route path="/certificate/verify/:certificateId" element={<CertificateVerifyPage />} />
         
         {/* Newsletter admin routes */}
         <Route
@@ -267,6 +273,8 @@ function App() {
             path="course-progress/:id"
             element={<StudentViewCourseProgressPage />}
           />
+          <Route path="certificates" element={<CertificatesPage />} />
+          <Route path="certificate/:certificateId" element={<CertificateViewPage />} />
           
           {/* Assessment routes for students */}
           <Route

@@ -1,4 +1,4 @@
-import { TvMinimalPlay, Menu, X, User as UserIcon, LogOut, ShoppingCart, LayoutDashboard } from "lucide-react";
+import { TvMinimalPlay, Menu, X, User as UserIcon, LogOut, ShoppingCart, LayoutDashboard, Award } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
 import { useContext, useState, useEffect, useRef } from "react";
@@ -174,6 +174,9 @@ function StudentViewCommonHeader() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onSelect={() => navigate("/student-courses")}>
                       <TvMinimalPlay className="mr-2 h-4 w-4" /> My learning
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => navigate("/certificates")}>
+                      <Award className="mr-2 h-4 w-4" /> My certificates
                     </DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => navigate("/cart")}>
                       <ShoppingCart className="mr-2 h-4 w-4" /> My cart
