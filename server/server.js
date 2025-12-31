@@ -14,6 +14,7 @@ import studentCartRoutes from "./routes/student-routes/cart-routes.js";
 import studentCourseProgressRoutes from "./routes/student-routes/course-progress-routes.js";
 import studentProfileRoutes from "./routes/student-routes/profile-routes.js";
 import videoDownloadRoutes from "./routes/student-routes/video-download-routes.js";
+import studentCertificateRoutes from "./routes/student-routes/certificate-routes.js";
 import commentRoutes from "./routes/student-routes/comment-routes.js";
 import chatRoutes from "./routes/chat-routes/index.js";
 import newsletterRoutes from "./routes/newsletter-routes/index.js";
@@ -24,6 +25,7 @@ import { startNewsletterScheduler } from "./helpers/newsletterScheduler.js";
 import { generalLimiter, authLimiter, apiLimiter, uploadLimiter } from "./middleware/rate-limit.js";
 import { sanitizeInput, validateRequestSize } from "./middleware/input-validation.js";
 import { apiSecurityHeaders } from "./middleware/security.js";
+import { ensureRedisConnected } from "./helpers/redisClient.js";
 
 // Environment variable validation
 const coreRequiredEnvVars = [
@@ -165,6 +167,10 @@ connect(MONGO_URI)
     console.log("MongoDB is connected");
     // Start the newsletter scheduler after database connection is established
     startNewsletterScheduler();
+    // Establish Redis connection in background (non-blocking)
+    ensureRedisConnected().catch((err) => {
+      console.warn("⚠️  Redis not connected (continuing without cache):", err?.message || err);
+    });
   })
   .catch((e) => console.log(e));
 
@@ -178,6 +184,7 @@ app.use("/api/v1/student/order", apiLimiter, studentViewOrderRoutes);
 app.use("/api/v1/student/courses-bought", apiLimiter, studentCoursesRoutes);
 app.use("/api/v1/student/course-progress", apiLimiter, studentCourseProgressRoutes);
 app.use("/api/v1/student/video", apiLimiter, videoDownloadRoutes);
+app.use("/api/v1/student/certificates", apiLimiter, studentCertificateRoutes);
 app.use("/api/v1/student", apiLimiter, studentProfileRoutes);
 app.use("/api/v1/comments", commentRoutes);
 app.use("/api/v1/chat", chatRoutes);

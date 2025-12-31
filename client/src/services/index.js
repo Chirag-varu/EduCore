@@ -12,6 +12,15 @@ export {
   markMessagesAsReadService
 } from "./chat-service.js";
 
+// Export all certificate services
+export {
+  getStudentCertificatesService,
+  getCertificateByCourseService,
+  generateCertificateService,
+  verifyCertificateService,
+  getCertificateByIdService
+} from "./certificateService.js";
+
 // Admin Services
 export async function getAllUsersService(params) {
   const { data } = await axiosInstance.get(`/admin/users`, { params });
