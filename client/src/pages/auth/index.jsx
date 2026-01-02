@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import auth_image from "@/assets/auth_image.jpg";
 import { GoogleLogin } from "@react-oauth/google";
+import { Loader2 } from "lucide-react";
 import ApiConfig from "@/lib/ApiConfig";
 import { signInFormControls, signUpFormControls } from "@/config";
 import GooglePasswordSetupDialog from "@/components/auth/GooglePasswordSetupDialog";
@@ -324,7 +325,14 @@ function AuthPage() {
 
                         {/* Submit */}
                         <Button type="submit" className="w-full" disabled={!checkIfSignUpFormIsValid() || loading}>
-                          {loading ? "Creating account..." : "Create account"}
+                          {loading ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Creating account...
+                            </>
+                          ) : (
+                            "Create account"
+                          )}
                         </Button>
 
                         {/* Switch to Login */}
