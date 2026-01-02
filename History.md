@@ -1,5 +1,54 @@
 # HISTORY.md
 
+# 1.16.0 / 2026-01-02
+- Feature: Google OAuth password setup flow - users can now set/create password after Google login
+- Feature: Student certificates - course completion certificates for students
+- Feature: Terraform deployment code for production + Valkey/AWS ElastiCache support
+- Feature: End-to-end course progress tracking with auth API, StudentContext, UI progress bar, and tests
+- Feature: Student profile page with inline social links editor (website, facebook, instagram, linkedin, tiktok, x, youtube)
+- Feature: Editable name and avatar on profile page with new backend endpoint
+- Feature: Idempotent course purchase flow to prevent double payments
+- Feature: Instructor ratings & reviews panel (Udemy-inspired) showing average rating, star distribution, and latest reviews
+- UI/UX: Toast notifications improved for sign-up page
+- UI/UX: Course page design improvements
+- UI/UX: Font changes and adjustments
+- UI/UX: Global route titles + dynamic course titles for tabs (details/progress pages)
+- Fix: Tab title corrections on Login/Sign Up/Forgot/Reset after navigation
+- Fix: "Please log in" issue on instructor dashboard - normalized userId and fixed analytics API path
+- Fix: Jest test failures by removing top-level await in Redis client
+- Fix: DB_NAME support added to seeder to resolve MongoDB case conflict
+- Security: Tightened password strength rules with improved a11y indicators
+- Security: Fixed ApiConfig BASE_URL/batch configuration
+- Auth: Standardized logout UX with reusable confirmation dialog
+- Maintenance: Documentation and history tracking updated
+
+Recent commits snapshot (2025-11-04 to 2026-01-02):
+- aaf7914 Merge pull request #4 from skymonil/main
+- 77e5d9e toast improved for sign up page
+- 911c2f7 course page design improve
+- 724565a all minor bug fixed and set, create password added for user with google login
+- 2e650dc Merge branch 'main' - Merging Terraform code
+- 63e5da9 Added Terraform code for deploy in prod + valkey package for AWS ElastiCache
+- 5d4c3e2 cert added
+- e8a1959 adjustment done
+- 252c98c certificate added for students
+- d340104 font changed
+- f378358 Fix Jest failure by removing top-level await in Redis client; add DB_NAME support
+- f618dfd Feature: End-to-end Course Progress (auth API, context, UI, tests, docs)
+- b86cb26 Implemented end-to-end Course Progress: auth API, StudentContext, UI bar, tests & docs
+- ab5877c Feature: Auth-Based Course Progress Tracking + UI Bar
+- 8b1865e implemented more backend routes
+- c605218 feat(profile): add /profile with inline links editor and editable name/avatar
+- 04958d0 feat(profile): add protected Profile page and inline social links editor
+- f5b87a6 feat(payments): add idempotent course purchase flow + social links to profile
+- d028cd0 fix(ui): global route titles + dynamic course titles; add edit/create title
+- a27ff43 fix(ui): global route titles + dynamic course titles (details/progress)
+- 90413e9 fix(title): correct tab title on Login/Sign Up/Forgot/Reset
+- 7bfb694 Adding Udemy-inspired Ratings & Reviews panel to instructor dashboard
+- 826c12e fix(client): resolve "Please log in" on instructor dashboard
+- fad0267 Tighten password strength rules, add a11y to indicators, fix ApiConfig
+- db64551 feat(auth/ui): standardize logout UX with reusable confirmation dialog
+
 # 1.15.6 / 2025-11-04
 - Added: Logout confirmation dialog using Radix AlertDialog; unified client-side logout via AuthContext and consistent redirect to `/auth`
 - Changed: Auth login flow on `client/src/pages/auth/index.jsx` now uses AuthContext for state + role-based redirects (student → `/home`, instructor → `/instructor`, admin → `/admin/newsletters`)
