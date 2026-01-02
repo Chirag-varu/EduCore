@@ -18,9 +18,16 @@ import {
   checkCoursePurchaseInfoService,
   fetchStudentViewCourseListService,
 } from "@/services";
-import { ArrowUpDownIcon } from "lucide-react";
+import { ArrowUpDownIcon, Filter, X, BookOpen, Clock, BarChart3 } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 function createSearchParamsHelper(filterParams) {
   const queryParams = [];
@@ -41,6 +48,7 @@ function StudentViewCoursesPage() {
   const [filters, setFilters] = useState({});
   const [searchParams, setSearchParams] = useSearchParams();
   const [enrolledCourses, setEnrolledCourses] = useState({});
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const {
     studentViewCoursesList,
     setStudentViewCoursesList,
@@ -49,6 +57,17 @@ function StudentViewCoursesPage() {
   } = useContext(StudentContext);
   const navigate = useNavigate();
   const { auth } = useContext(AuthContext);
+
+  // Count active filters
+  const activeFilterCount = Object.values(filters).reduce(
+    (count, arr) => count + (arr?.length || 0),
+    0
+  );
+
+  function clearAllFilters() {
+    setFilters({});
+    sessionStorage.removeItem("filters");
+  }
 
   function handleFilterOnChange(getSectionId, getCurrentOption) {
     let cpyFilters = { ...filters };
@@ -169,114 +188,222 @@ function StudentViewCoursesPage() {
 
   console.log(loadingState, "loadingState");
 
-  return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">All Courses</h1>
-      <div className="flex flex-col md:flex-row gap-4">
-        <aside className="w-full md:w-64 space-y-4">
-          <div>
-            {Object.keys(filterOptions).map((ketItem) => (
-              <div className="p-4 border-b" key={ketItem}>
-                <h3 className="font-bold mb-3">{ketItem.toUpperCase()}</h3>
-                <div className="grid gap-2 mt-2">
-                  {filterOptions[ketItem].map((option) => (
-                    <Label className="flex font-medium items-center gap-3" key={option.id}>
-                      <Checkbox
-                        checked={
-                          filters &&
-                          Object.keys(filters).length > 0 &&
-                          filters[ketItem] &&
-                          filters[ketItem].indexOf(option.id) > -1
-                        }
-                        onCheckedChange={() =>
-                          handleFilterOnChange(ketItem, option)
-                        }
-                      />
-                      {option.label}
-                    </Label>
-                  ))}
-                </div>
-              </div>
+  // Filter content component (reused in sidebar and mobile sheet)
+  const FilterContent = () => (
+    <div className="space-y-6">
+      {activeFilterCount > 0 && (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={clearAllFilters}
+          className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+        >
+          <X className="h-4 w-4 mr-2" />
+          Clear all filters ({activeFilterCount})
+        </Button>
+      )}
+      {Object.keys(filterOptions).map((keyItem) => (
+        <div className="space-y-3" key={keyItem}>
+          <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
+            {keyItem}
+          </h3>
+          <div className="space-y-2">
+            {filterOptions[keyItem].map((option) => (
+              <Label 
+                className="flex items-center gap-3 cursor-pointer hover:text-primary transition-colors" 
+                key={option.id}
+              >
+                <Checkbox
+                  checked={
+                    filters &&
+                    Object.keys(filters).length > 0 &&
+                    filters[keyItem] &&
+                    filters[keyItem].indexOf(option.id) > -1
+                  }
+                  onCheckedChange={() =>
+                    handleFilterOnChange(keyItem, option)
+                  }
+                />
+                <span className="text-sm font-medium">{option.label}</span>
+              </Label>
             ))}
           </div>
-        </aside>
-        <main className="flex-1">
-          <div className="flex justify-end items-center mb-4 gap-5">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2 p-5"
-                >
-                  <ArrowUpDownIcon className="h-4 w-4" />
-                  <span className="text-[16px] font-medium">Sort By</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[180px]">
-                <DropdownMenuRadioGroup
-                  value={sort}
-                  onValueChange={(value) => setSort(value)}
-                >
-                  {sortOptions.map((sortItem) => (
-                    <DropdownMenuRadioItem
-                      value={sortItem.id}
-                      key={sortItem.id}
-                    >
-                      {sortItem.label}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <span className="text-sm text-black font-bold">
-              {studentViewCoursesList.length} Results
-            </span>
-          </div>
-          <div className="space-y-4">
-            {studentViewCoursesList && studentViewCoursesList.length > 0 ? (
-              studentViewCoursesList.map((courseItem) => (
-                <Card
-                  onClick={() => handleCourseNavigate(courseItem?._id)}
-                  className="cursor-pointer"
-                  key={courseItem?._id}
-                >
-                  <CardContent className="flex gap-4 p-4">
-                    <div className="w-48 h-32 flex-shrink-0">
+        </div>
+      ))}
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header Section */}
+      <div className="border-b bg-card">
+        <div className="container mx-auto px-4 py-4 md:py-4">
+          {/* <h1 className="text-2xl md:text-3xl lg:text-3xl font-bold tracking-tight">
+            Explore Courses
+          </h1> */}
+          <p className="text-muted-foreground mt-2 text-sm md:text-base">
+            Discover courses that will help you grow your skills
+          </p>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+          {/* Desktop Sidebar */}
+          <aside className="hidden lg:block w-64 flex-shrink-0">
+            <div className="sticky top-4 bg-card rounded-lg border p-4">
+              <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                <Filter className="h-5 w-5" />
+                Filters
+              </h2>
+              <FilterContent />
+            </div>
+          </aside>
+
+          {/* Main Content */}
+          <main className="flex-1 min-w-0">
+            {/* Controls Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6 bg-card rounded-lg border p-3 md:p-4">
+              {/* Mobile Filter Button */}
+              <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm" className="lg:hidden">
+                    <Filter className="h-4 w-4 mr-2" />
+                    Filters
+                    {activeFilterCount > 0 && (
+                      <span className="ml-2 bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs">
+                        {activeFilterCount}
+                      </span>
+                    )}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-80 overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle className="flex items-center gap-2">
+                      <Filter className="h-5 w-5" />
+                      Filters
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <FilterContent />
+                  </div>
+                </SheetContent>
+              </Sheet>
+
+              {/* Results Count */}
+              <span className="text-sm text-muted-foreground order-last sm:order-none w-full sm:w-auto text-center sm:text-left">
+                <span className="font-semibold text-foreground">{studentViewCoursesList.length}</span> courses found
+              </span>
+
+              {/* Sort Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="ml-auto lg:ml-0">
+                    <ArrowUpDownIcon className="h-4 w-4 mr-2" />
+                    <span className="hidden sm:inline">Sort By</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuRadioGroup
+                    value={sort}
+                    onValueChange={(value) => setSort(value)}
+                  >
+                    {sortOptions.map((sortItem) => (
+                      <DropdownMenuRadioItem
+                        value={sortItem.id}
+                        key={sortItem.id}
+                        className="cursor-pointer"
+                      >
+                        {sortItem.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Course Grid */}
+            {loadingState ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} className="overflow-hidden">
+                    <Skeleton className="w-full h-40 md:h-48" />
+                    <CardContent className="p-4 space-y-3">
+                      <Skeleton className="h-6 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-4 w-full" />
+                      <div className="flex justify-between pt-2">
+                        <Skeleton className="h-6 w-16" />
+                        <Skeleton className="h-9 w-24" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : studentViewCoursesList && studentViewCoursesList.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+                {studentViewCoursesList.map((courseItem) => (
+                  <Card
+                    onClick={() => handleCourseNavigate(courseItem?._id)}
+                    className="cursor-pointer group overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                    key={courseItem?._id}
+                  >
+                    {/* Course Thumbnail */}
+                    <div className="relative aspect-video overflow-hidden bg-muted">
                       <img
                         src={courseItem?.thumbnail}
-                        className="w-ful h-full object-cover"
+                        alt={courseItem?.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
+                      {enrolledCourses[courseItem?._id] && (
+                        <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                          Enrolled
+                        </div>
+                      )}
                     </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-xl mb-2">
+
+                    <CardContent className="p-4">
+                      {/* Title */}
+                      <CardTitle className="text-base md:text-lg font-semibold line-clamp-2 mb-2 group-hover:text-primary transition-colors">
                         {courseItem?.title}
                       </CardTitle>
-                      <p className="text-sm text-gray-600 mb-1">
-                        Created By{" "}
+
+                      {/* Instructor */}
+                      <p className="text-sm text-muted-foreground mb-3">
+                        By{" "}
                         <Link
                           to={`/instructor/${courseItem?.instructorId}`}
-                          className="font-bold text-blue-600 hover:underline"
-                          onClick={e => e.stopPropagation()}
+                          className="font-medium text-primary hover:underline"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           {courseItem?.instructorName}
                         </Link>
                       </p>
-                      <p className="text-[16px] text-gray-600 mt-3 mb-2">
-                        {`${courseItem?.curriculum?.length} ${
-                          courseItem?.curriculum?.length <= 1
-                            ? "Lecture"
-                            : "Lectures"
-                        } - ${courseItem?.level.toUpperCase()} Level`}
-                      </p>
-                      <div className="flex justify-between items-center mb-3">
-                        <p className="font-bold text-lg">
+
+                      {/* Course Stats */}
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mb-4">
+                        <span className="flex items-center gap-1">
+                          <BookOpen className="h-3.5 w-3.5" />
+                          {courseItem?.curriculum?.length || 0}{" "}
+                          {courseItem?.curriculum?.length <= 1 ? "Lecture" : "Lectures"}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <BarChart3 className="h-3.5 w-3.5" />
+                          {courseItem?.level}
+                        </span>
+                      </div>
+
+                      {/* Price & Action */}
+                      <div className="flex items-center justify-between pt-3 border-t">
+                        <p className="text-lg md:text-xl font-bold text-primary">
                           ${courseItem?.price}
                         </p>
-                        {enrolledCourses[courseItem?._id] && (
-                          <Button 
-                            variant="outline" 
-                            className="bg-green-100 text-green-700 hover:bg-green-200 border-green-300"
+                        
+                        {enrolledCourses[courseItem?._id] ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-green-50 text-green-700 hover:bg-green-100 border-green-200"
                             onClick={(e) => {
                               e.stopPropagation();
                               navigate(`/course-progress/${courseItem?._id}`);
@@ -284,30 +411,37 @@ function StudentViewCoursesPage() {
                           >
                             Continue
                           </Button>
+                        ) : (
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <AddToCartButton
+                              course={courseItem}
+                              size="sm"
+                            />
+                          </div>
                         )}
                       </div>
-                      
-                      {/* Add to Cart button for non-enrolled courses */}
-                      {!enrolledCourses[courseItem?._id] && (
-                        <div onClick={(e) => e.stopPropagation()}>
-                          <AddToCartButton 
-                            course={courseItem} 
-                            size="sm"
-                            className="w-full"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : loadingState ? (
-              <Skeleton />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             ) : (
-              <h1 className="font-extrabold text-4xl">No Courses Found</h1>
+              <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                <div className="bg-muted rounded-full p-6 mb-4">
+                  <BookOpen className="h-12 w-12 text-muted-foreground" />
+                </div>
+                <h2 className="text-xl md:text-2xl font-semibold mb-2">No Courses Found</h2>
+                <p className="text-muted-foreground mb-4 max-w-md">
+                  We couldn't find any courses matching your filters. Try adjusting your search criteria.
+                </p>
+                {activeFilterCount > 0 && (
+                  <Button variant="outline" onClick={clearAllFilters}>
+                    Clear all filters
+                  </Button>
+                )}
+              </div>
             )}
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );
