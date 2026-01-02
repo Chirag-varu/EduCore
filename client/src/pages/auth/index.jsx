@@ -12,6 +12,7 @@ import auth_image from "@/assets/auth_image.jpg";
 import { GoogleLogin } from "@react-oauth/google";
 import ApiConfig from "@/lib/ApiConfig";
 import { signInFormControls, signUpFormControls } from "@/config";
+import GooglePasswordSetupDialog from "@/components/auth/GooglePasswordSetupDialog";
 
 function AuthPage() {
   // Page title
@@ -37,6 +38,11 @@ function AuthPage() {
     student: "/home",
     admin: "/admin/newsletters",
   };
+
+  // State for Google password setup dialog
+  const [showPasswordSetup, setShowPasswordSetup] = useState(false);
+  const [googleUserEmail, setGoogleUserEmail] = useState("");
+  const [pendingGoogleUser, setPendingGoogleUser] = useState(null);
 
   const handleSignIn = async (e) => {
     e.preventDefault();
@@ -87,19 +93,30 @@ function AuthPage() {
           localStorage.setItem("user", JSON.stringify(response.data.user));
         }
 
-        // Update auth context
-        if (handleGoogleLogin) {
-          await handleGoogleLogin(response);
+        const user = response?.data?.user;
+        
+        // Check if new user needs to set password
+        if (response.data?.needsPasswordSetup) {
+          // DON'T update auth context yet - we need to stay on this page for password setup
+          setGoogleUserEmail(user?.userEmail || "");
+          setPendingGoogleUser(user);
+          setShowPasswordSetup(true);
+          toast({
+            title: "🎉 Account created!",
+            description: "Please create a password to secure your account.",
+          });
+        } else {
+          // Update auth context only for existing users (no password setup needed)
+          if (handleGoogleLogin) {
+            await handleGoogleLogin(response);
+          }
+          toast({
+            title: "✅ Google login successful",
+            description: "Welcome back to EduCore!",
+          });
+          const redirectPath = roleRedirects[user?.role] || "/home";
+          navigate(redirectPath, { replace: true });
         }
-
-        toast({
-          title: "✅ Google login successful",
-          description: "Welcome to EduCore!",
-        });
-
-        const user = response?.data?.user || JSON.parse(localStorage.getItem("user"));
-        const redirectPath = roleRedirects[user?.role] || "/home";
-        navigate(redirectPath, { replace: true });
       } else {
         toast({
           title: "❌ Google login failed",
@@ -114,6 +131,26 @@ function AuthPage() {
         variant: "destructive",
       });
     }
+  };
+
+  const handlePasswordSetupComplete = (updatedUser) => {
+    // Now update auth context after password is set/skipped
+    const user = updatedUser || pendingGoogleUser;
+    const token = localStorage.getItem("token");
+    
+    // Manually set auth state
+    if (handleGoogleLogin) {
+      handleGoogleLogin({
+        success: true,
+        data: {
+          accessToken: token,
+          user: user,
+        }
+      });
+    }
+    
+    const redirectPath = roleRedirects[user?.role] || "/home";
+    navigate(redirectPath, { replace: true });
   };
 
   const checkIfSignInFormIsValid = () =>
@@ -131,11 +168,11 @@ function AuthPage() {
 
       if (response?.success) {
         toast({
-          title: "✅ Registration successful",
-          description: "We sent an OTP to your email. Please verify your account.",
+          title: "📧 OTP Sent",
+          description: "We've sent a verification code to your email.",
         });
-        // After successful registration, guide user back to Login tab
-        setActiveTab("login");
+        // Navigate to signup page for OTP verification
+        navigate("/auth/signup", { state: { step: 2, email: signUpFormData.userEmail } });
       } else {
         toast({
           title: "❌ Registration failed",
@@ -334,6 +371,14 @@ function AuthPage() {
           </div>
         </div>
       </div>
+
+      {/* Google Password Setup Dialog */}
+      <GooglePasswordSetupDialog
+        isOpen={showPasswordSetup}
+        onClose={() => setShowPasswordSetup(false)}
+        onSuccess={handlePasswordSetupComplete}
+        userEmail={googleUserEmail}
+      />
     </div>
   );
 }

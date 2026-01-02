@@ -245,17 +245,22 @@ const googleLogin = async (req, res) => {
 
     // Check if user exists or create new user
     let user = await User.findOne({ userEmail: payload.email });
+    let isNewUser = false;
+    
     if (!user) {
-      const password = "password"; // Use "password" as password for simplicity
-      const hashPassword = await hash(password, 10);
+      isNewUser = true;
+      // Create user without password - they'll set it later
       user = new User({
         userName: payload.name,
         userEmail: payload.email,
         role: "student",
-        password: hashPassword,
+        isGoogleUser: true,
+        needsPasswordSetup: true,
+        avatarUrl: payload.picture || "",
       });
       await user.save();
     }
+    
     // Generate JWT token
     const accessToken = sign(
       {
@@ -270,7 +275,7 @@ const googleLogin = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Logged in successfully",
+      message: isNewUser ? "Account created successfully" : "Logged in successfully",
       data: {
         accessToken,
         user: {
@@ -278,7 +283,11 @@ const googleLogin = async (req, res) => {
           userName: user.userName,
           userEmail: user.userEmail,
           role: user.role,
+          isGoogleUser: user.isGoogleUser,
+          needsPasswordSetup: user.needsPasswordSetup,
         },
+        isNewUser,
+        needsPasswordSetup: user.needsPasswordSetup,
       },
     });
   } catch (error) {
@@ -335,4 +344,101 @@ const loginUser = async (req, res) => {
   }
 };
 
-export default { registerUser, loginUser, googleLogin, verifyUser, chekAuth, forgotPassword, resetPassword };
+// Set password for Google users
+const setGoogleUserPassword = async (req, res) => {
+  try {
+    const { password } = req.body;
+    const userId = req.user._id;
+
+    // Validate password strength
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: passwordValidation.message,
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (!user.isGoogleUser) {
+      return res.status(400).json({
+        success: false,
+        message: "This endpoint is only for Google users",
+      });
+    }
+
+    const hashedPassword = await hash(password, 10);
+    user.password = hashedPassword;
+    user.needsPasswordSetup = false;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password set successfully",
+      data: {
+        user: {
+          _id: user._id,
+          userName: user.userName,
+          userEmail: user.userEmail,
+          role: user.role,
+          isGoogleUser: user.isGoogleUser,
+          needsPasswordSetup: false,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Set Google User Password Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to set password",
+    });
+  }
+};
+
+// Skip password setup for Google users
+const skipPasswordSetup = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    user.needsPasswordSetup = false;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password setup skipped",
+      data: {
+        user: {
+          _id: user._id,
+          userName: user.userName,
+          userEmail: user.userEmail,
+          role: user.role,
+          isGoogleUser: user.isGoogleUser,
+          needsPasswordSetup: false,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Skip Password Setup Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to skip password setup",
+    });
+  }
+};
+
+export default { registerUser, loginUser, googleLogin, verifyUser, chekAuth, forgotPassword, resetPassword, setGoogleUserPassword, skipPasswordSetup };

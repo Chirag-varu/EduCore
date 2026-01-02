@@ -23,7 +23,7 @@ const UserSchema = new Schema({
   },
   password: {
     type: String,
-    required: [true, 'Password is required'],
+    required: [function() { return !this.isGoogleUser; }, 'Password is required'],
     minlength: [8, 'Password must be at least 8 characters long']
   },
   role: {
@@ -31,6 +31,14 @@ const UserSchema = new Schema({
     required: [true, 'User role is required'],
     enum: ['student', 'instructor', 'admin'],
     default: 'student'
+  },
+  isGoogleUser: {
+    type: Boolean,
+    default: false
+  },
+  needsPasswordSetup: {
+    type: Boolean,
+    default: false
   },
   resetToken: { 
     type: String,

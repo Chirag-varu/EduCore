@@ -1,4 +1,14 @@
 import User from "../../models/User.js";
+import StudentCourses from "../../models/StudentCourses.js";
+import CourseProgress from "../../models/CourseProgress.js";
+import Cart from "../../models/Cart.js";
+import Order from "../../models/Order.js";
+import CourseComment from "../../models/CourseComment.js";
+import Certificate from "../../models/Certificate.js";
+import QuizAttempt from "../../models/QuizAttempt.js";
+import AssignmentSubmission from "../../models/AssignmentSubmission.js";
+import Chat from "../../models/Chat.js";
+import NewsletterSubscription from "../../models/NewsletterSubscription.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -115,4 +125,46 @@ export const updateBasicProfile = async (req, res) => {
   }
 };
 
-export default { updateProfileLinks, updateBasicProfile };
+// Delete student account and all associated data
+export const deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user?.userId || req.user?._id;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Only allow students to delete their own accounts via this endpoint
+    if (user.role !== "student") {
+      return res.status(403).json({ success: false, message: "Only student accounts can be deleted via this endpoint" });
+    }
+
+    // Delete all associated data
+    await Promise.all([
+      StudentCourses.deleteMany({ userId }),
+      CourseProgress.deleteMany({ userId }),
+      Cart.deleteMany({ userId }),
+      Order.deleteMany({ userId }),
+      CourseComment.deleteMany({ userId }),
+      Certificate.deleteMany({ userId }),
+      QuizAttempt.deleteMany({ userId }),
+      AssignmentSubmission.deleteMany({ studentId: userId }),
+      Chat.deleteMany({ $or: [{ senderId: userId }, { receiverId: userId }] }),
+      NewsletterSubscription.deleteMany({ email: user.userEmail }),
+    ]);
+
+    // Delete the user
+    await User.findByIdAndDelete(userId);
+
+    return res.json({ success: true, message: "Account deleted successfully" });
+  } catch (error) {
+    console.error("Delete account error:", error);
+    return res.status(500).json({ success: false, message: "Failed to delete account" });
+  }
+};
+
+export default { updateProfileLinks, updateBasicProfile, deleteAccount };

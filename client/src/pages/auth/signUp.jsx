@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AuthContext } from "@/context/auth-context";
 import { useContext, useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import EduCore_Logo from "@/assets/logoImg.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,8 +10,12 @@ import { Label } from "@/components/ui/label";
 import auth_image from "@/assets/auth_image.jpg";
 import { GoogleLogin } from "@react-oauth/google";
 import PasswordStrengthIndicator from "@/components/ui/password-strength-indicator";
+import GooglePasswordSetupDialog from "@/components/auth/GooglePasswordSetupDialog";
+import ApiConfig from "@/lib/ApiConfig";
 
 function Sign_up() {
+  const location = useLocation();
+  
   useEffect(() => {
     document.title = "Sign Up — EduCore";
   }, []);
@@ -20,13 +24,98 @@ function Sign_up() {
     setSignUpFormData,
     handleRegisterUser,
     handleOTPVerification,
-    // handleGoogleLogin, // Not used in this component
+    handleGoogleLogin,
   } = useContext(AuthContext);
 
   const { toast } = useToast();
-  const [registrationStep, setRegistrationStep] = useState(1); // 1 = registration form, 2 = OTP verification
+  const navigate = useNavigate();
+  // Check if navigated from auth page with OTP already sent
+  const initialStep = location.state?.step === 2 ? 2 : 1;
+  const [registrationStep, setRegistrationStep] = useState(initialStep); // 1 = registration form, 2 = OTP verification
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Google password setup state
+  const [showPasswordSetup, setShowPasswordSetup] = useState(false);
+  const [googleUserEmail, setGoogleUserEmail] = useState("");
+  const [pendingGoogleUser, setPendingGoogleUser] = useState(null);
+
+  const roleRedirects = {
+    instructor: "/instructor",
+    student: "/home",
+    admin: "/admin/newsletters",
+  };
+
+  const googleLoginSuccess = async (credential) => {
+    try {
+      const response = await ApiConfig.auth.googleLogin(credential);
+
+      if (ApiConfig.isSuccessResponse(response)) {
+        if (response.data?.accessToken) {
+          localStorage.setItem("token", response.data.accessToken);
+        }
+        if (response.data?.user) {
+          localStorage.setItem("user", JSON.stringify(response.data.user));
+        }
+
+        const user = response?.data?.user;
+        
+        if (response.data?.needsPasswordSetup) {
+          // DON'T update auth context yet - we need to stay on this page for password setup
+          setGoogleUserEmail(user?.userEmail || "");
+          setPendingGoogleUser(user);
+          setShowPasswordSetup(true);
+          toast({
+            title: "🎉 Account created!",
+            description: "Please create a password to secure your account.",
+          });
+        } else {
+          // Update auth context only for existing users (no password setup needed)
+          if (handleGoogleLogin) {
+            await handleGoogleLogin(response);
+          }
+          toast({
+            title: "✅ Google login successful",
+            description: "Welcome back to EduCore!",
+          });
+          const redirectPath = roleRedirects[user?.role] || "/home";
+          navigate(redirectPath, { replace: true });
+        }
+      } else {
+        toast({
+          title: "❌ Google login failed",
+          description: ApiConfig.getErrorMessage(response),
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "❌ Error",
+        description: error.message || "Failed to authenticate with Google",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePasswordSetupComplete = (updatedUser) => {
+    // Now update auth context after password is set/skipped
+    const user = updatedUser || pendingGoogleUser;
+    const token = localStorage.getItem("token");
+    
+    // Manually set auth state
+    if (handleGoogleLogin) {
+      handleGoogleLogin({
+        success: true,
+        data: {
+          accessToken: token,
+          user: user,
+        }
+      });
+    }
+    
+    const redirectPath = roleRedirects[user?.role] || "/home";
+    navigate(redirectPath, { replace: true });
+  };
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -351,12 +440,19 @@ function Sign_up() {
                 >
                   Privacy Policy
                 </a>
-                .
-              </div>
+              .              </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Google Password Setup Dialog */}
+      <GooglePasswordSetupDialog
+        isOpen={showPasswordSetup}
+        onClose={() => setShowPasswordSetup(false)}
+        onSuccess={handlePasswordSetupComplete}
+        userEmail={googleUserEmail}
+      />
     </div>
   );
 }

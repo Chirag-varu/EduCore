@@ -94,6 +94,16 @@ export async function loginService(formData) {
   return data;
 }
 
+export async function setGoogleUserPasswordService(password) {
+  const { data } = await axiosInstance.post("/auth/google/set-password", { password });
+  return data;
+}
+
+export async function skipPasswordSetupService() {
+  const { data } = await axiosInstance.post("/auth/google/skip-password");
+  return data;
+}
+
 export async function checkAuthService() {
   const { setAuth } = useContext(AuthContext);
   const { data } = await axiosInstance.get("/auth/check-auth");
@@ -346,6 +356,20 @@ export async function updateStudentBasicProfileService({ userName, avatarFile })
       throw new Error(error.response.data.message);
     } else {
       throw new Error("Failed to update profile. Please try again.");
+    }
+  }
+}
+
+// Delete student account
+export async function deleteStudentAccountService() {
+  try {
+    const { data } = await axiosInstance.delete(`/student/delete-account`);
+    return data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data.message);
+    } else {
+      throw new Error("Failed to delete account. Please try again.");
     }
   }
 }

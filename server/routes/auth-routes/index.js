@@ -2,7 +2,7 @@ import { Router } from "express";
 import authController from "../../controllers/auth-controller/index.js";
 import authenticateMiddleware from "../../middleware/auth-middleware.js";
 import { authLimiter, passwordResetLimiter } from "../../middleware/rate-limit.js";
-const { registerUser, loginUser, googleLogin, verifyUser, chekAuth, forgotPassword, resetPassword } = authController;
+const { registerUser, loginUser, googleLogin, verifyUser, chekAuth, forgotPassword, resetPassword, setGoogleUserPassword, skipPasswordSetup } = authController;
 const router = Router();
 
 // Apply rate limiting to authentication endpoints
@@ -10,6 +10,8 @@ router.post("/register", authLimiter, registerUser);
 router.post("/verifyUser", authLimiter, verifyUser);
 router.post("/login", authLimiter, loginUser);
 router.post("/google/login", authLimiter, googleLogin);
+router.post("/google/set-password", authenticateMiddleware, setGoogleUserPassword);
+router.post("/google/skip-password", authenticateMiddleware, skipPasswordSetup);
 router.get("/check-auth", authenticateMiddleware, chekAuth);
 
 // Apply stricter rate limiting to password reset endpoints
