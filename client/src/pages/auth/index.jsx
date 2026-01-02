@@ -43,6 +43,7 @@ function AuthPage() {
   const [showPasswordSetup, setShowPasswordSetup] = useState(false);
   const [googleUserEmail, setGoogleUserEmail] = useState("");
   const [pendingGoogleUser, setPendingGoogleUser] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSignIn = async (e) => {
     e.preventDefault();
@@ -163,6 +164,7 @@ function AuthPage() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const response = await handleRegisterUser();
 
@@ -187,6 +189,8 @@ function AuthPage() {
         description: error.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -319,8 +323,8 @@ function AuthPage() {
                         ))}
 
                         {/* Submit */}
-                        <Button type="submit" className="w-full" disabled={!checkIfSignUpFormIsValid()}>
-                          Create account
+                        <Button type="submit" className="w-full" disabled={!checkIfSignUpFormIsValid() || loading}>
+                          {loading ? "Creating account..." : "Create account"}
                         </Button>
 
                         {/* Switch to Login */}
