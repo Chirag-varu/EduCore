@@ -131,9 +131,10 @@ function Sign_up() {
         });
         setRegistrationStep(2);
       } else {
+        // Show the actual error message from backend
         toast({
-          title: "❌ Failed to Send OTP",
-          description: res?.message || "Something went wrong. Try again.",
+          title: "❌ Registration Failed",
+          description: res?.message || "Please check your input and try again.",
           variant: "destructive",
         });
       }

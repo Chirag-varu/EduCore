@@ -75,11 +75,16 @@ export async function registerService(formData) {
     });
     return data;
   } catch (error) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message);
-    } else {
-      throw new Error("Registration failed. Please try again.");
-    }
+    // Extract error message from backend response
+    const errorMessage = error.response?.data?.message 
+      || error.message 
+      || "Registration failed. Please try again.";
+    
+    // Return error object instead of throwing for consistent handling
+    return {
+      success: false,
+      message: errorMessage,
+    };
   }
 }
 

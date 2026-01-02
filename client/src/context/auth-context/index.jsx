@@ -31,12 +31,16 @@ export default function AuthProvider({ children }) {
 
   async function handleRegisterUser() {
     try {
-      return await registerService(signUpFormData);
+      const result = await registerService(signUpFormData);
+      return result; // Return the result (success or error object)
     } catch (error) {
       console.error("Registration failed:", error);
-      throw error; // Re-throw the error to be handled in the component
+      // Return error object for consistent handling
+      return {
+        success: false,
+        message: error.message || "Registration failed. Please try again.",
+      };
     }
-    // return await registerService(signUpFormData);
   }
 
   async function handleOTPVerification(otpData) {

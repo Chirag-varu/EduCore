@@ -174,9 +174,10 @@ function AuthPage() {
         // Navigate to signup page for OTP verification
         navigate("/auth/signup", { state: { step: 2, email: signUpFormData.userEmail } });
       } else {
+        // Show the actual error message from backend
         toast({
           title: "❌ Registration failed",
-          description: response?.message || "Please try again.",
+          description: response?.message || "Please check your input and try again.",
           variant: "destructive",
         });
       }
