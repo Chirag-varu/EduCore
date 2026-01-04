@@ -1,6 +1,4 @@
-import pkg from "paypal-rest-sdk";
-
-const paypal = pkg;
+import paypal from "paypal-rest-sdk";
 
 paypal.configure({
   mode: "sandbox", // or "live"
@@ -8,4 +6,5 @@ paypal.configure({
   client_secret: process.env.PAYPAL_SECRET_ID,
 });
 
-export default paypal;
+// Export the payment object for creating/executing payments
+export default paypal.payment;

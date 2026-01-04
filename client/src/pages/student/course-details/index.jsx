@@ -96,6 +96,12 @@ function StudentViewCourseDetailsPage() {
     setBuying(true);
     const key = orderKey || genKey();
     setOrderKey(key);
+    
+    // Ensure courseId is a string
+    const courseIdStr = typeof studentViewCourseDetails?._id === 'object'
+      ? studentViewCourseDetails._id.toString()
+      : String(studentViewCourseDetails?._id);
+    
     const paymentPayload = {
       userId: auth?.user?._id,
       userName: auth?.user?.userName,
@@ -110,7 +116,7 @@ function StudentViewCourseDetailsPage() {
       instructorName: studentViewCourseDetails?.instructorName,
       courseImage: studentViewCourseDetails?.thumbnail,
       courseTitle: studentViewCourseDetails?.title,
-      courseId: studentViewCourseDetails?._id,
+      courseId: courseIdStr,
       coursePricing: studentViewCourseDetails?.price,
     };
 
@@ -120,7 +126,7 @@ function StudentViewCourseDetailsPage() {
     if (response.success) {
       sessionStorage.setItem(
         "currentOrderId",
-        JSON.stringify(response?.data?.orderId)
+        String(response?.data?.orderId)
       );
       setApprovalUrl(response?.data?.approveUrl);
     }

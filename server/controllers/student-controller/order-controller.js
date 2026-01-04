@@ -39,6 +39,31 @@ const createOrder = async (req, res) => {
       coursePricing,
     } = req.body;
 
+    // Helper function to extract string ID from various formats
+    const extractIdString = (id) => {
+      if (!id) return '';
+      if (typeof id === 'string') return id;
+      if (id.$oid) return id.$oid; // MongoDB Extended JSON format
+      if (id._id) return extractIdString(id._id);
+      if (typeof id.toString === 'function' && id.toString() !== '[object Object]') {
+        return id.toString();
+      }
+      return '';
+    };
+
+    // Ensure courseId is a valid string
+    const courseIdStr = extractIdString(courseId);
+    
+    if (!courseIdStr || courseIdStr === '[object Object]') {
+      console.error("Invalid courseId received:", courseId);
+      return res.status(400).json({
+        success: false,
+        message: "Invalid course ID. Please try again.",
+      });
+    }
+    
+    console.log("Creating order with courseId:", courseIdStr);
+
     const create_payment_json = {
       intent: "sale",
       payer: {
@@ -54,7 +79,7 @@ const createOrder = async (req, res) => {
             items: [
               {
                 name: courseTitle,
-                sku: courseId,
+                sku: courseIdStr,
                 price: coursePricing,
                 currency: "USD",
                 quantity: 1,
@@ -96,7 +121,7 @@ const createOrder = async (req, res) => {
           instructorName,
           courseImage,
           courseTitle,
-          courseId,
+          courseId: courseIdStr,  // Use the sanitized string version
           coursePricing,
           idempotencyKey: idempotencyKey || undefined,
           approvalUrl: approveUrl,
@@ -126,12 +151,26 @@ const capturePaymentAndFinalizeOrder = async (req, res) => {
   try {
     const { paymentId, payerId, orderId } = req.body;
 
+    console.log("Capture payment request:", { paymentId, payerId, orderId });
+
     let order = await Order.findById(orderId);
 
     if (!order) {
       return res.status(404).json({
         success: false,
         message: "Order can not be found",
+      });
+    }
+
+    console.log("Order found:", { courseId: order.courseId, courseTitle: order.courseTitle });
+
+    // Validate courseId - it should be a valid ObjectId string
+    const courseIdStr = String(order.courseId);
+    if (!courseIdStr || courseIdStr === "[object Object]" || courseIdStr.includes(",")) {
+      console.error("Invalid courseId in order:", order.courseId);
+      return res.status(400).json({
+        success: false,
+        message: "Invalid course ID in order. Please create a new order.",
       });
     }
 
@@ -142,22 +181,28 @@ const capturePaymentAndFinalizeOrder = async (req, res) => {
 
     await order.save();
 
-    //update out student course model
+    //update student course model - prevent duplicates
     const studentCourses = await StudentCourses.findOne({
       userId: order.userId,
     });
 
     if (studentCourses) {
-      studentCourses.courses.push({
-        courseId: order.courseId,
-        title: order.courseTitle,
-        instructorId: order.instructorId,
-        instructorName: order.instructorName,
-        dateOfPurchase: order.orderDate,
-        courseImage: order.courseImage,
-      });
-
-      await studentCourses.save();
+      // Check if course already exists to prevent duplicates
+      const courseExists = studentCourses.courses.some(
+        (course) => course.courseId === order.courseId
+      );
+      
+      if (!courseExists) {
+        studentCourses.courses.push({
+          courseId: order.courseId,
+          title: order.courseTitle,
+          instructorId: order.instructorId,
+          instructorName: order.instructorName,
+          dateOfPurchase: order.orderDate,
+          courseImage: order.courseImage,
+        });
+        await studentCourses.save();
+      }
     } else {
       const newStudentCourses = new StudentCourses({
         userId: order.userId,
@@ -194,7 +239,7 @@ const capturePaymentAndFinalizeOrder = async (req, res) => {
       data: order,
     });
   } catch (err) {
-    console.log(err);
+    console.error("capturePaymentAndFinalizeOrder error:", err);
     res.status(500).json({
       success: false,
       message: "Some error occured!",

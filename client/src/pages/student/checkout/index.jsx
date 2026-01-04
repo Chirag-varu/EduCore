@@ -36,11 +36,40 @@ export default function CheckoutPage() {
   const handlePayPalPayment = async () => {
     if (!auth?.user?._id || !cart?.items?.length) return;
 
+    // Currently, we only support single course checkout
+    // For multiple courses, we need to process them one by one
+    if (cart.items.length > 1) {
+      toast({
+        title: "Multiple Courses",
+        description: "Please purchase courses one at a time. Remove extra courses from cart.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const courseItem = cart.items[0];
+    
+    // Extract courseId as string - handle various MongoDB ObjectId formats
+    const extractId = (id) => {
+      if (!id) return '';
+      if (typeof id === 'string') return id;
+      if (id.$oid) return id.$oid; // MongoDB Extended JSON format
+      if (id._id) return extractId(id._id);
+      if (typeof id.toString === 'function') return id.toString();
+      return String(id);
+    };
+    
+    const courseIdString = extractId(courseItem.courseId);
+    const instructorIdString = extractId(courseItem.instructorId);
+
+    console.log("Cart item:", courseItem);
+    console.log("Extracted courseId:", courseIdString);
+
     try {
       setProcessing(true);
-      const idKey = `checkout:${auth.user._id}:${cart.items.map(i=>i.courseId).join('-')}:${Date.now()}`;
+      const idKey = `checkout:${auth.user._id}:${courseIdString}:${Date.now()}`;
 
-      // Create a combined order for all cart items
+      // Create order for single course
       const paymentPayload = {
         userId: auth.user._id,
         userName: auth.user.userName,
@@ -51,24 +80,22 @@ export default function CheckoutPage() {
         orderDate: new Date(),
         paymentId: "",
         payerId: "",
-        // For multiple items, we'll use the first instructor as primary
-        // In a real scenario, you might want to split orders by instructor
-        instructorId: cart.items[0].instructorId,
-        instructorName: cart.items[0].instructorName,
-        courseImage: cart.items[0].courseImage,
-        courseTitle: `${cart.items.length} Course${cart.items.length > 1 ? 's' : ''}`,
-        courseId: cart.items.map(item => item.courseId).join(','), // Multiple course IDs
-        coursePricing: cart.totalPrice,
-        cartItems: cart.items, // Send all cart items
-        isCartCheckout: true // Flag to indicate this is a cart checkout
+        instructorId: instructorIdString,
+        instructorName: courseItem.instructorName,
+        courseImage: courseItem.courseImage,
+        courseTitle: courseItem.courseTitle || courseItem.title,
+        courseId: courseIdString,
+        coursePricing: courseItem.coursePrice || courseItem.price,
       };
+
+      console.log("Payment payload:", paymentPayload);
 
   const response = await createPaymentService(paymentPayload, idKey);
 
       if (response.success) {
         sessionStorage.setItem(
           "currentOrderId",
-          JSON.stringify(response.data.orderId)
+          String(response.data.orderId)
         );
         sessionStorage.setItem(
           "cartCheckout",
