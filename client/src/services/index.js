@@ -409,3 +409,35 @@ export async function checkItemInCartService(courseId) {
   const { data } = await axiosInstance.get(`/student/cart/check/${courseId}`);
   return data;
 }
+
+// Completion Quiz Services
+export async function getCompletionQuizService(courseId) {
+  const { data } = await axiosInstance.get(`/student/completion/course/${courseId}/quiz`);
+  return data;
+}
+
+export async function startQuizAttemptService(quizId) {
+  const { data } = await axiosInstance.post(`/student/completion/quiz/${quizId}/start`);
+  return data;
+}
+
+export async function submitQuizService(attemptId, answers) {
+  const { data } = await axiosInstance.post(`/student/completion/attempt/${attemptId}/submit`, { answers });
+  return data;
+}
+
+export async function getQuizAttemptsService(courseId) {
+  const { data } = await axiosInstance.get(`/student/completion/course/${courseId}/attempts`);
+  return data;
+}
+
+export async function getUserCertificatesService() {
+  const { data } = await axiosInstance.get(`/student/completion/certificates`);
+  return data;
+}
+
+export async function verifyCertificateByIdService(certificateId) {
+  const { data } = await axiosInstance.get(`/student/completion/certificate/${certificateId}`);
+  return data;
+}
+

@@ -28,7 +28,7 @@ import {
   generateCertificateService,
 } from "@/services";
 import { updateLectureViewed as updateLectureViewedV2, resetCourseProgress as resetCourseProgressV2 } from "@/services/courseProgress";
-import { Check, ChevronLeft, ChevronRight, Play, Award } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Play, Award, GraduationCap } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import Confetti from "react-confetti";
 import { useNavigate, useParams } from "react-router-dom";
@@ -578,24 +578,30 @@ function StudentViewCourseProgressPage() {
         </DialogContent>
       </Dialog>
       <Dialog open={showCourseCompleteDialog}>
-        <DialogContent showOverlay={false} className="sm:w-[425px]">
+        <DialogContent showOverlay={false} className="sm:w-[450px]">
           <DialogHeader>
             <DialogTitle>🎉 Congratulations!</DialogTitle>
             <DialogDescription className="flex flex-col gap-4">
-              <Label className="text-base">You have completed the course!</Label>
+              <Label className="text-base">You have completed all lectures!</Label>
               <p className="text-sm text-muted-foreground">
-                {generatingCertificate 
-                  ? "Generating your certificate..." 
-                  : "Your certificate is ready to view and download."}
+                Take the completion quiz to earn your certificate. You need to score at least 35% to pass.
               </p>
               <div className="flex flex-row gap-3 flex-wrap">
                 <Button 
+                  onClick={() => navigate(`/completion-quiz/${studentCurrentCourseProgress?.courseDetails?._id}`)}
+                  className="bg-indigo-600 hover:bg-indigo-700"
+                >
+                  <GraduationCap className="h-4 w-4 mr-2" />
+                  Take Quiz
+                </Button>
+                <Button 
                   onClick={handleViewCertificate}
-                  className="bg-amber-600 hover:bg-amber-700"
-                  disabled={generatingCertificate}
+                  variant="outline"
+                  disabled={!certificateId}
+                  title={certificateId ? "View your certificate" : "Complete the quiz first to get your certificate"}
                 >
                   <Award className="h-4 w-4 mr-2" />
-                  {generatingCertificate ? "Generating..." : "View Certificate"}
+                  {certificateId ? "View Certificate" : "No Certificate Yet"}
                 </Button>
                 <Button variant="outline" onClick={() => navigate("/student-courses")}>
                   My Courses

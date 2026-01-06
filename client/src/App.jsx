@@ -44,6 +44,8 @@ import ProfilePage from "./pages/student/profile";
 import CertificatesPage from "./pages/student/certificates";
 import CertificateViewPage from "./pages/student/certificates/CertificateView";
 import CertificateVerifyPage from "./pages/student/certificates/CertificateVerify";
+import CompletionQuizPage from "./pages/student/completion-quiz";
+import CertificatePage from "./pages/student/certificate";
 import Loader from "@/components/common/Loader";
 
 function App() {
@@ -106,6 +108,7 @@ function App() {
         
         {/* Public certificate verification */}
         <Route path="/certificate/verify/:certificateId" element={<CertificateVerifyPage />} />
+        <Route path="/certificate/:certificateId" element={<CertificatePage />} />
         
         {/* Newsletter admin routes */}
         <Route
@@ -275,6 +278,7 @@ function App() {
           />
           <Route path="certificates" element={<CertificatesPage />} />
           <Route path="certificate/:certificateId" element={<CertificateViewPage />} />
+          <Route path="completion-quiz/:courseId" element={<CompletionQuizPage />} />
           
           {/* Assessment routes for students */}
           <Route
