@@ -18,6 +18,17 @@ function PaypalPaymentReturnPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
+    // Prevent duplicate calls
+    let isCancelled = false;
+    const captureKey = `capture_${paymentId}_${payerId}`;
+    
+    if (sessionStorage.getItem(captureKey)) {
+      // Already processed this payment
+      setStatus("success");
+      setTimeout(() => navigate("/student-courses"), 3000);
+      return;
+    }
+
     if (paymentId && payerId) {
       async function capturePayment() {
         let orderId = sessionStorage.getItem("currentOrderId");
@@ -36,11 +47,16 @@ function PaypalPaymentReturnPage() {
         }
 
         try {
+          // Mark as being processed
+          sessionStorage.setItem(captureKey, "processing");
+          
           const response = await captureAndFinalizePaymentService(
             paymentId,
             payerId,
             orderId
           );
+
+          if (isCancelled) return;
 
           if (response?.success) {
             sessionStorage.removeItem("currentOrderId");
@@ -64,10 +80,13 @@ function PaypalPaymentReturnPage() {
               navigate("/student-courses");
             }, 3000);
           } else {
+            sessionStorage.removeItem(captureKey);
             setStatus("error");
             setErrorMessage(response?.message || "Payment verification failed");
           }
         } catch (error) {
+          if (isCancelled) return;
+          sessionStorage.removeItem(captureKey);
           console.error("Payment capture error:", error);
           setStatus("error");
           setErrorMessage(error.message || "Failed to process payment");
@@ -79,6 +98,10 @@ function PaypalPaymentReturnPage() {
       setStatus("error");
       setErrorMessage("Missing payment information");
     }
+
+    return () => {
+      isCancelled = true;
+    };
   }, [payerId, paymentId, navigate]);
 
   return (

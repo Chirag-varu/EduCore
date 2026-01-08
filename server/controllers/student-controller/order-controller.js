@@ -2,6 +2,7 @@ import payment from "../../helpers/paypal.js";
 import Order from "../../models/Order.js";
 import Course from "../../models/Course.js";
 import StudentCourses from "../../models/StudentCourses.js";
+import { sendPaymentReceipt } from "../../helpers/emailService.js";
 
 const createOrder = async (req, res) => {
   try {
@@ -232,6 +233,15 @@ const capturePaymentAndFinalizeOrder = async (req, res) => {
         },
       },
     });
+
+    // Send payment receipt email
+    try {
+      await sendPaymentReceipt(order);
+      console.log("Payment receipt sent to:", order.userEmail);
+    } catch (emailError) {
+      console.error("Failed to send payment receipt:", emailError);
+      // Don't fail the order if email fails
+    }
 
     res.status(200).json({
       success: true,
