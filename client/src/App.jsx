@@ -28,6 +28,7 @@ import NewsletterDashboard from "./pages/admin/NewsletterDashboard";
 import NewsletterForm from "./pages/admin/NewsletterForm";
 import SubscriberManagement from "./pages/admin/SubscriberManagement";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminOverview from "./pages/admin/AdminOverview";
 import UserManagement from "./pages/admin/UserManagement";
 import CourseModeration from "./pages/admin/CourseModeration";
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -138,6 +139,17 @@ function App() {
           element={
             <RouteGuard
               element={<CourseModeration />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+              allowedRoles={["admin"]}
+            />
+          }
+        />
+        <Route
+          path="/admin/overview"
+          element={
+            <RouteGuard
+              element={<AdminOverview />}
               authenticated={auth?.authenticate}
               user={auth?.user}
               allowedRoles={["admin"]}

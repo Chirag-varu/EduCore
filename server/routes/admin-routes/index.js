@@ -15,12 +15,22 @@ import {
   deleteCourse,
   getModerationSummary
 } from '../../controllers/admin-controller/course-moderation-controller.js';
+import {
+  getInstructorsWithCourses,
+  getStudentsWithCourses,
+  getOverviewStats
+} from '../../controllers/admin-controller/overview-controller.js';
 import authenticate from '../../middleware/auth-middleware.js';
 
 const router = express.Router();
 
 // Apply authentication middleware to all admin routes
 router.use(authenticate);
+
+// Overview Routes
+router.get('/overview/stats', getOverviewStats);
+router.get('/overview/instructors', getInstructorsWithCourses);
+router.get('/overview/students', getStudentsWithCourses);
 
 // User Management Routes
 router.get('/users', getAllUsers);

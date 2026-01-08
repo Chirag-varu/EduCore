@@ -110,8 +110,8 @@ const seedDB = async () => {
         ],
       },
       {
-        instructorId: new mongoose.Types.ObjectId(),
-        instructorName: "Alice Martin",
+        instructorId: new mongoose.Types.ObjectId("689dafb83d96d35705cfb0fc"),
+        instructorName: "Chirag Varu",
         title: "Data Structures & Algorithms in JavaScript",
         subtitle: "Master problem solving & coding interviews",
         description:
@@ -135,8 +135,8 @@ const seedDB = async () => {
         ],
       },
       {
-        instructorId: new mongoose.Types.ObjectId(),
-        instructorName: "David Lee",
+        instructorId: new mongoose.Types.ObjectId("689dafb83d96d35705cfb0fc"),
+        instructorName: "Chirag Varu",
         title: "Python for Beginners",
         subtitle: "Start coding with Python",
         description: "Beginner-friendly course to learn Python programming.",
@@ -156,8 +156,8 @@ const seedDB = async () => {
         ],
       },
       {
-        instructorId: new mongoose.Types.ObjectId(),
-        instructorName: "Sara Williams",
+        instructorId: new mongoose.Types.ObjectId("689dafb83d96d35705cfb0fc"),
+        instructorName: "Chirag Varu",
         title: "UI/UX Design Fundamentals",
         subtitle: "Design beautiful user experiences",
         description: "Design principles, prototyping, and user testing.",
@@ -177,8 +177,8 @@ const seedDB = async () => {
         ],
       },
       {
-        instructorId: new mongoose.Types.ObjectId(),
-        instructorName: "Michael Brown",
+        instructorId: new mongoose.Types.ObjectId("689dafb83d96d35705cfb0fc"),
+        instructorName: "Chirag Varu",
         title: "Advanced React Patterns",
         subtitle: "Build scalable React apps",
         description: "Hooks, context, performance optimizations and patterns.",
