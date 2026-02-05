@@ -137,7 +137,7 @@ jobs:
 
       - name: Deploy to S3
         run: |
-          aws s3 sync ./client/dist s3://${{ env.S3_BUCKET_NAME }} --delete \
+          aws s3 sync ./client/dist s3://${{ env.S3_BUCKET_NAME }}  \
             --cache-control "max-age=0,no-cache,no-store,must-revalidate"
 
       - name: Invalidate CloudFront
