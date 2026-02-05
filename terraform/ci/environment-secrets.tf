@@ -151,7 +151,7 @@ resource "github_actions_environment_secret" "prod_bucket" {
   repository      = var.repo_name
   environment     = github_repository_environment.prod.environment
   secret_name     = "S3_BUCKET_PROD"
-  plaintext_value = "lms67 "
+  plaintext_value = "caam51 "
 }
 
 resource "github_actions_environment_secret" "prod_cloudfront" {
