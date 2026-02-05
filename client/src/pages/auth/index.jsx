@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import auth_image from "@/assets/auth_image.jpg";
 import { GoogleLogin } from "@react-oauth/google";
+import { Loader2 } from "lucide-react";
 import ApiConfig from "@/lib/ApiConfig";
 import { signInFormControls, signUpFormControls } from "@/config";
 import GooglePasswordSetupDialog from "@/components/auth/GooglePasswordSetupDialog";
@@ -43,6 +44,7 @@ function AuthPage() {
   const [showPasswordSetup, setShowPasswordSetup] = useState(false);
   const [googleUserEmail, setGoogleUserEmail] = useState("");
   const [pendingGoogleUser, setPendingGoogleUser] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSignIn = async (e) => {
     e.preventDefault();
@@ -163,6 +165,7 @@ function AuthPage() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const response = await handleRegisterUser();
 
@@ -187,6 +190,8 @@ function AuthPage() {
         description: error.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -319,8 +324,15 @@ function AuthPage() {
                         ))}
 
                         {/* Submit */}
-                        <Button type="submit" className="w-full" disabled={!checkIfSignUpFormIsValid()}>
-                          Create account
+                        <Button type="submit" className="w-full" disabled={!checkIfSignUpFormIsValid() || loading}>
+                          {loading ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Creating account...
+                            </>
+                          ) : (
+                            "Create account"
+                          )}
                         </Button>
 
                         {/* Switch to Login */}

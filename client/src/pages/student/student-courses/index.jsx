@@ -67,13 +67,23 @@ function StudentCoursesPage() {
     }
   }, [auth?.user?._id]);
 
+  // Deduplicate courses by courseId to avoid showing same course multiple times
+  const uniqueCourses = studentBoughtCoursesList && studentBoughtCoursesList.length > 0
+    ? studentBoughtCoursesList.filter((course, index, self) => {
+        const courseIdentifier = course?.courseId || course?._id;
+        return index === self.findIndex((c) => 
+          (c?.courseId || c?._id) === courseIdentifier
+        );
+      })
+    : [];
+
   return (
     <>
       <div className="p-6 max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">My Courses</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5">
-        {studentBoughtCoursesList && studentBoughtCoursesList.length > 0 ? (
-          studentBoughtCoursesList.map((course) => {
+        {uniqueCourses.length > 0 ? (
+          uniqueCourses.map((course) => {
             console.log("Rendering course:", course);
             return (
               <Card key={course._id || course.id || Math.random()} className="flex flex-col">

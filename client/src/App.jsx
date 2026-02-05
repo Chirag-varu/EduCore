@@ -28,6 +28,7 @@ import NewsletterDashboard from "./pages/admin/NewsletterDashboard";
 import NewsletterForm from "./pages/admin/NewsletterForm";
 import SubscriberManagement from "./pages/admin/SubscriberManagement";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminOverview from "./pages/admin/AdminOverview";
 import UserManagement from "./pages/admin/UserManagement";
 import CourseModeration from "./pages/admin/CourseModeration";
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -44,6 +45,8 @@ import ProfilePage from "./pages/student/profile";
 import CertificatesPage from "./pages/student/certificates";
 import CertificateViewPage from "./pages/student/certificates/CertificateView";
 import CertificateVerifyPage from "./pages/student/certificates/CertificateVerify";
+import CompletionQuizPage from "./pages/student/completion-quiz";
+import CertificatePage from "./pages/student/certificate";
 import Loader from "@/components/common/Loader";
 
 function App() {
@@ -106,6 +109,7 @@ function App() {
         
         {/* Public certificate verification */}
         <Route path="/certificate/verify/:certificateId" element={<CertificateVerifyPage />} />
+        <Route path="/certificate/:certificateId" element={<CertificatePage />} />
         
         {/* Newsletter admin routes */}
         <Route
@@ -135,6 +139,17 @@ function App() {
           element={
             <RouteGuard
               element={<CourseModeration />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+              allowedRoles={["admin"]}
+            />
+          }
+        />
+        <Route
+          path="/admin/overview"
+          element={
+            <RouteGuard
+              element={<AdminOverview />}
               authenticated={auth?.authenticate}
               user={auth?.user}
               allowedRoles={["admin"]}
@@ -275,6 +290,7 @@ function App() {
           />
           <Route path="certificates" element={<CertificatesPage />} />
           <Route path="certificate/:certificateId" element={<CertificateViewPage />} />
+          <Route path="completion-quiz/:courseId" element={<CompletionQuizPage />} />
           
           {/* Assessment routes for students */}
           <Route

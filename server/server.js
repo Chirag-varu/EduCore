@@ -26,6 +26,7 @@ import { generalLimiter, authLimiter, apiLimiter, uploadLimiter } from "./middle
 import { sanitizeInput, validateRequestSize } from "./middleware/input-validation.js";
 import { apiSecurityHeaders } from "./middleware/security.js";
 import { ensureRedisConnected } from "./helpers/redisClient.js";
+import completionQuizRoutes from "./routes/student-routes/completion-quiz-routes.js";
 
 // Environment variable validation
 const coreRequiredEnvVars = [
@@ -186,6 +187,7 @@ app.use("/api/v1/newsletter", newsletterRoutes);
 app.use("/api/v1/admin", apiLimiter, adminRoutes);
 app.use("/api/v1/instructor/assessment", apiLimiter, instructorAssessmentRoutes);
 app.use("/api/v1/student/assessment", apiLimiter, studentAssessmentRoutes);
+app.use("/api/v1/student/completion", apiLimiter, completionQuizRoutes);
 
 app.use((err, req, res, next) => {
   console.log(err.stack);
