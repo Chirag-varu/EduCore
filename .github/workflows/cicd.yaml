@@ -1,0 +1,136 @@
+name: CD — Deploy to Production
+
+on:
+  push:
+    branches:
+      - main        # Runs when a PR is merged to main
+      - 'hotfix/*'  # Runs when pushing directly to hotfix branches
+      - 'bugfix/*'  # Runs when pushing directly to bugfix branches
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      ECR_REPO: ${{ secrets.ECR_REPOSITORY }}
+      IMAGE_TAG: prod-latest
+      CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+      TASK_DEF_FAMILY: ${{ secrets.TASK_DEF_FAMILY }}
+      ECS_CLUSTER: ${{ secrets.ECS_CLUSTER_PROD }}
+      ECS_SERVICE: ${{ secrets.ECS_SERVICE_PROD }}
+      CLOUDFRONT_DIST_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_PROD }}
+      S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_PROD }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      #######################################
+      # 🐳 Build & Push Backend Image
+      #######################################
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+          install: true  
+
+      - name: Build and push backend Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          push: true
+          tags: |
+            ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:${{ env.IMAGE_TAG }}
+            ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:buildcache
+          cache-to: type=registry,ref=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:buildcache,mode=max
+
+      #######################################
+      # 🚀 Deploy Backend (ECS)
+      #######################################
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      # Retrieves the current Task Definition config from AWS
+      - name: Fetch current task definition
+        run: |
+          aws ecs describe-task-definition --task-definition ${TASK_DEF_FAMILY} > taskdef.json
+          jq '.taskDefinition | {family: .family, containerDefinitions: .containerDefinitions, volumes: .volumes, 
+          executionRoleArn:.executionRoleArn, networkMode:.networkMode, cpu:.cpu, memory:.memory, requiresCompatibilities:.requiresCompatibilities} + 
+          (if .taskRoleArn != null then {taskRoleArn: .taskRoleArn} else {} end)' taskdef.json > td_template.json
+
+      # Updates the Task Definition with the new image URI
+      - name: Patch container image to prod-latest
+        run: |
+          IMAGE_URI="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}"
+          jq --arg img "$IMAGE_URI" --arg cname "$CONTAINER_NAME" \
+            '.containerDefinitions |= map( if .name==$cname then .image=$img else . end )' td_template.json > new_taskdef.json
+
+      - name: Register new task definition
+        id: register
+        run: |
+          NEW_TASKDEF_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://new_taskdef.json \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+          echo "new_taskdef_arn=$NEW_TASKDEF_ARN" >> $GITHUB_OUTPUT
+
+      - name: Update ECS service to use new task definition
+        run: |
+          aws ecs update-service \
+            --cluster ${ECS_CLUSTER} \
+            --service ${ECS_SERVICE} \
+            --task-definition ${{ steps.register.outputs.new_taskdef_arn }}
+
+      - name: Wait for ECS service stability
+        run: |
+          aws ecs wait services-stable \
+            --cluster ${ECS_CLUSTER} \
+            --services ${ECS_SERVICE}
+          echo "✅ ECS service is stable."
+
+      #######################################
+      # 🎨 Deploy Frontend (S3 + CloudFront)
+      #######################################
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          # Caches node_modules based on the lockfile in the client folder
+          cache: 'npm'
+          cache-dependency-path: ./client/package-lock.json
+
+      - name: Install and build frontend
+        working-directory: ./client
+        run: |
+          # 'npm ci' is safer for production (Clean Install)
+          npm ci
+          npm run build
+
+      - name: Deploy frontend to S3
+        run: |
+          echo "Uploading frontend build to S3: ${S3_BUCKET_NAME}"
+          aws s3 sync ./client/dist s3://${S3_BUCKET_NAME}  \
+            --cache-control "max-age=0,no-cache,no-store,must-revalidate"
+
+      - name: Invalidate CloudFront cache
+        if: ${{ env.CLOUDFRONT_DIST_ID != '' }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${CLOUDFRONT_DIST_ID} \
+            --paths "/*"
