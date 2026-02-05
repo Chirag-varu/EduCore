@@ -70,6 +70,7 @@ variable "ecs_config" {
       email_service          = optional(string, "gmail")
       paypal_client_id       = optional(string, "")
       paypal_secret_id       = optional(string, "")
+      redis_url              = optional(string, "")
     }), {})
 
     # App configuration with defaults
@@ -81,6 +82,13 @@ variable "ecs_config" {
   
   # This marks the entire variable as sensitive
   sensitive = true
+}
+
+
+variable "external_secrets" {
+  description = "SSM ARNs for external dependencies"
+  type        = map(string)
+  default     = {}
 }
 
 

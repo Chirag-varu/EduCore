@@ -32,6 +32,21 @@ resource "aws_subnet" "public_subnet" {
   }
 }
 
+resource "aws_subnet" "private" {
+  for_each = var.vpc.private_subnets # 👈 Reusing the grouped variable
+
+  vpc_id            = aws_vpc.caam_vpc.id
+  cidr_block        = each.value.cidr
+  availability_zone = each.value.az
+  
+  map_public_ip_on_launch = false # 👈 Security: No public IPs here
+
+  tags = merge(
+    { Name = "private-${each.key}-${var.environment}" },
+    each.value.tags
+  )
+}
+
 resource "aws_route_table" "public_route_table" {
   vpc_id = aws_vpc.caam_vpc.id
 

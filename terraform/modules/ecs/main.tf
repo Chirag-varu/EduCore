@@ -227,6 +227,7 @@ resource "aws_ssm_parameter" "client_url" {
 }
 
 
+
 resource "aws_cloudwatch_log_group" "ecs_app_logs" {
   name              = var.ecs_config.logging.log_group
   retention_in_days = 7
@@ -260,7 +261,10 @@ resource "aws_ecs_task_definition" "this" {
       protocol      = "tcp"
     }]
 
-    secrets = [
+    # 1. Added closing parenthesis for concat
+    # 2. Corrected list comprehension syntax for external_secrets
+    secrets = concat(
+      [
         { name = "PORT", valueFrom = aws_ssm_parameter.port.arn },
         { name = "NODE_ENV", valueFrom = aws_ssm_parameter.node_env.arn },
         { name = "MONGO_URI", valueFrom = aws_ssm_parameter.mongodb_uri.arn },
@@ -280,15 +284,19 @@ resource "aws_ecs_task_definition" "this" {
         { name = "EMAIL_SERVICE", valueFrom = aws_ssm_parameter.email_service.arn },
         { name = "PAYPAL_CLIENT_ID", valueFrom = aws_ssm_parameter.paypal_client_id.arn },
         { name = "PAYPAL_SECRET_ID", valueFrom = aws_ssm_parameter.paypal_secret_id.arn },
-      ]
+       
+      ],
+      [for name, arn in var.external_secrets : { name = name, valueFrom = arn }]
+    )
 
-      environment = [
-        {
-          name  = "SECRET_KEY"
-          value = var.ecs_config.secrets.jwt_secret  # Using same as JWT secret
-        }
-      ]
-      
+    # 3. Added missing environment list structure
+    environment = [
+      {
+        name  = "SECRET_KEY"
+        value = var.ecs_config.secrets.jwt_secret
+      }
+    ]
+
     logConfiguration = {
       logDriver = "awslogs"
       options = {

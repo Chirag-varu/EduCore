@@ -9,7 +9,7 @@ module "network" {
   vpc         = var.vpc
   environment = var.environment
   region      = var.region
-
+  
 
 }
 
@@ -112,7 +112,35 @@ module "alb" {
   alb_security_group_id     = module.security_groups.alb_security_group_id
 }
 
+module "redis"{
+  source               = "../../modules/elasticache"
+  environment          = var.environment
+  redis_cluster_name   = "caam-redis"
+  redis = {
+    node_type        = "cache.t3.micro"
+    port             = 6379
+    engine_version   = "7.0"
+    num_nodes        = 1
 
+    automatic_failover = false
+    multi_az           = false
+
+    at_rest_encryption = true
+    transit_encryption = true
+
+    maintenance_window = "sun:05:00-sun:09:00"
+  }
+  networking = {
+    subnet_ids         = module.network.private_subnet_ids
+    security_group_ids = [module.security_groups.redis_security_group_id]
+  }
+
+  
+
+  ssm = {
+    base_path = "/caam/prod/redis"
+  }
+}
 
 
 module "ecs" {
@@ -122,6 +150,9 @@ module "ecs" {
 
   ecs_config = var.ecs_config
 
+external_secrets = {
+    REDIS_URL = module.redis.redis_url_ssm_arn
+  }
   networking = {
     subnet_ids         = module.network.public_subnet_ids
     security_group_ids = [module.security_groups.ecs_security_group_id]

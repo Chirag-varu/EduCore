@@ -15,3 +15,6 @@ output "public_subnet_ids_map" {
 }
 
 
+output "private_subnet_ids" {
+  value = [for s in aws_subnet.private : s.id]
+}
