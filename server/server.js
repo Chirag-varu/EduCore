@@ -199,7 +199,7 @@ app.use((err, req, res, next) => {
 
 app.get("/health", (req, res) => {
   res.status(200).json({
-    status: "UP v1",
+    status: "UPV2",
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   });

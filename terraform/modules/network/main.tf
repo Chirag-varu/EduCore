@@ -1,4 +1,4 @@
-resource "aws_vpc" "caam_vpc" {
+resource "aws_vpc" "educore_vpc" {
   cidr_block       = var.vpc.cidr_block
   instance_tenancy = "default"
 
@@ -10,7 +10,7 @@ resource "aws_vpc" "caam_vpc" {
 }
 
 resource "aws_internet_gateway" "internet_gateway" {
-  vpc_id = aws_vpc.caam_vpc.id
+  vpc_id = aws_vpc.educore_vpc.id
 
   tags = {
     Name = "internet-gateway-${var.environment}"
@@ -20,7 +20,7 @@ resource "aws_internet_gateway" "internet_gateway" {
 resource "aws_subnet" "public_subnet" {
   for_each = var.vpc.public_subnets
 
-  vpc_id                  = aws_vpc.caam_vpc.id
+  vpc_id                  = aws_vpc.educore_vpc.id
   cidr_block              = each.value.cidr
   availability_zone       = each.value.az
   map_public_ip_on_launch = true
@@ -35,7 +35,7 @@ resource "aws_subnet" "public_subnet" {
 resource "aws_subnet" "private" {
   for_each = var.vpc.private_subnets # 👈 Reusing the grouped variable
 
-  vpc_id            = aws_vpc.caam_vpc.id
+  vpc_id            = aws_vpc.educore_vpc.id
   cidr_block        = each.value.cidr
   availability_zone = each.value.az
   
@@ -48,7 +48,7 @@ resource "aws_subnet" "private" {
 }
 
 resource "aws_route_table" "public_route_table" {
-  vpc_id = aws_vpc.caam_vpc.id
+  vpc_id = aws_vpc.educore_vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"

@@ -23,7 +23,7 @@ module "cloudfront_logs" {
   providers = {
     aws = aws.us_east_1
   }
-  bucket_name = "prod-caam-cloudfront-logs-us-east-1"
+  bucket_name = "prod-educore-cloudfront-logs-us-east-1"
   environment = var.environment
 }
 
@@ -115,7 +115,7 @@ module "alb" {
 module "redis"{
   source               = "../../modules/elasticache"
   environment          = var.environment
-  redis_cluster_name   = "caam-redis"
+  redis_cluster_name   = "educore-redis"
   redis = {
     node_type        = "cache.t3.micro"
     port             = 6379
@@ -138,7 +138,7 @@ module "redis"{
   
 
   ssm = {
-    base_path = "/caam/prod/redis"
+    base_path = "/educore/prod/redis"
   }
 }
 
