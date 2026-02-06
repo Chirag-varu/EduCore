@@ -106,7 +106,7 @@ const seedDB = async () => {
         curriculum: lectures.map((lec) => lec._id),
         isPublised: true,
         enrolledStudents: [
-          new mongoose.Types.ObjectId("689db59c3de3445393020261"),
+          new mongoose.Types.ObjectId("68a55e919dab646029238b81"),
         ],
       },
       {
@@ -131,7 +131,7 @@ const seedDB = async () => {
         curriculum: [lectures[0]._id],
         isPublised: true,
         enrolledStudents: [
-          new mongoose.Types.ObjectId("689db59c3de3445393020261"),
+          new mongoose.Types.ObjectId("68a55e919dab646029238b81"),
         ],
       },
       {
@@ -152,7 +152,7 @@ const seedDB = async () => {
         curriculum: [lectures[1]._id],
         isPublised: true,
         enrolledStudents: [
-          new mongoose.Types.ObjectId("689db59c3de3445393020261"),
+          new mongoose.Types.ObjectId("68a55e919dab646029238b81"),
         ],
       },
       {
@@ -173,7 +173,7 @@ const seedDB = async () => {
         curriculum: [lectures[2]._id],
         isPublised: true,
         enrolledStudents: [
-          new mongoose.Types.ObjectId("689db59c3de3445393020261"),
+          new mongoose.Types.ObjectId("68a55e919dab646029238b81"),
         ],
       },
       {
@@ -194,7 +194,7 @@ const seedDB = async () => {
         curriculum: [lectures[0]._id, lectures[1]._id],
         isPublised: true,
         enrolledStudents: [
-          new mongoose.Types.ObjectId("689db59c3de3445393020261"),
+          new mongoose.Types.ObjectId("68a55e919dab646029238b81"),
         ],
       },
       // Machine Learning & AI Courses
@@ -220,7 +220,7 @@ const seedDB = async () => {
         curriculum: lectures.map((lec) => lec._id),
         isPublised: true,
         enrolledStudents: [
-          new mongoose.Types.ObjectId("689db59c3de3445393020261"),
+          new mongoose.Types.ObjectId("68a55e919dab646029238b81"),
         ],
       },
       {
@@ -286,7 +286,7 @@ const seedDB = async () => {
         curriculum: [lectures[1]._id, lectures[2]._id],
         isPublised: true,
         enrolledStudents: [
-          new mongoose.Types.ObjectId("689db59c3de3445393020261"),
+          new mongoose.Types.ObjectId("68a55e919dab646029238b81"),
         ],
       },
       {
@@ -352,7 +352,7 @@ const seedDB = async () => {
         curriculum: [lectures[0]._id],
         isPublised: true,
         enrolledStudents: [
-          new mongoose.Types.ObjectId("689db59c3de3445393020261"),
+          new mongoose.Types.ObjectId("68a55e919dab646029238b81"),
         ],
       },
       // Mobile Development Courses
@@ -419,7 +419,7 @@ const seedDB = async () => {
         curriculum: lectures.map((lec) => lec._id),
         isPublised: true,
         enrolledStudents: [
-          new mongoose.Types.ObjectId("689db59c3de3445393020261"),
+          new mongoose.Types.ObjectId("68a55e919dab646029238b81"),
         ],
       },
       {
@@ -485,7 +485,7 @@ const seedDB = async () => {
         curriculum: lectures.map((lec) => lec._id),
         isPublised: true,
         enrolledStudents: [
-          new mongoose.Types.ObjectId("689db59c3de3445393020261"),
+          new mongoose.Types.ObjectId("68a55e919dab646029238b81"),
         ],
       },
       // Frontend Development
@@ -746,7 +746,7 @@ const seedDB = async () => {
         curriculum: lectures.map((lec) => lec._id),
         isPublised: true,
         enrolledStudents: [
-          new mongoose.Types.ObjectId("689db59c3de3445393020261"),
+          new mongoose.Types.ObjectId("68a55e919dab646029238b81"),
         ],
       },
       {
