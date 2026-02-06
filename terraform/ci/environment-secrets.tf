@@ -158,5 +158,5 @@ resource "github_actions_environment_secret" "prod_cloudfront" {
   repository      = var.repo_name
   environment     = github_repository_environment.prod.environment
   secret_name     = "CLOUDFRONT_DISTRIBUTION_ID_PROD"
-  plaintext_value = "E1YIM7KZO4EV0Y"
+  plaintext_value = "E244FBY8Q8YNFZ"
 }
