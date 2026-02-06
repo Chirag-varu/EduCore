@@ -231,7 +231,7 @@ app.get("/health", (req, res) => {
 
 // Additional health check endpoint for load balancers or uptime monitoring
 app.get("/api/v1/health", (req, res) => {
-  res.status(200).json({ status: "UPV2.1" });
+  res.status(200).json({ status: "UPV2.3" });
 });
 
 app.listen(PORT, () => {
