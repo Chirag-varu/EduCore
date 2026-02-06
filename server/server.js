@@ -4,6 +4,29 @@ import express, { json } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { connect } from "mongoose";
+import { existsSync, mkdirSync, accessSync, constants } from "fs";
+
+// Ensure upload directories exist with proper error handling
+const uploadDirs = ['uploads', 'uploads/tmp'];
+uploadDirs.forEach(dir => {
+  try {
+    if (!existsSync(dir)) {
+      mkdirSync(dir, { recursive: true });
+      console.log(`📁 Created directory: ${dir}`);
+    } else {
+      // Check if we have write access to existing directory
+      accessSync(dir, constants.W_OK);
+    }
+  } catch (err) {
+    if (err.code === 'EACCES' || err.code === 'EPERM') {
+      console.error(`❌ Permission denied: Cannot write to '${dir}'`);
+      console.error('   Please ensure the server has write access to this directory.');
+      console.error('   You may need to run: chmod -R 755 uploads (Linux/Mac) or check folder permissions (Windows)');
+      process.exit(1);
+    }
+    throw err; // Re-throw unexpected errors
+  }
+});
 import authRoutes from "./routes/auth-routes/index.js";
 import mediaRoutes from "./routes/instructor-routes/media-routes.js";
 import instructorCourseRoutes from "./routes/instructor-routes/course-routes.js";
