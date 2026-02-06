@@ -362,7 +362,11 @@ resource "aws_ecs_service" "this" {
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.this.id
   desired_count   = var.ecs_config.autoscaling.min
-  launch_type     = "FARGATE"
+ capacity_provider_strategy {
+    capacity_provider = "FARGATE_SPOT"
+    weight            = 1
+    base              = 0
+  }
 
   network_configuration {
     subnets          = var.networking.subnet_ids
@@ -374,5 +378,8 @@ resource "aws_ecs_service" "this" {
     target_group_arn = var.load_balancer.target_group_arn
     container_name   = var.ecs_config.container.name
     container_port   = var.ecs_config.container.port
+  }
+  lifecycle {
+    ignore_changes = [task_definition]
   }
 }

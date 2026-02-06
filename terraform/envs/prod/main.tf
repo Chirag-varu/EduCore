@@ -3,6 +3,18 @@
 
 # Prevent accidental deletion
 
+terraform {
+  backend "s3" {
+    bucket       = "my-company-educore-tf-state"
+    key          = "prod/educore-monolith.tfstate"
+    region       = "ap-south-1"
+    
+    # ✅ Enable S3-native locking (No DynamoDB needed)
+    use_lockfile = true 
+    
+    encrypt      = true
+  }
+}
 
 module "network" {
   source      = "../../modules/network"

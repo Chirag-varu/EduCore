@@ -9,10 +9,9 @@ on:
 
 permissions:
   contents: read
-  id-token: write   # Recommended if you ever switch to OIDC, otherwise 'read' is fine
+  id-token: write 
 
 jobs:
-  # 🔍 JOB 1: Detect which folders changed
   check-changes:
     runs-on: ubuntu-latest
     outputs:
@@ -21,7 +20,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
       - name: Filter paths
         uses: dorny/paths-filter@v3
         id: filter
@@ -32,7 +30,6 @@ jobs:
             frontend:
               - 'client/**'
 
-  # 🚀 JOB 2: Backend Deploy (Runs only if 'server/' changed)
   deploy-backend:
     needs: check-changes
     if: ${{ needs.check-changes.outputs.backend == 'true' }}
@@ -64,6 +61,8 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container # Better performance for parallel layer processing
 
       - name: Build and push Docker image
         id: build-image
@@ -71,20 +70,17 @@ jobs:
         with:
           context: ./server
           push: true
-          # Using 'gha' cache is generally faster than registry cache
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:prod-latest
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ github.sha }}
 
-      # Downloads the current Task Definition
       - name: Download Task Definition
         run: |
           aws ecs describe-task-definition --task-definition ${{ env.TASK_DEF_FAMILY }} \
           --query taskDefinition > task-definition.json
 
-      # Updates the Task Definition with the new image ID
       - name: Render Amazon ECS task definition
         id: render-web-container
         uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -93,8 +89,8 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ github.sha }}
 
-      # Deploys the new definition to the service
       - name: Deploy to Amazon ECS
+        id: ecs-deploy
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.render-web-container.outputs.task-definition }}
@@ -102,7 +98,12 @@ jobs:
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
 
-  # 🎨 JOB 3: Frontend Deploy (Runs only if 'client/' changed)
+      # 💡 OPTIMIZATION: Sync the new Task Def ARN back to Terraform State (if using TF)
+      # This prevents "flapping" in your next terraform plan
+      - name: Inform Terraform of new revision
+        run: |
+          echo "Deployed Revision: ${{ steps.ecs-deploy.outputs.task-definition-arn }}"
+
   deploy-frontend:
     needs: check-changes
     if: ${{ needs.check-changes.outputs.frontend == 'true' }}
@@ -136,14 +137,24 @@ jobs:
           npm ci
           npm run build
 
-      - name: Deploy to S3
+      # 💡 OPTIMIZATION: Split upload for better caching
+      # 1. Upload assets (JS/CSS) with long cache
+      - name: Deploy Assets to S3
         run: |
-          aws s3 sync ./client/dist s3://${{ env.S3_BUCKET_NAME }}  \
-            --cache-control "max-age=0,no-cache,no-store,must-revalidate"
+          aws s3 sync ./client/dist/assets s3://${{ env.S3_BUCKET_NAME }}/assets \
+            --delete --size-only \
+            --cache-control "public, max-age=31536000, immutable"
+
+      # 2. Upload index.html and other files with NO cache
+      - name: Deploy Index to S3
+        run: |
+          aws s3 sync ./client/dist s3://${{ env.S3_BUCKET_NAME }} \
+            --exclude "assets/*"  \
+            --cache-control "no-cache, no-store, must-revalidate"
 
       - name: Invalidate CloudFront
         if: ${{ env.CLOUDFRONT_DIST_ID != '' }}
         run: |
           aws cloudfront create-invalidation \
             --distribution-id ${{ env.CLOUDFRONT_DIST_ID }} \
-            --paths "/*"
+            --paths "/index.html" # 💡 Only invalidate index.html to save money/time

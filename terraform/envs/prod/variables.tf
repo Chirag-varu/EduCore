@@ -167,7 +167,7 @@ variable "assign_public_ip" {
 variable "service_launch_type" {
   description = "The launch type for the ECS service (e.g., FARGATE or EC2)."
   type        = string
-  default     = "FARGATE"
+  default     = "FARGATE_SPOT"
 }
 
 variable "log_group" {
