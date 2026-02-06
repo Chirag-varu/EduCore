@@ -158,7 +158,7 @@ export async function mediaDeleteService(id) {
 
 export async function fetchInstructorCourseListService() {
   const { data } = await axiosInstance.get(`/instructor/course/get`);
-
+  
   return data;
 }
 
