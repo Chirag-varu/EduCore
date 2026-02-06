@@ -229,7 +229,7 @@ function AuthPage() {
                         <div className="flex flex-col items-center text-center">
                           <h1 className="text-2xl font-bold">Welcome back</h1>
                           <p className="text-balance text-muted-foreground">
-                            LoginV2.3 to your EduCore account
+                            Login V2.4 to your EduCore account
                           </p>
                         </div>
 
