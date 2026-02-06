@@ -223,7 +223,7 @@ app.use((err, req, res, next) => {
 // Basic health check endpoint for uptime monitoring and load balancers
 app.get("/health", (req, res) => {
   res.status(200).json({
-    status: "UPV2.4",
+    status: "UPV2.5",
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   });
