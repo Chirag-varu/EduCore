@@ -25,6 +25,12 @@ variable "vpc" {
       tags = optional(map(string), {})
     })), {})
 
+    # ADD THIS HERE
+    private_subnets = optional(map(object({
+      cidr = string
+      az   = string
+      tags = optional(map(string), {})
+    })), {})
   })
 }
 
@@ -134,6 +140,7 @@ variable "ecs_config" {
       email_service          = optional(string, "gmail")
       paypal_client_id       = optional(string, "")
       paypal_secret_id       = optional(string, "")
+      redis_url              = optional(string, "")
     }), {})
 
     # App configuration with defaults
@@ -142,6 +149,7 @@ variable "ecs_config" {
     api_url     = optional(string, "")
     client_url  = optional(string, "")
   })
+  
   
   # This marks the entire variable as sensitive
   sensitive = true
@@ -159,14 +167,13 @@ variable "assign_public_ip" {
 variable "service_launch_type" {
   description = "The launch type for the ECS service (e.g., FARGATE or EC2)."
   type        = string
-  default     = "FARGATE"
+  default     = "FARGATE_SPOT"
 }
 
 variable "log_group" {
   description = "The CloudWatch log group for the ECS task."
   type        = string
 }
-
 
 
 
@@ -192,7 +199,39 @@ variable "memory_target_value" {
   default     = 75
 }
 
+variable "ssm" {
+  description = "SSM parameter configuration"
+  type = object({
+    base_path = string
+  })
+}
+
+variable "redis_cluster_name" {
+  description = "Logical name for the Redis cluster"
+  type        = string
+}
 
 
+
+variable "redis" {
+  description = "ElastiCache Redis configuration"
+  type = object({
+    node_type        = string
+    port             = optional(number, 6379)
+    engine_version   = optional(string, "7.0")
+    num_nodes        = optional(number, 1)
+
+    # HA / scaling (future-proof)
+    automatic_failover = optional(bool, false)
+    multi_az           = optional(bool, false)
+
+    # Security
+    at_rest_encryption = optional(bool, true)
+    transit_encryption = optional(bool, true)
+
+    # Maintenance
+    maintenance_window = optional(string)
+  })
+}
 
 

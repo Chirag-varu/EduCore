@@ -34,16 +34,21 @@ variable "vpc" {
   type = object({
     name       = string
     cidr_block = string
-    
+
     public_subnets = optional(map(object({
       cidr = string
       az   = string
       tags = optional(map(string), {})
     })), {})
-    
+
+    # ADD THIS HERE
+    private_subnets = optional(map(object({
+      cidr = string
+      az   = string
+      tags = optional(map(string), {})
+    })), {})
   })
 }
-
 
 
 variable "environment" {

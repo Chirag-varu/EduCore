@@ -121,35 +121,27 @@ resource "aws_cloudfront_distribution" "cdn" {
 resource "aws_cloudfront_response_headers_policy" "security" {
   name = "${var.environment}-security-headers"
 
-  security_headers_config {
+   security_headers_config {
     content_security_policy {
-  content_security_policy = join("; ", [
-        "default-src 'self'",
-        "script-src 'self' https://accounts.google.com https://www.google.com https://www.gstatic.com",
-        "style-src 'self' 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com",
-        "img-src 'self' data: https://www.google.com https://*.googleusercontent.com",
-        "font-src 'self' https://fonts.gstatic.com",
-        "connect-src 'self' https://accounts.google.com https://*.googleapis.com",
-        "frame-src 'self' https://accounts.google.com"
-      ])
+    content_security_policy = join("; ", [
+  "default-src 'self'",
+  # Added 'unsafe-inline' to script-src (Google GSI library often needs this for the button trigger)
+  "script-src 'self' 'unsafe-inline' https://accounts.google.com https://www.google.com https://www.gstatic.com",
+  "style-src 'self' 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com",
+  "img-src 'self' data: https: https://www.google.com https://*.googleusercontent.com",
+  "font-src 'self' https://fonts.gstatic.com",
+  "connect-src 'self' https: https://accounts.google.com https://*.googleapis.com",
+  "media-src 'self' blob: https://www.w3schools.com https://res.cloudinary.com",
+  # frame-src is vital for the Google OneTap / Sign-in iframe
+  "frame-src 'self' https://accounts.google.com https://content-sheets.googleapis.com",
+  # Added parent-src/ancestor check for iframes
+  "frame-ancestors 'self'"
+])
       override = true
     }
-
-    strict_transport_security {
-      access_control_max_age_sec = 63072000
-      include_subdomains         = true
-      preload                    = true
-      override                   = true
-    }
-
-    xss_protection {
-      protection = true
-      mode_block = true
-      override   = true
-    }
-  }
 }
 
+}
 # Update S3 bucket policy to allow only CloudFront access
 resource "aws_s3_bucket_policy" "cdn_access" {
   bucket = var.s3_bucket_id

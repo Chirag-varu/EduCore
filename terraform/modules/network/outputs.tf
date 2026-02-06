@@ -1,6 +1,6 @@
 output "vpc_id" {
   description = "The ID of the VPC"
-  value       = aws_vpc.caam_vpc.id
+  value       = aws_vpc.educore_vpc.id
 }
 
 output "public_subnet_ids" {
@@ -15,3 +15,6 @@ output "public_subnet_ids_map" {
 }
 
 
+output "private_subnet_ids" {
+  value = [for s in aws_subnet.private : s.id]
+}

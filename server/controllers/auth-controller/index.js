@@ -31,10 +31,10 @@ const forgotPassword = async (req, res) => {
     const resetLink = `${process.env.CLIENT_URL}/auth/resetPassword/${resetToken}`;
 
     const transporter = nodemailer.createTransport({
-      service: process.env.Email_Service,
+      service: process.env.EMAIL_SERVICE,
       auth: {
-        user: process.env.Email,
-        pass: process.env.Email_Password,
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
       },
     });
 
@@ -162,15 +162,15 @@ const registerUser = async (req, res) => {
 
     // Send email
     const transporter = nodemailer.createTransport({
-      service: process.env.Email_Service,
+      service: process.env.EMAIL_SERVICE,
       auth: {
-        user: process.env.Email,
-        pass: process.env.Email_Password,
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
       },
     });
 
     await transporter.sendMail({
-      from: `"EduCore" <${process.env.Email}>`,
+      from: `"EduCore" <${process.env.EMAIL}>`,
       to: userEmail,
       subject: "Account verification OTP",
       html: `

@@ -1,0 +1,156 @@
+name: CD — Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+      - 'hotfix/*'
+      - 'bugfix/*'
+
+permissions:
+  contents: read
+  id-token: write 
+
+jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Filter paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'server/**'
+            frontend:
+              - 'client/**'
+
+  deploy-backend:
+    needs: check-changes
+    if: ${{ needs.check-changes.outputs.backend == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: prod
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      ECR_REPO: ${{ secrets.ECR_REPOSITORY }}
+      CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+      ECS_SERVICE: ${{ secrets.ECS_SERVICE_PROD }}
+      ECS_CLUSTER: ${{ secrets.ECS_CLUSTER_PROD }}
+      TASK_DEF_FAMILY: ${{ secrets.TASK_DEF_FAMILY }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container # Better performance for parallel layer processing
+
+      - name: Build and push Docker image
+        id: build-image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:prod-latest
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ github.sha }}
+
+      - name: Download Task Definition
+        run: |
+          aws ecs describe-task-definition --task-definition ${{ env.TASK_DEF_FAMILY }} \
+          --query taskDefinition > task-definition.json
+
+      - name: Render Amazon ECS task definition
+        id: render-web-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ github.sha }}
+
+      - name: Deploy to Amazon ECS
+        id: ecs-deploy
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-web-container.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+      # 💡 OPTIMIZATION: Sync the new Task Def ARN back to Terraform State (if using TF)
+      # This prevents "flapping" in your next terraform plan
+      - name: Inform Terraform of new revision
+        run: |
+          echo "Deployed Revision: ${{ steps.ecs-deploy.outputs.task-definition-arn }}"
+
+  deploy-frontend:
+    needs: check-changes
+    if: ${{ needs.check-changes.outputs.frontend == 'true' }}
+    runs-on: ubuntu-latest
+    environment: prod
+    env:
+      S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_PROD }}
+      CLOUDFRONT_DIST_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_PROD }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: ./client/package-lock.json
+
+      - name: Install and build
+        working-directory: ./client
+        run: |
+          npm ci
+          npm run build
+
+      # 💡 OPTIMIZATION: Split upload for better caching
+      # 1. Upload assets (JS/CSS) with long cache
+      - name: Deploy Assets to S3
+        run: aws s3 sync ./client/dist/assets s3://${{ env.S3_BUCKET_NAME }}/assets --delete --cache-control "public, max-age=31536000, immutable"
+           
+
+      # 2. Upload index.html and other files with NO cache
+      - name: Deploy Index to S3
+        run: aws s3 sync ./client/dist s3://${{ env.S3_BUCKET_NAME }} --exclude "assets/*" --exclude "env.js" --cache-control "no-cache, no-store, must-revalidate"
+          
+
+      - name: Invalidate CloudFront
+        if: ${{ env.CLOUDFRONT_DIST_ID != '' }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ env.CLOUDFRONT_DIST_ID }} \
+            --paths "/index.html" # 💡 Only invalidate index.html to save money/time

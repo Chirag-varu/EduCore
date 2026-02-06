@@ -64,9 +64,9 @@ const featureEnvVars = [
   'CLOUDINARY_API_SECRET',
   'PAYPAL_CLIENT_ID',
   'PAYPAL_SECRET_ID',
-  'Email_Service',
-  'Email',
-  'Email_Password',
+  'EMAIL_SERVICE', 
+  'EMAIL',         
+  'EMAIL_PASSWORD', 
   'GOOGLE_CLIENT_ID'
 ];
 
@@ -124,22 +124,16 @@ const MONGO_URI = process.env.MONGO_URI;
 
 // Security middleware
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:", "blob:"],
-      scriptSrc: ["'self'"],
-      connectSrc: ["'self'", "https:", "ws:", "wss:"],
-    },
-  },
-  crossOriginEmbedderPolicy: false, // Required for some video players
+  // Disable CSP in Helmet because CloudFront is handling it
+  contentSecurityPolicy: false, 
+  crossOriginEmbedderPolicy: false,
 }));
 
 // CORS configuration - allow client URL from env and common local dev ports
 const allowedOrigins = [
   process.env.CLIENT_URL,
+  "https://615915.xyz",          // Explicitly add production
+  "https://staging.615915.xyz",
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:5000",
@@ -226,6 +220,43 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Basic health check endpoint for uptime monitoring and load balancers
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "UPV2.5",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+// Additional health check endpoint for load balancers or uptime monitoring
+app.get("/api/v1/health", (req, res) => {
+  res.status(200).json({ status: "UPV2.3" });
+});
+
 app.listen(PORT, () => {
   console.log(`Server is now running on port: ${PORT}`);
+});
+
+// --- GRACEFUL SHUTDOWN LOGIC ---
+// This replaces PM2's "reload" safety
+process.on("SIGTERM", () => {
+  console.log("SIGTERM signal received: closing HTTP server");
+  
+  // 1. Stop accepting new requests
+  server.close(() => {
+    console.log("HTTP server closed");
+    
+    // 2. Close DB connections
+    import('mongoose').then(m => m.connection.close(false, () => {
+      console.log('MongoDB connection closed');
+      process.exit(0);
+    }));
+  });
+
+  // If server doesn't close in 20s, force shutdown
+  setTimeout(() => {
+    console.error("Could not close connections in time, forcefully shutting down");
+    process.exit(1);
+  }, 20000);
 });

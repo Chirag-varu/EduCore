@@ -1,6 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import AuthPage from "./pages/auth";
-import Sign_up from "./pages/auth/signup";
+import Sign_up from "./pages/auth/signUp";
 import RouteGuard from "./components/route-guard";
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "./context/auth-context";
