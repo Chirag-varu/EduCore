@@ -37,6 +37,7 @@ jobs:
     needs: check-changes
     if: ${{ needs.check-changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: prod
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
