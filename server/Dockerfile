@@ -1,24 +1,25 @@
 ARG NODE_VERSION=22.14.0
-FROM node:${NODE_VERSION}-alpine AS base
+FROM node:${NODE_VERSION}-alpine
 
-# Set working directory
+# 1. Set working directory
 WORKDIR /app
 
-# Install dependencies in a separate layer
+# 2. Combine dependency installation and permission setup into one layer
+# We use the built-in 'node' user instead of creating 'appuser'
 COPY package*.json ./
 
-RUN npm install --omit=dev --no-optional --no-audit --no-fund
+RUN mkdir -p /app/uploads && \
+    chown -R node:node /app && \
+    npm install --omit=dev --no-optional --no-audit --no-fund
 
-# Copy the rest of the source code
-COPY . .
+# 3. Copy source code and ensure ownership in one step
+# Using --chown prevents a separate 'chown' layer after copying
+COPY --chown=node:node . .
 
-# Use non-root user for security
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser
+# 4. Use the pre-existing 'node' user
+USER node
 
-# Set environment and expose port
 ENV NODE_ENV=production
 EXPOSE 5000
 
-# Start app
 CMD ["npm", "start"]

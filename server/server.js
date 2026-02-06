@@ -220,12 +220,18 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Basic health check endpoint for uptime monitoring and load balancers
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "UPV2.1",
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   });
+});
+
+// Additional health check endpoint for load balancers or uptime monitoring
+app.get("/api/v1/health", (req, res) => {
+  res.status(200).json({ status: "UPV2.1" });
 });
 
 app.listen(PORT, () => {
