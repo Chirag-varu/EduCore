@@ -39,7 +39,7 @@ const forgotPassword = async (req, res) => {
     });
 
     await transporter.sendMail({
-      from: `"EduCore" <${process.env.Email}>`,
+      from: `"EduCore" <${process.env.EMAIL}>`,
       to: email,
       subject: "Password Reset",
       html: `

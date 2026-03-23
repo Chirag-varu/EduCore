@@ -7,10 +7,10 @@ import "dotenv/config";
  */
 const createTransporter = () => {
   return nodemailer.createTransport({
-    service: process.env.Email_Service,
+    service: process.env.EMAIL_SERVICE,
     auth: {
-      user: process.env.Email,
-      pass: process.env.Email_Password,
+      user: process.env.EMAIL,
+      pass: process.env.EMAIL_PASSWORD,
     },
   });
 };
@@ -29,7 +29,7 @@ export const sendEmail = async (options) => {
   try {
     const transporter = createTransporter();
     const result = await transporter.sendMail({
-      from: options.from || `"EduCore" <${process.env.Email}>`,
+      from: options.from || `"EduCore" <${process.env.EMAIL}>`,
       to: options.to,
       subject: options.subject,
       html: options.html,
